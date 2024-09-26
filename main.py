@@ -9,13 +9,16 @@ class PyRedis:
         self.db = db
         self.port = port
         self.host = host
-        self.r = self.connect()
+        self.redis = self.connect()
 
     def connect(self) -> Redis:
         return Redis(host=self.host, port=self.port, db=self.db, password=self.psw)
 
     def set(self, key, value):
-        self.r.set(key, value)
+        self.redis.set(key, value)
+
+    def get(self, key):
+        return self.redis.get(key)
 
 
 load_dotenv()  # Load environment variables from .env file
