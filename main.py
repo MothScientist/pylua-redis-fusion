@@ -1,10 +1,25 @@
 from os import getenv
 from dotenv import load_dotenv
-from redis import Redis, ConnectionPool
+from redis import Redis, ConnectionPool, ConnectionError, TimeoutError
+
 
 class PyRedis:
-    def __init__(self, host, port, psw, db=0):
-        self.redis = Redis(connection_pool=ConnectionPool(host=host, port=port, db=db, password=psw))
+    def __init__(self, host, port, psw, db=0, socket_timeout=None):
+        self.redis = Redis(
+            connection_pool=ConnectionPool(
+                host=host,
+                port=port,
+                db=db,
+                password=psw,
+                socket_timeout=socket_timeout
+            )
+        )
+
+    def ping(self) -> bool:
+        try:
+            return self.redis.ping()
+        except (ConnectionError, TimeoutError):
+            return False
 
     def set(
             self,
@@ -50,4 +65,5 @@ redis_db: int = int(getenv('REDIS_DB'))
 redis_host: str = getenv('REDIS_HOST')
 redis_port: int = int(getenv('REDIS_PORT'))
 
-r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db)
+r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.0000000001)
+print(r.ping())
