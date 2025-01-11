@@ -1,6 +1,17 @@
+"""
+Client for working with the Redis database
+"""
+
 from os import getenv
 from dotenv import load_dotenv
 from redis import Redis, ConnectionPool, ConnectionError, TimeoutError
+
+
+load_dotenv('redis.env')  # Load environment variables from redis.env file
+redis_psw: str = getenv('REDIS_PSW')
+redis_db: int = int(getenv('REDIS_DB'))
+redis_host: str = getenv('REDIS_HOST')
+redis_port: int = int(getenv('REDIS_PORT'))
 
 
 class PyRedis:
@@ -41,6 +52,10 @@ class PyRedis:
         :param if_not_exist:
         :return: None
         """
+        if time_s and time_ms:
+            time_ms = PyRedis.compare_and_select_seconds_and_milliseconds(time_s, time_ms)
+            time_s = None
+
         self.redis.set(key, value, nx=if_not_exist, xx=if_exist, ex=time_s, px=time_ms)
 
     def get(self, key, default_value=None):
@@ -58,12 +73,14 @@ class PyRedis:
         self.redis.delete(key)
         return res
 
+    @staticmethod
+    def compare_and_select_seconds_and_milliseconds(time_s: float, time_ms: float) -> float:
+        """
+        If both seconds and milliseconds are specified,
+        the time is converted to milliseconds and the smallest one is selected
+        """
+        return min(time_s * 1_000, time_ms)
 
-load_dotenv('redis.env')  # Load environment variables from redis.env file
-redis_psw: str = getenv('REDIS_PSW')
-redis_db: int = int(getenv('REDIS_DB'))
-redis_host: str = getenv('REDIS_HOST')
-redis_port: int = int(getenv('REDIS_PORT'))
 
-r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.0000000001)
+r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.001)
 print(r.ping())
