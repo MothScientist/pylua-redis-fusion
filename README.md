@@ -1,3 +1,3 @@
 # Install (pip)
 
-pip install git+https://github.com/MothScientist/PyRedis.git
+`pip install git+https://github.com/MothScientist/PyRedis.git`
