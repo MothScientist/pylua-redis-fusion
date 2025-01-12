@@ -12,8 +12,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ ubuntu-latest ]
         python-version: [ '3.11', '3.12', '3.13' ]
+        architecture: [ 'x64' ]
 
     services:
       redis:
@@ -47,7 +48,6 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest
 
       - name: Create .env file
         env:
