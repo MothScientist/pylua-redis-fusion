@@ -61,6 +61,7 @@ jobs:
           echo "REDIS_DB=${REDIS_DB}" >> redis.env
           echo "REDIS_HOST=${REDIS_HOST}" >> redis.env
           echo "REDIS_PORT=${REDIS_PORT}" >> redis.env
+          ls -l
 
       - name: Run UnitTests
         run: |
