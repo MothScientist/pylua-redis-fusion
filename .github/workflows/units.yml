@@ -1,0 +1,68 @@
+name: UnitTests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1'  # launches every Monday at midnight
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+        python-version: [ '3.11', '3.12', '3.13' ]
+
+    services:
+      redis:
+        image: redis:7.2-alpine
+        env:
+          REDIS_PSW: ${{ secrets.REDIS_PSW }}
+          REDIS_DB: ${{ secrets.REDIS_DB }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+        ports:
+          - 6379:6379
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+          check-latest: true
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Create .env file
+        env:
+          REDIS_PSW: ${{ secrets.REDIS_PSW }}
+          REDIS_DB: ${{ secrets.REDIS_DB }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+        run: |
+          cd src || exit 1
+          echo "REDIS_PSW=${REDIS_PSW}" >> redis.env
+          echo "REDIS_DB=${REDIS_DB}" >> redis.env
+          echo "REDIS_HOST=${REDIS_HOST}" >> redis.env
+          echo "REDIS_PORT=${REDIS_PORT}" >> redis.env
+
+      - name: Run UnitTests
+        run: |
+          cd tests || exit 1
+          python -m pytest units_1.py
