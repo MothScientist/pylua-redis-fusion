@@ -1,0 +1,11 @@
+
+[MASTER]
+fail-under=9.9
+ignore-paths=
+    tests/.*
+
+disable=
+    fixme
+
+[FORMAT]
+max-line-length=120
