@@ -57,7 +57,7 @@ class PyRedis:
         :return: None
         """
         if key is value is None:
-            return None
+            return
 
         if time_s and time_ms:
             time_s, time_ms = None, PyRedis.compare_and_select_seconds_and_milliseconds(time_s, time_ms)
