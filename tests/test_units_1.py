@@ -1,5 +1,7 @@
 import unittest
 
+from sys import path as sys_path
+sys_path.append('../')
 from src.client import PyRedis, redis_psw, redis_db, redis_host, redis_port
 
 
