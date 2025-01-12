@@ -4,7 +4,8 @@ Client for working with the Redis database
 
 from os import getenv
 from dotenv import load_dotenv
-from redis import Redis, ConnectionPool, ConnectionError, TimeoutError
+from redis import (Redis, ConnectionPool as rConnectionPool, ConnectionError as rConnectionError,
+                   TimeoutError as rTimeoutError)
 
 
 load_dotenv('redis.env')  # Load environment variables from redis.env file
@@ -15,9 +16,12 @@ redis_port: int = int(getenv('REDIS_PORT'))
 
 
 class PyRedis:
+    """
+    The main entity for working with Redis
+    """
     def __init__(self, host, port, psw, db=0, socket_timeout=None):
         self.redis = Redis(
-            connection_pool=ConnectionPool(
+            connection_pool=rConnectionPool(
                 host=host,
                 port=port,
                 db=db,
@@ -29,7 +33,7 @@ class PyRedis:
     def ping(self) -> bool:
         try:
             return self.redis.ping()
-        except (ConnectionError, TimeoutError):
+        except (rConnectionError, rTimeoutError):
             return False
 
     def set(
@@ -53,14 +57,13 @@ class PyRedis:
         :return: None
         """
         if time_s and time_ms:
-            time_ms = PyRedis.compare_and_select_seconds_and_milliseconds(time_s, time_ms)
-            time_s = None
+            time_s, time_ms = None, PyRedis.compare_and_select_seconds_and_milliseconds(time_s, time_ms)
 
         self.redis.set(key, value, nx=if_not_exist, xx=if_exist, ex=time_s, px=time_ms)
 
     def get(self, key, default_value=None):
         res = self.redis.get(key)
-        return res if res else default_value
+        return res or default_value
 
     def delete(self, key, returning: bool = False):
         """
