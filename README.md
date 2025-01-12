@@ -17,3 +17,7 @@ using the library in your projects</u></span>
 It helps in the development of applications following the [12-factor](https://12factor.net/) principles.
 
 #### It is based on the library https://github.com/redis/redis-py
+
+<div style="text-align: center;">
+    <img src="logo1.jpg" alt="PyRedisImage" style="width: 500px; height: 500px;" />
+</div>
