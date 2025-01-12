@@ -64,4 +64,5 @@ jobs:
 
       - name: Run UnitTests
         run: |
-          python -m unittest discover -s tests
+          cd tests || exit 1
+          python -m unittest test_units_1.py
