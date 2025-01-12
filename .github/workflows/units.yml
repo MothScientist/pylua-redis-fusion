@@ -65,4 +65,4 @@ jobs:
       - name: Run UnitTests
         run: |
           cd tests || exit 1
-          python -m pytest units_1.py
+          python -m unittest units_1.py
