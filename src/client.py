@@ -123,7 +123,7 @@ class PyRedis:
 
         # if one of the parameters is specified, then we collect a dictionary of existing key-values
         exists_key_value: dict = self.check_keys_and_get_values(keys)
-        non_exists_keys: tuple = tuple(filter(lambda item: item not in exists_key_value, keys))
+        non_exists_keys: tuple = tuple(set(keys).difference(set(exists_key_value)))
 
         return (
             non_exists_keys if return_non_exists else (),
