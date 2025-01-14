@@ -56,12 +56,11 @@ jobs:
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
         run: |
-          cd src || exit 1
+          cd tests || exit 1
           echo "REDIS_PSW=${REDIS_PSW}" >> redis.env
           echo "REDIS_DB=${REDIS_DB}" >> redis.env
           echo "REDIS_HOST=${REDIS_HOST}" >> redis.env
           echo "REDIS_PORT=${REDIS_PORT}" >> redis.env
-          ls -l
 
       - name: Run UnitTests
         run: |
