@@ -126,9 +126,9 @@ class PyRedis:
         non_exists_keys: tuple = tuple(frozenset(keys).difference(frozenset(exists_key_value)))
 
         return (
-            non_exists_keys if return_non_exists else (),
-            tuple(exists_key_value.keys()) if return_exists else (),
-            exists_key_value if get_dict_key_value_exists else {}
+            non_exists_keys if return_non_exists is not None else (),
+            tuple(exists_key_value.keys()) if return_exists is not None else (),
+            exists_key_value if get_dict_key_value_exists is not None else {}
         )
 
     def r_mass_check_keys_exists(self, keys: list | tuple | set | frozenset) -> tuple:
