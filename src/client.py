@@ -2,17 +2,8 @@
 Client for working with the Redis database
 """
 
-from os import getenv
-from dotenv import load_dotenv
 from redis import (Redis, ConnectionPool as rConnectionPool, ConnectionError as rConnectionError,
                    TimeoutError as rTimeoutError)
-
-
-load_dotenv('redis.env')  # Load environment variables from redis.env file
-redis_psw: str = getenv('REDIS_PSW')
-redis_db: int = int(getenv('REDIS_DB'))
-redis_host: str = getenv('REDIS_HOST')
-redis_port: int = int(getenv('REDIS_PORT'))
 
 
 class PyRedis:
@@ -74,10 +65,10 @@ class PyRedis:
         if not key:
             return default_value  # default_value or None
 
-        res = self.redis.get(key)
-        return res or default_value
+        res = self.redis.get(key).decode('utf-8')
+        return res.decode('utf-8') if res else default_value
 
-    def r_delete(self, key, returning: bool = False):
+    def r_delete(self, key: str, returning: bool = False) -> str | None:
         """
         Delete a key
         getdel function is not suitable because it only works for string values
@@ -95,7 +86,7 @@ class PyRedis:
 
     def r_mass_delete(
             self,
-            keys: list | tuple | set | frozenset,
+            keys: list[str] | tuple[str] | set[str] | frozenset[str],
             return_exists: bool | None = None,
             return_non_exists: bool | None = None,
             get_dict_key_value_exists: bool | None = None
@@ -138,10 +129,7 @@ class PyRedis:
         keys: tuple = PyRedis.remove_duplicates(keys)  # remove duplicates
         return tuple(key for key, value in zip(keys, self.redis.mget(keys)) if value is not None)
 
-        # filter only those keys whose values is not None
-        return tuple(keys[i] for i, value in enumerate(existing_keys) if value is not None)
-
-    def check_keys_and_get_values(self, keys: list | tuple | set | frozenset) -> dict:
+    def check_keys_and_get_values(self, keys: list[str] | tuple[str] | set[str] | frozenset[str]) -> dict:
         """
         Checks for the existence of keys in Redis and returns a dictionary of existing keys with their values
         """
@@ -158,7 +146,7 @@ class PyRedis:
         return min(time_s * 1_000, time_ms)
 
     @staticmethod
-    def remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
+    def remove_duplicates(iterable_var: list[str] | tuple[str] | set[str] | frozenset[str]) -> tuple:
         if isinstance(iterable_var, (set, frozenset)):
             return tuple(iterable_var)
         return tuple(set(iterable_var))
