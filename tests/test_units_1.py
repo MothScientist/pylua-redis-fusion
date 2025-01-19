@@ -147,6 +147,18 @@ class SmokeTests(unittest.TestCase):
 
 		self.assertEqual(res, keys, f'len(res) = {len(res)}; len(keys) = {len(keys)}')
 
+	def test_r_mass_check_keys_exists_011(self):
+		keys: list = list({SmokeTests.get_random_string(length=randint(10, 20)) for _ in range(randint(100, 500))})
+		for key in keys:
+			SmokeTests.r.r_set(key, SmokeTests.get_random_string(length=randint(1, 100)))
+		non_exist: tuple = tuple({SmokeTests.get_random_string(length=randint(3, 5)) for _ in range(randint(10, 50))})
+		res: list = list(SmokeTests.r.r_mass_check_keys_exists({*keys, *non_exist}))
+
+		keys.sort()
+		res.sort()
+
+		self.assertEqual(res, keys, f'len(res) = {len(res)}; len(keys) = {len(keys)}')
+
 
 if __name__ == '__main__':
 	unittest.main()
