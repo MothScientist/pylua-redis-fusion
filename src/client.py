@@ -55,7 +55,7 @@ class PyRedis:
 
         self.redis.set(key, value, nx=if_not_exist, xx=if_exist, ex=time_s, px=time_ms)
 
-    def r_get(self, key, default_value=None):
+    def r_get(self, key: str, default_value=None):
         """
         Used both to get a value by key and to check for its existence
         :param key:
@@ -65,7 +65,7 @@ class PyRedis:
         if not key:
             return default_value  # default_value or None
 
-        res = self.redis.get(key).decode('utf-8')
+        res = self.redis.get(key)
         return res.decode('utf-8') if res else default_value
 
     def r_delete(self, key: str, returning: bool = False) -> str | None:
@@ -80,9 +80,11 @@ class PyRedis:
         if not key:
             return None
 
-        res = self.redis.get(key) if returning else None
-        self.redis.delete(key)
-        return res
+        res = self.r_get(key)
+        if res:
+            self.redis.delete(key)
+
+        return res if returning else None
 
     def r_mass_delete(
             self,
