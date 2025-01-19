@@ -38,7 +38,7 @@ class PyRedis:
 
     def r_set(
             self,
-            key: str,
+            key,
             value,
             time_ms=None,
             time_s=None,
