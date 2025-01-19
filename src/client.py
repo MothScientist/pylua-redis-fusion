@@ -132,6 +132,9 @@ class PyRedis:
         )
 
     def r_mass_check_keys_exists(self, keys: list | tuple | set | frozenset) -> tuple:
+        """
+        Mass operation to check for keys
+        """
         if not keys:
             return ()
 

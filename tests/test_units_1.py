@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 from os import getenv
 from random import randint, choice
 from string import ascii_letters, digits
-
 from sys import path as sys_path
+
 sys_path.append('../')
 from src.client import PyRedis
 
@@ -17,7 +17,7 @@ redis_port: int = int(getenv('REDIS_PORT'))
 
 class SmokeTests(unittest.TestCase):
 	# def setUp(self):
-		# self.maxDiff = None
+	# 	self.maxDiff = None
 
 	r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.1)  # .1 special for smoke tests
 
@@ -146,6 +146,7 @@ class SmokeTests(unittest.TestCase):
 		res.sort()
 
 		self.assertEqual(res, keys, f'len(res) = {len(res)}; len(keys) = {len(keys)}')
+
 
 if __name__ == '__main__':
 	unittest.main()

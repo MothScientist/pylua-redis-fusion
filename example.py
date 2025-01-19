@@ -10,6 +10,7 @@ redis_db: int = int(getenv('REDIS_DB'))
 redis_host: str = getenv('REDIS_HOST')
 redis_port: int = int(getenv('REDIS_PORT'))
 
+
 def redis_connection() -> PyRedis:
     return PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.001)
 
@@ -29,6 +30,7 @@ def main():
 ########################################################################################################################
 # Works with the help of a decorator
 # P.S. the decorator is not included in the library, as I want each user to customize it for themselves
+
 
 def redis(func):
     @wraps(func)
