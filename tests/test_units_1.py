@@ -8,7 +8,10 @@ from src.client import PyRedis, redis_psw, redis_db, redis_host, redis_port
 
 
 class SmokeTests(unittest.TestCase):
-	r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.001)
+	# def setUp(self):
+		# self.maxDiff = None
+
+	r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.1)  # .1 special for smoke tests
 
 	@staticmethod
 	def get_random_integer():
@@ -84,13 +87,57 @@ class SmokeTests(unittest.TestCase):
 		res_1 = SmokeTests.r.r_get('test_006')
 		self.assertEqual(res_1, value.encode('utf-8'))
 
-		# delete (with returning)
-		self.assertEqual(SmokeTests.r.r_delete('test_006', returning=True), value.encode('utf-8'))
+		# delete (without returning - False)
+		self.assertIsNone(SmokeTests.r.r_delete('test_006', returning=False))
 		self.assertIsNone(SmokeTests.r.r_get('test_006'))
 
 		res_2 = SmokeTests.r.r_get('test_006')
 		self.assertIsNone(res_2)
 
+	def test_set_get_delete_007(self):
+		value: int = SmokeTests.get_random_integer()
+
+		self.assertIsNone(SmokeTests.r.r_set('test_007', value))
+		res_1 = SmokeTests.r.r_get('test_007')
+		self.assertEqual(res_1, str(value).encode('utf-8'))
+
+		# delete (with returning)
+		self.assertEqual(SmokeTests.r.r_delete('test_007', returning=True), str(value).encode('utf-8'))
+		self.assertIsNone(SmokeTests.r.r_get('test_007'))
+
+		res_2 = SmokeTests.r.r_get('test_007')
+		self.assertIsNone(res_2)
+
+	def test_set_get_delete_008(self):
+		value: str = SmokeTests.get_random_string()
+
+		self.assertIsNone(SmokeTests.r.r_set('test_008', value))
+		res_1 = SmokeTests.r.r_get('test_008')
+		self.assertEqual(res_1, value.encode('utf-8'))
+
+		# delete (with returning)
+		self.assertEqual(SmokeTests.r.r_delete('test_008', returning=True), value.encode('utf-8'))
+		self.assertIsNone(SmokeTests.r.r_get('test_008'))
+
+		res_2 = SmokeTests.r.r_get('test_008')
+		self.assertIsNone(res_2)
+
+	def test_cycle_set_get_delete_009(self):
+		for value, key in enumerate([i for i in range(100_000_000, 100_000_000 + randint(500, 1_000))]):
+			key = str(key)
+			value_encode = str(value).encode('utf-8')
+			self.assertIsNone(SmokeTests.r.r_set(key, value))
+			self.assertEqual(SmokeTests.r.r_get(key), value_encode)
+			self.assertEqual(SmokeTests.r.r_delete(key, returning=True), value_encode)
+			self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_r_mass_check_keys_exists_010(self):
+		keys: tuple = tuple(sorted([SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(50, 100))]))
+		for key in keys:
+			SmokeTests.r.r_set(key, randint(0, 10_000))
+		non_exist: tuple = tuple({SmokeTests.get_random_string(length=randint(1, 3)) for _ in range(randint(5, 10))})
+		res: tuple = tuple(sorted(list(SmokeTests.r.r_mass_check_keys_exists({*keys, *non_exist}))))
+		self.assertEqual(res, keys, f'len(res) = {len(res)}; len(keys) = {len(keys)}')
 
 if __name__ == '__main__':
 	unittest.main()
