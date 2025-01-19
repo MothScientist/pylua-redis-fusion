@@ -131,12 +131,12 @@ class PyRedis:
             exists_key_value if get_dict_key_value_exists is not None else {}
         )
 
-    def r_mass_check_keys_exists(self, keys: list | tuple | set | frozenset) -> tuple:
+    def r_mass_check_keys_exists(self, keys: list[str] | tuple[str] | set[str] | frozenset[str]) -> tuple:
         if not keys:
             return ()
 
         keys: tuple = PyRedis.remove_duplicates(keys)  # remove duplicates
-        existing_keys = self.redis.mget(keys)
+        return tuple(key for key, value in zip(keys, self.redis.mget(keys)) if value is not None)
 
         # filter only those keys whose values is not None
         return tuple(keys[i] for i, value in enumerate(existing_keys) if value is not None)
