@@ -131,17 +131,15 @@ class PyRedis:
             exists_key_value if get_dict_key_value_exists else {}
         )
 
-    def r_keys_exists(self, keys: list | tuple | set | frozenset) -> tuple:
-        """
-        Массовая операция для проверки наличия ключей в базе данных
-        :param keys:
-        :return:
-        """
+    def r_mass_check_keys_exists(self, keys: list | tuple | set | frozenset) -> tuple:
         if not keys:
             return ()
 
-        keys: tuple = PyRedis.remove_duplicates(keys)
-        return tuple(self.redis.mget(keys))
+        keys: tuple = PyRedis.remove_duplicates(keys)  # remove duplicates
+        existing_keys = self.redis.mget(keys)
+
+        # filter only those keys whose values is not None
+        return tuple(keys[i] for i, value in enumerate(existing_keys) if value is not None)
 
     def check_keys_and_get_values(self, keys: list | tuple | set | frozenset) -> dict:
         """
