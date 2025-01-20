@@ -152,6 +152,18 @@ class PyRedis:
         values = self.redis.mget(keys)  # later in the library the variable is converted to list
         return {keys[i]: value for i, value in enumerate(values) if value is not None}
 
+    def r_remove_all_keys(self, get_count_keys: bool = False) -> int | None:
+        """
+        Delete all keys in all databases on the current host
+        :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
+        """
+        key_count: int | None = None
+        if get_count_keys:
+            key_count = self.redis.dbsize()
+
+        self.redis.flushall()
+        return key_count
+
     @staticmethod
     def compare_and_select_seconds_and_milliseconds(time_s: float, time_ms: float) -> float:
         """
