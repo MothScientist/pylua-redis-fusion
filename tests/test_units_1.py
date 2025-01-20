@@ -56,7 +56,7 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_get('test_3')
 		self.assertEqual(res_2, value_2)
 
-	def test_set_get_delete_004(self):
+	def test_set_get_delete_001(self):
 		value: int = SmokeTests.get_random_integer()
 
 		self.assertIsNone(SmokeTests.r.r_set('test_004', value))
@@ -70,7 +70,7 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_get('test_004')
 		self.assertIsNone(res_2)
 
-	def test_set_get_delete_005(self):
+	def test_set_get_delete_002(self):
 		value: int = SmokeTests.get_random_integer()
 
 		self.assertIsNone(SmokeTests.r.r_set('test_005', value))
@@ -84,7 +84,7 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_get('test_005')
 		self.assertIsNone(res_2)
 
-	def test_set_get_delete_006(self):
+	def test_set_get_delete_003(self):
 		value: str = SmokeTests.get_random_string()
 
 		self.assertIsNone(SmokeTests.r.r_set('test_006', value))
@@ -98,7 +98,7 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_get('test_006')
 		self.assertIsNone(res_2)
 
-	def test_set_get_delete_007(self):
+	def test_set_get_delete_004(self):
 		value: int = SmokeTests.get_random_integer()
 
 		self.assertIsNone(SmokeTests.r.r_set('test_007', value))
@@ -112,7 +112,7 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_get('test_007')
 		self.assertIsNone(res_2)
 
-	def test_set_get_delete_008(self):
+	def test_set_get_delete_005(self):
 		value: str = SmokeTests.get_random_string()
 
 		self.assertIsNone(SmokeTests.r.r_set('test_008', value))
@@ -126,7 +126,7 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_get('test_008')
 		self.assertIsNone(res_2)
 
-	def test_cycle_set_get_delete_009(self):
+	def test_cycle_set_get_delete_001(self):
 		for value, key in enumerate([i for i in range(100_000_000, 100_000_000 + randint(500, 1_000))]):
 			key = str(key)
 			str_value = str(value)
@@ -135,7 +135,7 @@ class SmokeTests(unittest.TestCase):
 			self.assertEqual(SmokeTests.r.r_delete(key, returning=True), str_value)
 			self.assertIsNone(SmokeTests.r.r_get(key))
 
-	def test_r_mass_check_keys_exists_010(self):
+	def test_r_mass_check_keys_exists_001(self):
 		keys: list = list({SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(50, 100))})
 		for key in keys:
 			SmokeTests.r.r_set(key, randint(0, 10_000))
@@ -147,7 +147,7 @@ class SmokeTests(unittest.TestCase):
 
 		self.assertEqual(res, keys, f'len(res) = {len(res)}; len(keys) = {len(keys)}')
 
-	def test_r_mass_check_keys_exists_011(self):
+	def test_r_mass_check_keys_exists_002(self):
 		keys: list = list({SmokeTests.get_random_string(length=randint(10, 20)) for _ in range(randint(100, 500))})
 		for key in keys:
 			SmokeTests.r.r_set(key, SmokeTests.get_random_string(length=randint(1, 100)))
@@ -158,6 +158,15 @@ class SmokeTests(unittest.TestCase):
 		res.sort()
 
 		self.assertEqual(res, keys, f'len(res) = {len(res)}; len(keys) = {len(keys)}')
+
+	def test_r_remove_all_keys_001(self):
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		key_count: int = randint(1_000, 5_000)
+		for key in range(key_count):
+			SmokeTests.r.r_set(str(key), key)
+		res = SmokeTests.r.r_remove_all_keys(get_count_keys=True)
+		self.assertEqual(res, key_count)
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 
 
 if __name__ == '__main__':
