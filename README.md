@@ -7,9 +7,10 @@ Python version: __3.13.1__ (Support includes Python __3.11__ and __3.12__)
 ## <span style="color: white;">For what?</span>
 
 For quick connection to your Python projects and easy usage. <span style="color: violet;">__«Plug and Play»__ :)</span></br>
-* It is assumed that you already have the Redis service installed and running.
+* It is assumed that you already have the <span style="color: red;">Redis</span> service installed and running.
 
-#### <span style="color: orange;">The package is limited by the number of functions</span> (their list is expanding as development proceeds), but it has all the basic methods for working with Redis (see the list and description of current commands with examples in the `example.py` file in the root of the repository).
+#### <span style="color: orange;">Please note that the library does not support all data types and methods available in the original library. Pay attention to the annotation of types and description of functions and their parameters!</span>
+The number of supported methods and data types increases as the project develops, <span style="color: aqua;">**but it has all the basic methods for working with Redis**</span> (see the list and description of current commands with examples in the `example.py` file in the root of the repository).
 
 <span style="color: white;"><u>Backward compatibility of functions is also preserved, which allows you to avoid problems when 
 using the library in your projects</u></span>
