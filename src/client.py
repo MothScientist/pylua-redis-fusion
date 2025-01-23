@@ -1,5 +1,6 @@
 """
 Client for working with the Redis database
+Original library documentation: https://redis-py.readthedocs.io/en/stable/index.html
 """
 
 from os import getenv
@@ -170,7 +171,8 @@ class PyRedis:
         If both seconds and milliseconds are specified,
         the time is converted to milliseconds and the smallest one is selected
         """
-        return min(time_s * 1_000, time_ms)
+
+        return min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
 
     @staticmethod
     def remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
