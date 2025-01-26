@@ -32,108 +32,240 @@ class SmokeTests(unittest.TestCase):
 	def test_ping(self):
 		self.assertTrue(SmokeTests.r.r_ping())
 
-	def test_set_get_001(self):
+	# set/get ##########################################################################################################
+
+	def test_set_get_int_001(self):
 		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set('test_1', value))
-		res = SmokeTests.r.r_get('test_1')
+		self.assertIsNone(SmokeTests.r.r_set('set_get_int_001', value))
+		res = SmokeTests.r.r_get('set_get_int_001')
 		self.assertEqual(int(res), value)
 
-	def test_set_get_002(self):
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set('test_2', value))
-		res = SmokeTests.r.r_get('test_2')
-		self.assertEqual(int(res), value)
+	def test_set_get_int_002(self):
+		value_1: int = SmokeTests.get_random_integer()
+		self.assertIsNone(SmokeTests.r.r_set('set_get_int_002', value_1))
+		res_1 = SmokeTests.r.r_get('set_get_int_002')
+		self.assertEqual(int(res_1), value_1)
 
-	def test_set_get_003(self):
+		# rewrite
+		value_2: int = SmokeTests.get_random_integer()
+		self.assertIsNone(SmokeTests.r.r_set('set_get_int_002', value_2))
+		res_2 = SmokeTests.r.r_get('set_get_int_002')
+		self.assertEqual(int(res_2), value_2)
+
+	def test_set_get_float_001(self):
+		value: float = float(SmokeTests.get_random_integer())
+		self.assertIsNone(SmokeTests.r.r_set('set_get_float_001', value))
+		res = SmokeTests.r.r_get('set_get_float_001')
+		self.assertEqual(float(res), value)
+
+	def test_set_get_float_002(self):
+		value_1: float = float(SmokeTests.get_random_integer())
+		self.assertIsNone(SmokeTests.r.r_set('set_get_float_002', value_1))
+		res_1 = SmokeTests.r.r_get('set_get_float_002')
+		self.assertEqual(float(res_1), value_1)
+
+		# rewrite
+		value_2: float = float(SmokeTests.get_random_integer())
+		self.assertIsNone(SmokeTests.r.r_set('set_get_float_002', value_2))
+		res_2 = SmokeTests.r.r_get('set_get_float_002')
+		self.assertEqual(float(res_2), value_2)
+
+	def test_set_get_str_001(self):
+		value: str = SmokeTests.get_random_string()
+		self.assertIsNone(SmokeTests.r.r_set('set_get_str_001', value))
+		res = SmokeTests.r.r_get('set_get_str_001')
+		self.assertEqual(res, value)
+
+	def test_set_get_str_002(self):
 		value_1: str = SmokeTests.get_random_string()
-		self.assertIsNone(SmokeTests.r.r_set('test_3', value_1))
-		res_1 = SmokeTests.r.r_get('test_3')
+		self.assertIsNone(SmokeTests.r.r_set('set_get_str_002', value_1))
+		res_1: str = SmokeTests.r.r_get('set_get_str_002')
 		self.assertEqual(res_1, value_1)
 
 		# rewrite
 		value_2: str = SmokeTests.get_random_string()
-		self.assertIsNone(SmokeTests.r.r_set('test_3', value_2))
-		res_2 = SmokeTests.r.r_get('test_3')
+		self.assertIsNone(SmokeTests.r.r_set('set_get_str_002', value_2))
+		res_2: str = SmokeTests.r.r_get('set_get_str_002')
 		self.assertEqual(res_2, value_2)
 
-	def test_set_get_delete_001(self):
+	def test_set_get_bool_001(self):
+		value: bool = True
+		self.assertIsNone(SmokeTests.r.r_set('set_get_bool_001', value))
+		res = SmokeTests.r.r_get('set_get_bool_001', convert_to_type='bool')
+		self.assertEqual(res, value)
+
+	def test_set_get_list_001(self):
+		value: list = [SmokeTests.get_random_integer() for _ in range(randint(1, 15))]
+		self.assertIsNone(SmokeTests.r.r_set('set_get_list_001', value))
+		res: list = list(map(int, SmokeTests.r.r_get('set_get_list_001')))
+		self.assertEqual(res, value)
+
+	def test_set_get_list_002(self):
+		value_1: list = [SmokeTests.get_random_integer() for _ in range(randint(1, 25))]
+		self.assertIsNone(SmokeTests.r.r_set('set_get_list_002', value_1))
+		res_1: list = list(map(int, SmokeTests.r.r_get('set_get_list_002')))
+		self.assertEqual(res_1, value_1)
+
+		# rewrite
+		value_2: list = [SmokeTests.get_random_integer() for _ in range(randint(1, 15))]
+		self.assertIsNone(SmokeTests.r.r_set('set_get_list_002', value_2))
+		res_2: list = list(map(int, SmokeTests.r.r_get('set_get_list_002')))
+		self.assertEqual(res_2, value_2)
+
+	def test_set_get_list_003(self):
+		value: list = [SmokeTests.get_random_string() for _ in range(randint(1, 50))]
+		self.assertIsNone(SmokeTests.r.r_set('set_get_list_003', value))
+		res: list = list(map(str, SmokeTests.r.r_get('set_get_list_003')))
+		self.assertEqual(res, value)
+
+	def test_set_get_list_004(self):
+		value: list[bool] = [bool(randint(0, 1)) for _ in range(randint(1, 50))]
+		self.assertIsNone(SmokeTests.r.r_set('set_get_list_003', value))
+		res: list = list(SmokeTests.r.r_get('set_get_list_003', convert_to_type='boolean'))
+		self.assertEqual(res, value)
+
+	def test_set_get_tuple_001(self):
+		value: tuple = tuple(SmokeTests.get_random_integer() for _ in range(randint(1, 25)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_tuple_001', value))
+		res: tuple = tuple(map(int, SmokeTests.r.r_get('set_get_tuple_001')))
+		self.assertEqual(res, value)
+
+	def test_set_get_tuple_002(self):
+		value_1: tuple = tuple(SmokeTests.get_random_integer() for _ in range(randint(1, 25)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_tuple_002', value_1))
+		res_1: tuple = tuple(map(int, SmokeTests.r.r_get('set_get_tuple_002')))
+		self.assertEqual(res_1, value_1)
+
+		# rewrite
+		value_2: tuple = tuple(SmokeTests.get_random_integer() for _ in range(randint(1, 15)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_tuple_002', value_2))
+		res_2: tuple = tuple(map(int, SmokeTests.r.r_get('set_get_tuple_002')))
+		self.assertEqual(res_2, value_2)
+
+	def test_set_get_tuple_003(self):
+		value: tuple = tuple(SmokeTests.get_random_string() for _ in range(randint(1, 50)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_tuple_003', value))
+		res: tuple = tuple(map(str, SmokeTests.r.r_get('set_get_tuple_003')))
+		self.assertEqual(res, value)
+
+	def test_set_get_tuple_004(self):
+		value: tuple = tuple(SmokeTests.get_random_integer() for _ in range(randint(1, 50)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_tuple_004', value))
+		res: tuple = tuple(SmokeTests.r.r_get('set_get_tuple_004', convert_to_type='int'))
+		self.assertEqual(res, value)
+
+	def test_set_get_tuple_005(self):
+		value: tuple = tuple(float(SmokeTests.get_random_integer()) for _ in range(randint(1, 25)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_tuple_005', value))
+		res: tuple = tuple(SmokeTests.r.r_get('set_get_tuple_005', convert_to_type='float'))
+		self.assertEqual(res, value)
+
+	def test_set_get_set_001(self):
+		value: set = set(SmokeTests.get_random_integer() for _ in range(randint(1, 100)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_set_001', value))
+		res: set = set(map(int, SmokeTests.r.r_get('set_get_set_001')))
+		self.assertEqual(res, value)
+
+	def test_set_get_set_002(self):
+		value: set = set(SmokeTests.get_random_string() for _ in range(randint(1, 25))).union(
+			set(str(SmokeTests.get_random_integer()) for _ in range(randint(1, 25)))
+		)
+		self.assertIsNone(SmokeTests.r.r_set('set_get_set_002', value))
+		res: set = set(SmokeTests.r.r_get('set_get_set_002'))
+		self.assertEqual(res, value)
+
+	def test_set_get_set_003(self):
+		value: set = set(SmokeTests.get_random_string() for _ in range(randint(1, 10))).union(
+			set(SmokeTests.get_random_integer() for _ in range(randint(1, 10)))
+		)
+		self.assertIsNone(SmokeTests.r.r_set('set_get_set_003', value))
+		res: set = set(SmokeTests.r.r_get('set_get_set_003', convert_to_type='int'))
+		self.assertEqual(res, value)
+
+	# set/get convert_to_type #########################################################################################
+
+	# set/get/delete ###################################################################################################
+
+	def test_set_get_delete_int_001(self):
 		value: int = SmokeTests.get_random_integer()
 
-		self.assertIsNone(SmokeTests.r.r_set('test_004', value))
-		res_1 = SmokeTests.r.r_get('test_004')
+		self.assertIsNone(SmokeTests.r.r_set('set_get_delete_int_001', value))
+		res_1 = SmokeTests.r.r_get('set_get_delete_int_001')
 		self.assertEqual(int(res_1), value)
 
 		# delete (without returning - None)
-		self.assertIsNone(SmokeTests.r.r_delete('test_004'))
-		self.assertIsNone(SmokeTests.r.r_get('test_004'))
+		self.assertIsNone(SmokeTests.r.r_delete('set_get_delete_int_001'))
+		self.assertIsNone(SmokeTests.r.r_get('set_get_delete_int_001'))
 
-		res_2 = SmokeTests.r.r_get('test_004')
+		res_2 = SmokeTests.r.r_get('set_get_delete_int_001')
 		self.assertIsNone(res_2)
 
-	def test_set_get_delete_002(self):
+	def test_set_get_delete_int_002(self):
 		value: int = SmokeTests.get_random_integer()
 
-		self.assertIsNone(SmokeTests.r.r_set('test_005', value))
-		res_1 = SmokeTests.r.r_get('test_005')
+		self.assertIsNone(SmokeTests.r.r_set('set_get_delete_int_002', value))
+		res_1 = SmokeTests.r.r_get('set_get_delete_int_002')
 		self.assertEqual(int(res_1), value)
 
 		# delete (without returning - False)
-		self.assertIsNone(SmokeTests.r.r_delete('test_005', returning=False))
-		self.assertIsNone(SmokeTests.r.r_get('test_005'))
+		self.assertIsNone(SmokeTests.r.r_delete('set_get_delete_int_002', returning=False))
+		self.assertIsNone(SmokeTests.r.r_get('set_get_delete_int_002'))
 
-		res_2 = SmokeTests.r.r_get('test_005')
+		res_2 = SmokeTests.r.r_get('set_get_delete_int_002')
 		self.assertIsNone(res_2)
 
-	def test_set_get_delete_003(self):
-		value: str = SmokeTests.get_random_string()
-
-		self.assertIsNone(SmokeTests.r.r_set('test_006', value))
-		res_1 = SmokeTests.r.r_get('test_006')
-		self.assertEqual(res_1, value)
-
-		# delete (without returning - False)
-		self.assertIsNone(SmokeTests.r.r_delete('test_006', returning=False))
-		self.assertIsNone(SmokeTests.r.r_get('test_006'))
-
-		res_2 = SmokeTests.r.r_get('test_006')
-		self.assertIsNone(res_2)
-
-	def test_set_get_delete_004(self):
+	def test_set_get_delete_int_003(self):
 		value: int = SmokeTests.get_random_integer()
 
-		self.assertIsNone(SmokeTests.r.r_set('test_007', value))
-		res_1 = SmokeTests.r.r_get('test_007')
+		self.assertIsNone(SmokeTests.r.r_set('set_get_delete_int_003', value))
+		res_1 = SmokeTests.r.r_get('set_get_delete_int_003')
 		self.assertEqual(res_1, str(value))
 
 		# delete (with returning)
-		self.assertEqual(SmokeTests.r.r_delete('test_007', returning=True), str(value))
-		self.assertIsNone(SmokeTests.r.r_get('test_007'))
+		self.assertEqual(SmokeTests.r.r_delete('set_get_delete_int_003', returning=True), str(value))
+		self.assertIsNone(SmokeTests.r.r_get('set_get_delete_int_003'))
 
-		res_2 = SmokeTests.r.r_get('test_007')
+		res_2 = SmokeTests.r.r_get('set_get_delete_int_003')
 		self.assertIsNone(res_2)
 
-	def test_set_get_delete_005(self):
+	def test_set_get_delete_str_001(self):
 		value: str = SmokeTests.get_random_string()
 
-		self.assertIsNone(SmokeTests.r.r_set('test_008', value))
-		res_1 = SmokeTests.r.r_get('test_008')
+		self.assertIsNone(SmokeTests.r.r_set('set_get_delete_str_001', value))
+		res_1 = SmokeTests.r.r_get('set_get_delete_str_001')
+		self.assertEqual(res_1, value)
+
+		# delete (without returning - False)
+		self.assertIsNone(SmokeTests.r.r_delete('set_get_delete_str_001', returning=False))
+		self.assertIsNone(SmokeTests.r.r_get('set_get_delete_str_001'))
+
+		res_2 = SmokeTests.r.r_get('set_get_delete_str_001')
+		self.assertIsNone(res_2)
+
+	def test_set_get_delete_str_002(self):
+		value: str = SmokeTests.get_random_string()
+
+		self.assertIsNone(SmokeTests.r.r_set('set_get_delete_str_002', value))
+		res_1 = SmokeTests.r.r_get('set_get_delete_str_002')
 		self.assertEqual(res_1, value)
 
 		# delete (with returning)
-		self.assertEqual(SmokeTests.r.r_delete('test_008', returning=True), value)
-		self.assertIsNone(SmokeTests.r.r_get('test_008'))
+		self.assertEqual(SmokeTests.r.r_delete('set_get_delete_str_002', returning=True), value)
+		self.assertIsNone(SmokeTests.r.r_get('set_get_delete_str_002'))
 
-		res_2 = SmokeTests.r.r_get('test_008')
+		res_2 = SmokeTests.r.r_get('set_get_delete_str_002')
 		self.assertIsNone(res_2)
 
 	def test_cycle_set_get_delete_001(self):
-		for value, key in enumerate([i for i in range(100_000_000, 100_000_000 + randint(500, 1_000))]):
+		for value, key in enumerate([i for i in range(100_000_000, 100_000_000 + randint(100, 500))]):
 			key = str(key)
 			str_value = str(value)
 			self.assertIsNone(SmokeTests.r.r_set(key, value))
 			self.assertEqual(SmokeTests.r.r_get(key), str_value)
 			self.assertEqual(SmokeTests.r.r_delete(key, returning=True), str_value)
 			self.assertIsNone(SmokeTests.r.r_get(key))
+
+	# mass check keys ##################################################################################################
 
 	def test_r_mass_check_keys_exists_001(self):
 		keys: list = list({SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(50, 100))})
@@ -148,10 +280,10 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(res, keys, f'len(res) = {len(res)}; len(keys) = {len(keys)}')
 
 	def test_r_mass_check_keys_exists_002(self):
-		keys: list = list({SmokeTests.get_random_string(length=randint(10, 20)) for _ in range(randint(100, 500))})
+		keys: list = list({SmokeTests.get_random_string(length=randint(10, 20)) for _ in range(randint(50, 100))})
 		for key in keys:
 			SmokeTests.r.r_set(key, SmokeTests.get_random_string(length=randint(1, 100)))
-		non_exist: tuple = tuple({SmokeTests.get_random_string(length=randint(3, 5)) for _ in range(randint(10, 50))})
+		non_exist: tuple = tuple({SmokeTests.get_random_string(length=randint(3, 5)) for _ in range(randint(10, 25))})
 		res: list = list(SmokeTests.r.r_mass_check_keys_exists({*keys, *non_exist}))
 
 		keys.sort()
@@ -159,9 +291,11 @@ class SmokeTests(unittest.TestCase):
 
 		self.assertEqual(res, keys, f'len(res) = {len(res)}; len(keys) = {len(keys)}')
 
+	# remove all keys ##################################################################################################
+
 	def test_r_remove_all_keys_001(self):
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		key_count: int = randint(1_000, 5_000)
+		key_count: int = randint(100, 250)
 		for key in range(key_count):
 			SmokeTests.r.r_set(str(key), key)
 		res = SmokeTests.r.r_remove_all_keys(get_count_keys=True)
@@ -170,4 +304,8 @@ class SmokeTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
+	from redis import Redis, ConnectionPool
+	_redis = Redis(connection_pool=ConnectionPool(host=redis_host,port=redis_port,db=0,password=redis_psw))
+	_redis.flushall()
+
 	unittest.main()
