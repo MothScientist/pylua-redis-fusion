@@ -37,10 +37,13 @@ class PyRedis:
         except (rConnectionError, rTimeoutError):
             return False
 
+    def key_is_exist(self, key: int | str) -> bool:
+        return bool(self.redis.exists(key))
+
     def r_set(
             self,
-            key,
-            value,
+            key: int | str | dict,
+            value: int | float | str | list | tuple | set | frozenset | None,
             time_ms=None,
             time_s=None,
             if_exist: bool = None,
@@ -50,38 +53,93 @@ class PyRedis:
         Set a new key or override an existing one
         If both parameters (time_s, time_ms) are specified, the key will be deleted based on the smallest value.
         :param key:
-        :param value:
-        :param time_ms: key lifetime in milliseconds
-        :param time_s: key lifetime in seconds
-        :param if_exist: set value only if such key already exists
-        :param if_not_exist: set value only if such key does not exist yet
+        :param value: IMPORTANT: not considered if a dict type object was passed in key.
+        :param time_ms: key lifetime in milliseconds.
+        :param time_s: key lifetime in seconds.
+        :param if_exist: set value only if such key already exists.
+        :param if_not_exist: set value only if such key does not exist yet.
         :return: None
         """
         if key is value is None:
             return
 
-        if time_s and time_ms:
+        key_exist: bool | None = None
+        if (if_exist or if_not_exist) and not isinstance(key, dict):
+            key_exist: bool = self.key_is_exist(key)
+
+        if time_s or time_ms:
             time_s, time_ms = None, PyRedis.compare_and_select_seconds_and_milliseconds(time_s, time_ms)
 
-        self.redis.set(key, value, nx=if_not_exist, xx=if_exist, ex=time_s, px=time_ms)
+        if isinstance(key, dict):
+            # TODO - key_exists if dict
+            self.__r_set_dict_helper(key, time_ms=time_ms, if_exist=if_exist, if_not_exist=if_not_exist, key_exist=key_exist)
 
-    def r_get(self, key, default_value=None):
+        elif isinstance(value, (bool, int, float, str)):
+            self.redis.set(str(key), str(value) if isinstance(value, bool) else value,
+                           nx=if_not_exist, xx=if_exist, ex=time_s, px=time_ms)
+
+        elif isinstance(value, (list, tuple, set, frozenset)):
+            self.__r_set_array_helper(key, value, time_ms=time_ms, if_exist=if_exist, if_not_exist=if_not_exist, key_exist=key_exist)
+
+    def __r_set_array_helper(
+            self,
+            key: int | str,
+            value: list | tuple | set | frozenset,
+            time_ms: int | None,
+            if_exist: bool | None,
+            if_not_exist: bool | None,
+            key_exist: bool | None
+    ) -> None:
+        # if such a key already exists, it must be cleared before writing, otherwise it will simply expand
+        key_exist: bool = self.key_is_exist(key) if key_exist is None else key_exist
+        if key_exist:
+            self.r_delete(key)
+
+        elif (if_exist and not key_exist) or (if_not_exist and key_exist):
+            return
+
+        if any(isinstance(element, bool) for element in value):
+            value = [str(element) if isinstance(element, bool) else element for element in value]  # bool -> strings
+        self.redis.rpush(key, *value)
+        if time_ms:
+            self.redis.pexpire(key, time_ms, if_exist, if_not_exist)
+
+    def __r_set_dict_helper(
+            self,
+            key: dict,
+            time_ms: int | None,
+            if_exist: bool | None,
+            if_not_exist: bool | None,
+            key_exist: bool | None
+    ) -> None:
+        pass  # TODO
+
+    def r_get(self, key, default_value=None, convert_to_type: str = None):
         """
         Used both to get a value by key and to check for its existence
         :param key:
         :param default_value: value that will be returned if there is no such key.
-        :return:
+        :param convert_to_type: bool/int/float (by default all output data is of type str after decode() function)
+        :return: value, none or default_value
         """
         if not key:
             return default_value  # default_value or None
 
-        res = self.redis.get(key)
-        return res or default_value
+        value_type = self.redis.type(key).decode('utf-8')
+
+        if value_type == 'string':
+            res = self.redis.get(key).decode('utf-8') if self.redis.get(key) else None
+        elif value_type == 'list':
+            res = [byte.decode('utf-8') for byte in self.redis.lrange(key, 0, -1)]
+        else:  # value_type = 'none'
+            return default_value
+
+        return PyRedis.convert_to_type(res, convert_to_type) if convert_to_type else res
 
     def r_delete(self, key, returning: bool = False):
         """
         Delete a key
-        getdel function is not suitable because it only works for string values
+        'getdel' (from origin module) function is not suitable because it only works for string values
         (https://redis.io/docs/latest/commands/getdel/)
         :param key:
         :param returning: return the value the key had before deletion
@@ -90,9 +148,9 @@ class PyRedis:
         if not key:
             return None
 
-        res = self.redis.get(key) if returning else None
+        value = self.r_get(key) if returning else None
         self.redis.delete(key)
-        return res
+        return value
 
     def r_mass_delete(
             self,
@@ -157,6 +215,7 @@ class PyRedis:
         """
         Delete all keys in all databases on the current host
         :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
+        :return: count keys or None
         """
         key_count: int | None = None
         if get_count_keys:
@@ -171,7 +230,6 @@ class PyRedis:
         If both seconds and milliseconds are specified,
         the time is converted to milliseconds and the smallest one is selected
         """
-
         return min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
 
     @staticmethod
@@ -180,6 +238,22 @@ class PyRedis:
             return tuple(iterable_var)
         return tuple(set(iterable_var))
 
+    @staticmethod
+    def convert_to_type(value: str | list[str], _type: str) -> str | bool | int | float | list:
+        if isinstance(value, list):
+            return [PyRedis.__helper_convert_to_type(i, _type) for i in value]
+        else:
+            return PyRedis.__helper_convert_to_type(value, _type)
 
-r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.001)
-print(r.r_ping())
+    @staticmethod
+    def __helper_convert_to_type(value: str, _type: str) -> str | int | float:
+        try:
+            if _type in ('int', 'integer'):
+                value = int(value)
+            elif _type in ('float', 'double', 'numeric'):
+                value = float(value)
+            elif _type in ('bool', 'boolean'):
+                value = True if value in ('1', 'True', 'true') else False
+        except ValueError:
+            pass
+        return value
