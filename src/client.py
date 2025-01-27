@@ -99,7 +99,8 @@ class PyRedis:
             return
 
         if any(isinstance(element, bool) for element in value):
-            value = [str(element) if isinstance(element, bool) else element for element in value]  # bool -> strings
+            # if there are values of type bool, then we convert them to strings
+            value = tuple(str(element) if isinstance(element, bool) else element for element in value)
         self.redis.rpush(key, *value)
         if time_ms:
             self.redis.pexpire(key, time_ms, if_exist, if_not_exist)
