@@ -3,8 +3,12 @@ Client for working with the Redis database
 Original library documentation: https://redis-py.readthedocs.io/en/stable/index.html
 """
 
-from redis import (Redis, ConnectionPool as rConnectionPool, ConnectionError as rConnectionError,
-                   TimeoutError as rTimeoutError)
+from redis import (
+    Redis,
+    ConnectionPool as rConnectionPool,
+    ConnectionError as rConnectionError,
+    TimeoutError as rTimeoutError
+)
 
 
 class PyRedis:
