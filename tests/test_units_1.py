@@ -182,6 +182,42 @@ class SmokeTests(unittest.TestCase):
 		res: set = set(SmokeTests.r.r_get('set_get_set_003', convert_to_type='int'))
 		self.assertEqual(res, value)
 
+	def test_set_get_set_004(self):
+		value: set = set(SmokeTests.get_random_integer() for _ in range(randint(50, 100)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_set_004', value))
+		res: set = set(SmokeTests.r.r_get('set_get_set_004', convert_to_type='int'))
+		self.assertEqual(value, res)
+
+	def test_set_get_set_005(self):
+		value: set = set(SmokeTests.get_random_string() for _ in range(randint(50, 100)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_set_005', value))
+		res: set = set(SmokeTests.r.r_get('set_get_set_005'))
+		self.assertEqual(value, res)
+
+	def test_set_get_set_006(self):
+		value: set = set(SmokeTests.get_random_string() for _ in range(randint(25, 50)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_set_006', value))
+		res: set = set(SmokeTests.r.r_get('set_get_set_006', convert_to_type='float'))  # str -> float = str
+		self.assertEqual(value, res)
+
+	def test_set_get_frozenset_001(self):
+		value: frozenset = frozenset(SmokeTests.get_random_string() for _ in range(randint(5, 10)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_frozenset_001', value))
+		res: frozenset = frozenset(SmokeTests.r.r_get('set_get_frozenset_001'))
+		self.assertEqual(value, res)
+
+	def test_set_get_frozenset_002(self):
+		value: frozenset = frozenset(SmokeTests.get_random_integer() for _ in range(randint(50, 100)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_frozenset_002', value))
+		res: frozenset = frozenset(SmokeTests.r.r_get('set_get_frozenset_002', convert_to_type='integer'))
+		self.assertEqual(value, res)
+
+	def test_set_get_frozenset_003(self):
+		value: frozenset = frozenset(float(SmokeTests.get_random_integer()) for _ in range(randint(25, 50)))
+		self.assertIsNone(SmokeTests.r.r_set('set_get_frozenset_003', value))
+		res: frozenset = frozenset(SmokeTests.r.r_get('set_get_frozenset_003', convert_to_type='numeric'))
+		self.assertEqual(value, res)
+
 	# set/get convert_to_type #########################################################################################
 
 	# set/get/delete ###################################################################################################
