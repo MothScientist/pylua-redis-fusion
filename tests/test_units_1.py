@@ -403,6 +403,24 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(bool(value), res, f'res = {res}; type(res) = {type(res)}')
 		self.assertTrue(isinstance(res, bool), type(res))
 
+	def test_change_set_get_type_008(self):
+		""" Wrong type to convert """
+		key: str = 'change_set_get_type_008'
+		value: int = SmokeTests.get_random_integer()
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res: str = SmokeTests.r.r_get(key, convert_to_type='float1')
+		self.assertEqual(str(value), res, f'res = {res}; type(res) = {type(res)}')
+		self.assertTrue(isinstance(res, str), type(res))
+
+	def test_change_set_get_type_009(self):
+		""" Wrong type to convert """
+		key: str = 'change_set_get_type_009'
+		value: int = SmokeTests.get_random_integer()
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res: str = SmokeTests.r.r_get(key, convert_to_type='bigint')
+		self.assertEqual(str(value), res, f'res = {res}; type(res) = {type(res)}')
+		self.assertTrue(isinstance(res, str), type(res))
+
 	# set/get/delete ###################################################################################################
 
 	def test_set_get_delete_int_001(self):
