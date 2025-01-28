@@ -94,6 +94,41 @@ class SmokeTests(unittest.TestCase):
 		res = SmokeTests.r.r_get('set_get_bool_001', convert_to_type='bool')
 		self.assertEqual(res, value)
 
+	def test_set_get_bool_002(self): # convert_to_type
+		key: str = 'set_get_bool_002'
+		value: bool = False
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res = SmokeTests.r.r_get(key, convert_to_type='bool')
+		self.assertEqual(res, value)
+
+	def test_set_get_bool_003(self):  # convert_to_type
+		key: str = 'set_get_bool_003'
+		value: int = 1
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res = SmokeTests.r.r_get(key, convert_to_type='bool')
+		self.assertEqual(res, bool(value))
+
+	def test_set_get_bool_004(self):  # convert_to_type
+		key: str = 'set_get_bool_004'
+		value: int = 0
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res = SmokeTests.r.r_get(key, convert_to_type='bool')
+		self.assertEqual(res, bool(value))
+
+	def test_set_get_bool_005(self): # convert_to_type
+		key: str = 'set_get_bool_005'
+		value: bool = True
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res = SmokeTests.r.r_get(key)
+		self.assertEqual(res, str(value))
+
+	def test_set_get_bool_006(self): # convert_to_type
+		key: str = 'set_get_bool_006'
+		value: bool = False
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res = SmokeTests.r.r_get(key)
+		self.assertEqual(res, str(value))
+
 	def test_set_get_list_001(self):
 		value: list = [SmokeTests.get_random_integer() for _ in range(randint(1, 15))]
 		self.assertIsNone(SmokeTests.r.r_set('set_get_list_001', value))
