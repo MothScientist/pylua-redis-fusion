@@ -3,17 +3,8 @@ Client for working with the Redis database
 Original library documentation: https://redis-py.readthedocs.io/en/stable/index.html
 """
 
-from os import getenv
-from dotenv import load_dotenv
 from redis import (Redis, ConnectionPool as rConnectionPool, ConnectionError as rConnectionError,
                    TimeoutError as rTimeoutError)
-
-
-load_dotenv('redis.env')  # Load environment variables from redis.env file
-redis_psw: str = getenv('REDIS_PSW')
-redis_db: int = int(getenv('REDIS_DB'))
-redis_host: str = getenv('REDIS_HOST')
-redis_port: int = int(getenv('REDIS_PORT'))
 
 
 class PyRedis:
