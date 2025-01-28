@@ -67,14 +67,27 @@ class PyRedis:
 
         if isinstance(key, dict):
             # TODO - key_exists if dict
-            self.__r_set_dict_helper(key, time_ms=time_ms, if_exist=if_exist, if_not_exist=if_not_exist, key_exist=key_exist)
+            self.__r_set_dict_helper(key, time_ms=time_ms, if_exist=if_exist, if_not_exist=if_not_exist)
 
         elif isinstance(value, (bool, int, float, str)):
-            self.redis.set(str(key), str(value) if isinstance(value, bool) else value,
-                           nx=if_not_exist, xx=if_exist, ex=time_s, px=time_ms)
+            self.redis.set(
+                str(key),
+                str(value) if isinstance(value, bool) else value,
+                nx=if_not_exist,
+                xx=if_exist,
+                ex=time_s,
+                px=time_ms
+            )
 
         elif isinstance(value, (list, tuple, set, frozenset)):
-            self.__r_set_array_helper(key, value, time_ms=time_ms, if_exist=if_exist, if_not_exist=if_not_exist, key_exist=key_exist)
+            self.__r_set_array_helper(
+                key,
+                value,
+                time_ms=time_ms,
+                if_exist=if_exist,
+                if_not_exist=if_not_exist,
+                key_exist=key_exist
+            )
 
     def __r_set_array_helper(
             self,
@@ -105,8 +118,7 @@ class PyRedis:
             key: dict,
             time_ms: int | None,
             if_exist: bool | None,
-            if_not_exist: bool | None,
-            key_exist: bool | None
+            if_not_exist: bool | None
     ) -> None:
         pass  # TODO
 
@@ -221,20 +233,6 @@ class PyRedis:
         return key_count
 
     @staticmethod
-    def compare_and_select_seconds_and_milliseconds(time_s: float, time_ms: float) -> float:
-        """
-        If both seconds and milliseconds are specified,
-        the time is converted to milliseconds and the smallest one is selected
-        """
-        return min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
-
-    @staticmethod
-    def remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
-        if isinstance(iterable_var, (set, frozenset)):
-            return tuple(iterable_var)
-        return tuple(set(iterable_var))
-
-    @staticmethod
     def convert_to_type(value: str | list[str], _type: str) -> str | bool | int | float | list:
         if isinstance(value, list):
             return [PyRedis.__helper_convert_to_type(i, _type) for i in value]
@@ -257,3 +255,17 @@ class PyRedis:
         except ValueError:
             pass
         return value
+
+    @staticmethod
+    def compare_and_select_seconds_and_milliseconds(time_s: float, time_ms: float) -> float:
+        """
+        If both seconds and milliseconds are specified,
+        the time is converted to milliseconds and the smallest one is selected
+        """
+        return min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
+
+    @staticmethod
+    def remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
+        if isinstance(iterable_var, (set, frozenset)):
+            return tuple(iterable_var)
+        return tuple(set(iterable_var))
