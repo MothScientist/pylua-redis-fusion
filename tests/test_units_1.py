@@ -544,6 +544,15 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(res, key_count)
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 
+	def test_r_remove_all_keys_002(self):
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		key_count: int = randint(25, 50)
+		for key in range(key_count):
+			SmokeTests.r.r_set(str(key), [key])
+		res = SmokeTests.r.r_remove_all_keys(get_count_keys=True)
+		self.assertEqual(res, key_count)
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+
 
 if __name__ == '__main__':
 	from redis import Redis, ConnectionPool
