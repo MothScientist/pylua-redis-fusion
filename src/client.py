@@ -20,13 +20,13 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    def __init__(self, host, port, psw, db=0, socket_timeout=None):
+    def __init__(self, host='localhost', port=6379, password='', db=0, socket_timeout=None):
         self.redis = Redis(
             connection_pool=rConnectionPool(
                 host=host,
                 port=port,
                 db=db,
-                password=psw,
+                password=password,
                 socket_timeout=socket_timeout
             )
         )
