@@ -459,8 +459,6 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(SmokeTests.r.r_delete(key, returning=True), str(value))
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
 	def test_set_get_delete_str_001(self):
 		key: str = 'set_get_delete_str_001'
 		value: str = SmokeTests.get_random_string()
@@ -473,8 +471,6 @@ class SmokeTests(unittest.TestCase):
 		self.assertIsNone(SmokeTests.r.r_delete(key, returning=False))
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
 	def test_set_get_delete_str_002(self):
 		key: str = 'set_get_delete_str_002'
 		value: str = SmokeTests.get_random_string()
@@ -485,8 +481,6 @@ class SmokeTests(unittest.TestCase):
 
 		# delete (with returning)
 		self.assertEqual(SmokeTests.r.r_delete(key, returning=True), value)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
 	def test_set_get_delete_convert_001(self):
@@ -505,8 +499,6 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(return_value, float(value))
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
 	def test_set_get_delete_convert_002(self):
 		key: str = 'set_get_delete_convert_002'
 		value: float = float(SmokeTests.get_random_integer())
@@ -521,8 +513,6 @@ class SmokeTests(unittest.TestCase):
 		# delete (with returning)
 		return_value = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='float')
 		self.assertEqual(return_value, value)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
 	def test_set_get_delete_convert_003(self):
