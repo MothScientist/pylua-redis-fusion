@@ -15,17 +15,23 @@ def redis_connection() -> PyRedis:
     return PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.001)
 
 
-def set_cache(key: str, value: int):
+def set_cache(key: str, value):
     redis_connection().r_set(key, value)
 
 
-def get_cache(key: str):
-    return redis_connection().r_get(key).decode('utf-8')
+def get_cache(key: str, convert_to_type=None):
+    return redis_connection().r_get(key, convert_to_type=convert_to_type)
 
 
 def main():
-    set_cache('12345', 123)
-    return get_cache('12345')
+    set_cache('1', 'cache')
+    set_cache('2', (1, 2, 3, 4, 5))
+    print(f"--- Simple set/get: {get_cache('1')}")
+    data_1: tuple = get_cache('2', convert_to_type='int')
+    print(f"--- tuple[int] set/get: {data_1} / type(tuple[0]) = {type(data_1[0])}")
+    set_cache('3', True)
+    data_2: bool = get_cache('3', convert_to_type='bool')
+    print(f"--- Set/get bool type: {data_2} / type = {type(data_2)}")
 
 ########################################################################################################################
 # Works with the help of a decorator
@@ -46,13 +52,18 @@ def easy_set_cache(r, key, value):
 
 
 @redis
-def easy_get_cache(r, key):
-    return r.r_get(key).decode('utf-8')
+def easy_get_cache(r, key, convert_to_type=None):
+    return r.r_get(key, convert_to_type=convert_to_type)
+
+#######################################################################################################################
 
 
 if __name__ == '__main__':
-    print(f'Simple example (set + get): {main()}\n\n')
-
+    main()
+    print('\n')
     print('Example with decorator @redis (set + get):')
-    easy_set_cache('1', 2)
-    print(f'Get value: {easy_get_cache('1')}')
+    easy_set_cache('easy_1', 'Decorator')
+    easy_set_cache('easy_2', 1.5)
+    print(f'Get value: {easy_get_cache('easy_1')}')
+    easy_2 = easy_get_cache('easy_2', convert_to_type="float")
+    print(f'Get value: {easy_2} / type = {type(easy_2)}')
