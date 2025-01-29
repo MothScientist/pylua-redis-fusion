@@ -1,14 +1,12 @@
 
 [MASTER]
-fail-under=9.9
+fail-under=9.95
 ignore-paths=
     tests/.*
 
 disable=
-    too-many-positional-arguments,
-    missing-function-docstring,
-    too-many-arguments,
-    fixme
+    too-many-positional-arguments
+    too-many-arguments
 
 [FORMAT]
 max-line-length=120
