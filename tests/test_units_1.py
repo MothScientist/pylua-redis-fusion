@@ -495,8 +495,55 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(SmokeTests.r.r_delete(key, returning=True), value)
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
-		res_2 = SmokeTests.r.r_get(key)
-		self.assertIsNone(res_2)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_delete_convert_001(self):
+		key: str = 'set_get_delete_convert_001'
+		value: int = SmokeTests.get_random_integer()
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res_1, value)
+
+		res_2 = SmokeTests.r.r_get(key, convert_to_type='float')
+		self.assertEqual(res_2, float(value))
+
+		# delete (with returning)
+		return_value = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='float')
+		self.assertEqual(return_value, float(value))
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_delete_convert_002(self):
+		key: str = 'set_get_delete_convert_002'
+		value: float = float(SmokeTests.get_random_integer())
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res_1, int(value))
+
+		res_2 = SmokeTests.r.r_get(key, convert_to_type='float')
+		self.assertEqual(res_2, value)
+
+		# delete (with returning)
+		return_value = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='float')
+		self.assertEqual(return_value, value)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_delete_convert_003(self):
+		""" use convert to type without returning """
+		key: str = 'set_get_delete_convert_003'
+		value: list[int] = [1, 2, 3, 4, 5]
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res_1, value)
+
+		# delete (without returning)
+		self.assertIsNone(SmokeTests.r.r_delete(key, convert_to_type_for_return='int'))
 
 	def test_cycle_set_get_delete_001(self):
 		for value, key in enumerate([i for i in range(100_000_000, 100_000_000 + randint(100, 500))]):
