@@ -144,19 +144,20 @@ class PyRedis:
 
         return PyRedis.convert_to_type(res, convert_to_type) if convert_to_type else res
 
-    def r_delete(self, key, returning: bool = False):
+    def r_delete(self, key, returning: bool = False, convert_to_type_for_return: str = None):
         """
         Delete a key
         'getdel' (from origin module) function is not suitable because it only works for string values
         (https://redis.io/docs/latest/commands/getdel/)
         :param key:
         :param returning: return the value the key had before deletion
+        :param convert_to_type_for_return: what type the return value should be converted to (if returning=True)
         :return: value or None
         """
         if not key:
             return None
 
-        value = self.r_get(key) if returning else None
+        value = self.r_get(key, convert_to_type=convert_to_type_for_return) if returning else None
         self.redis.delete(key)
         return value
 
