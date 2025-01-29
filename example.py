@@ -12,7 +12,7 @@ redis_port: int = int(getenv('REDIS_PORT'))
 
 
 def redis_connection() -> PyRedis:
-    return PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.001)
+    return PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.1)
 
 
 def set_cache(key: str, value):
@@ -55,6 +55,10 @@ def easy_set_cache(r, key, value):
 def easy_get_cache(r, key, convert_to_type=None):
     return r.r_get(key, convert_to_type=convert_to_type)
 
+@redis
+def easy_delete_all_keys(r, get_count_keys=None):
+    return r.r_remove_all_keys(get_count_keys=get_count_keys)
+
 #######################################################################################################################
 
 
@@ -62,8 +66,14 @@ if __name__ == '__main__':
     main()
     print('\n')
     print('Example with decorator @redis (set + get):')
+
     easy_set_cache('easy_1', 'Decorator')
     easy_set_cache('easy_2', 1.5)
     print(f'Get value: {easy_get_cache('easy_1')}')
     easy_2 = easy_get_cache('easy_2', convert_to_type="float")
     print(f'Get value: {easy_2} / type = {type(easy_2)}')
+
+    easy_delete: int = easy_delete_all_keys(get_count_keys=True)
+    print(f'Delete {easy_delete} keys')
+    easy_1 = easy_get_cache('easy_1')
+    print(f'easy_1 key = {easy_1}')
