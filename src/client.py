@@ -32,12 +32,12 @@ class PyRedis:
         except (rConnectionError, rTimeoutError):
             return False
 
-    def key_is_exist(self, key: int | str) -> bool:
+    def key_is_exist(self, key: str) -> bool:
         return bool(self.redis.exists(key))
 
     def r_set(
             self,
-            key: int | str | dict,
+            key: str | dict,
             value: int | float | str | list | tuple | set | frozenset | None,
             time_ms=None,
             time_s=None,
@@ -71,7 +71,7 @@ class PyRedis:
 
         elif isinstance(value, (bool, int, float, str)):
             self.redis.set(
-                str(key),
+                key,
                 str(value) if isinstance(value, bool) else value,
                 nx=if_not_exist,
                 xx=if_exist,
@@ -91,7 +91,7 @@ class PyRedis:
 
     def __r_set_array_helper(
             self,
-            key: int | str,
+            key: str,
             value: list | tuple | set | frozenset,
             time_ms: int | None,
             if_exist: bool | None,
@@ -122,7 +122,7 @@ class PyRedis:
     ) -> None:
         pass  # TODO
 
-    def r_get(self, key, default_value=None, convert_to_type: str = None):
+    def r_get(self, key: str, default_value=None, convert_to_type: str = None):
         """
         Used both to get a value by key and to check for its existence
         :param key:
