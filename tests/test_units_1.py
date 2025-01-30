@@ -536,6 +536,96 @@ class SmokeTests(unittest.TestCase):
 			self.assertEqual(SmokeTests.r.r_delete(key, returning=True), str_value)
 			self.assertIsNone(SmokeTests.r.r_get(key))
 
+	# rename ###########################################################################################################
+
+	def test_rename_key_001(self):
+		""" string """
+		key: str = SmokeTests.get_random_string()
+		new_key: str = SmokeTests.get_random_string()
+		value: str = SmokeTests.get_random_string()
+		self.assertIsNone(self.r.r_set(key, value))
+		self.assertEqual(self.r.r_get(key), value)
+		self.r.rename_key(key, new_key)
+		self.assertIsNone(self.r.r_get(key))
+		self.assertEqual(self.r.r_get(new_key), value)
+
+	def test_rename_key_002(self):
+		""" boolean """
+		key: str = SmokeTests.get_random_string()
+		new_key: str = SmokeTests.get_random_string()
+		value: bool = True if SmokeTests.get_random_integer() % 2 == 0 else False
+		self.assertIsNone(self.r.r_set(key, value))
+		self.assertEqual(self.r.r_get(key, convert_to_type='bool'), value)
+		self.r.rename_key(key, new_key)
+		self.assertIsNone(self.r.r_get(key))
+		self.assertEqual(self.r.r_get(new_key, convert_to_type='bool'), value)
+
+	def test_rename_key_003(self):
+		""" integer """
+		key: str = SmokeTests.get_random_string()
+		new_key: str = SmokeTests.get_random_string()
+		value: int = SmokeTests.get_random_integer()
+		self.assertIsNone(self.r.r_set(key, value))
+		self.assertEqual(self.r.r_get(key, convert_to_type='int'), value)
+		self.r.rename_key(key, new_key)
+		self.assertIsNone(self.r.r_get(key))
+		self.assertEqual(self.r.r_get(new_key, convert_to_type='int'), value)
+
+	def test_rename_key_004(self):
+		""" float """
+		key: str = SmokeTests.get_random_string()
+		new_key: str = SmokeTests.get_random_string()
+		value: float = float(SmokeTests.get_random_integer()) + random()
+		self.assertIsNone(self.r.r_set(key, value))
+		self.assertEqual(self.r.r_get(key, convert_to_type='float'), value)
+		self.r.rename_key(key, new_key)
+		self.assertIsNone(self.r.r_get(key))
+		self.assertEqual(self.r.r_get(new_key, convert_to_type='float'), value)
+
+	def test_rename_key_005(self):
+		""" list """
+		key: str = SmokeTests.get_random_string()
+		new_key: str = SmokeTests.get_random_string()
+		value: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(10, 20))]
+		self.assertIsNone(self.r.r_set(key, value))
+		self.assertEqual(self.r.r_get(key, convert_to_type='int'), value)
+		self.r.rename_key(key, new_key)
+		self.assertIsNone(self.r.r_get(key))
+		self.assertEqual(self.r.r_get(new_key, convert_to_type='int'), value)
+
+	def test_rename_key_006(self):
+		""" tuple """
+		key: str = SmokeTests.get_random_string()
+		new_key: str = SmokeTests.get_random_string()
+		value: tuple = tuple(float(SmokeTests.get_random_integer()) + random() for _ in range(randint(10, 20)))
+		self.assertIsNone(self.r.r_set(key, value))
+		self.assertEqual(tuple(self.r.r_get(key, convert_to_type='float')), value)
+		self.r.rename_key(key, new_key)
+		self.assertIsNone(self.r.r_get(key))
+		self.assertEqual(tuple(self.r.r_get(new_key, convert_to_type='float')), value)
+
+	def test_rename_key_007(self):
+		""" set """
+		key: str = SmokeTests.get_random_string()
+		new_key: str = SmokeTests.get_random_string()
+		value: set = {SmokeTests.get_random_integer() for _ in range(randint(5, 10))}
+		self.assertIsNone(self.r.r_set(key, value))
+		self.assertEqual(set(self.r.r_get(key, convert_to_type='int')), value)
+		self.r.rename_key(key, new_key)
+		self.assertIsNone(self.r.r_get(key))
+		self.assertEqual(set(self.r.r_get(new_key, convert_to_type='int')), value)
+
+	def test_rename_key_008(self):
+		""" set """
+		key: str = SmokeTests.get_random_string()
+		new_key: str = SmokeTests.get_random_string()
+		value: frozenset = frozenset(SmokeTests.get_random_string() for _ in range(randint(5, 10)))
+		self.assertIsNone(self.r.r_set(key, value))
+		self.assertEqual(frozenset(self.r.r_get(key)), value)
+		self.r.rename_key(key, new_key)
+		self.assertIsNone(self.r.r_get(key))
+		self.assertEqual(frozenset(self.r.r_get(new_key)), value)
+
 	# mass check keys ##################################################################################################
 
 	def test_r_mass_check_keys_exists_001(self):
