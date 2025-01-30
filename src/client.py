@@ -161,6 +161,19 @@ class PyRedis:
         self.redis.delete(key)
         return value
 
+    def rename_key(self, key: str, new_key: str, get_rename_status: bool = None):  # TODO tests
+        """
+        Change key name
+        :param key: current key name
+        :param new_key: new key name
+        :param get_rename_status: get True if the key exists and has been renamed, False if there is no such key
+        :return:
+        """
+        if self.key_is_exist(key):
+            self.redis.rename(key, new_key)
+            return True if get_rename_status else None
+        return False if get_rename_status else None
+
     def r_mass_delete(
             self,
             keys: list | tuple | set | frozenset,
