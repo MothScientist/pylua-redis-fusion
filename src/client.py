@@ -22,7 +22,8 @@ class PyRedis:
                 port=port,
                 db=db,
                 password=password,
-                socket_timeout=socket_timeout
+                socket_timeout=socket_timeout,
+                decode_responses=True
             )
         )
 
@@ -133,12 +134,12 @@ class PyRedis:
         if not key:
             return default_value  # default_value or None
 
-        value_type = self.redis.type(key).decode('utf-8')
+        value_type = self.redis.type(key)
 
         if value_type == 'string':
-            res = self.redis.get(key).decode('utf-8') if self.redis.get(key) else None
+            res = self.redis.get(key) or None
         elif value_type == 'list':
-            res = [byte.decode('utf-8') for byte in self.redis.lrange(key, 0, -1)]
+            res = [byte for byte in self.redis.lrange(key, 0, -1)]
         else:  # value_type = 'none'
             return default_value
 
