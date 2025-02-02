@@ -15,13 +15,14 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    def __init__(self, host='localhost', port=6379, password='', db=0, socket_timeout=None):
+    def __init__(self, host='localhost', port=6379, password='',username='default', db=0, socket_timeout=None):
         self.redis = Redis(
             connection_pool=rConnectionPool(
                 host=host,
                 port=port,
-                db=db,
                 password=password,
+                username=username,
+                db=db,
                 socket_timeout=socket_timeout,
                 decode_responses=True
             )
@@ -45,8 +46,9 @@ class PyRedis:
             time_ms=None,
             time_s=None,
             if_exist: bool = None,
-            if_not_exist: bool = None
-    ) -> None:
+            if_not_exist: bool = None,
+            keep_ttl: bool = None
+    ) -> None | str:
         """
         Set a new key or override an existing one
         If both parameters (time_s, time_ms) are specified, the key will be deleted based on the smallest value.
@@ -58,6 +60,7 @@ class PyRedis:
         :param time_s: key lifetime in seconds.
         :param if_exist: set value only if such key already exists.
         :param if_not_exist: set value only if such key does not exist yet.
+        :param keep_ttl: retain the time to live associated with the key (only for bool/int/float/str).
         :return: None
         """
         if key is value is None:
@@ -87,6 +90,7 @@ class PyRedis:
                 str(value) if isinstance(value, bool) else value,
                 nx=if_not_exist,
                 xx=if_exist,
+                keepttl=keep_ttl,
                 ex=time_s,
                 px=time_ms
             )

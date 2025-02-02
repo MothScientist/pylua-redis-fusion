@@ -9,10 +9,11 @@ redis_psw: str = getenv('REDIS_PSW')
 redis_db: int = int(getenv('REDIS_DB'))
 redis_host: str = getenv('REDIS_HOST')
 redis_port: int = int(getenv('REDIS_PORT'))
+redis_username: str = str(getenv('REDIS_USERNAME'))
 
 
 def redis_connection() -> PyRedis:
-    return PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.1)
+    return PyRedis(host=redis_host, port=redis_port, password=redis_psw, db=redis_db, username=redis_username)
 
 
 def set_cache(key: str, value):
