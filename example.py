@@ -56,6 +56,7 @@ def easy_set_cache(r, key, value):
 def easy_get_cache(r, key, convert_to_type=None):
     return r.r_get(key, convert_to_type=convert_to_type)
 
+
 @redis
 def easy_delete_all_keys(r, get_count_keys=None):
     return r.r_remove_all_keys(get_count_keys=get_count_keys)
