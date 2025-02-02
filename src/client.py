@@ -40,6 +40,8 @@ class PyRedis:
             self,
             key: int | str | dict,
             value: int | float | str | list | tuple | set | frozenset | None,
+            get_old_value: bool = None,
+            convert_to_type_for_get: str = None,
             time_ms=None,
             time_s=None,
             if_exist: bool = None,
@@ -50,6 +52,8 @@ class PyRedis:
         If both parameters (time_s, time_ms) are specified, the key will be deleted based on the smallest value.
         :param key:
         :param value: IMPORTANT: not considered if a dict type object was passed in key.
+        :param get_old_value: return the old value stored at key, or None if the key did not exist.
+        :param convert_to_type_for_get: parameter for 'get_old_value', similar to the action in the 'get' function
         :param time_ms: key lifetime in milliseconds.
         :param time_s: key lifetime in seconds.
         :param if_exist: set value only if such key already exists.
@@ -65,6 +69,13 @@ class PyRedis:
 
         if time_s or time_ms:
             time_s, time_ms = None, PyRedis.compare_and_select_seconds_and_milliseconds(time_s, time_ms)
+
+        res = None
+        if get_old_value:
+            # Moved to a separate block, not as a parameter,
+            # because this library allows you to write after integer in this key, for example, list.
+            # Therefore, it is necessary to get the old value separately
+            res = self.r_get(key, convert_to_type=convert_to_type_for_get)
 
         if isinstance(key, dict):
             # TODO - key_exists if dict
@@ -89,6 +100,8 @@ class PyRedis:
                 if_not_exist=if_not_exist,
                 key_exist=key_exist
             )
+
+        return res
 
     def __r_set_array_helper(
             self,
