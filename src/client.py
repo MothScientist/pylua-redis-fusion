@@ -15,13 +15,14 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    def __init__(self, host='localhost', port=6379, password='', db=0, socket_timeout=None):
+    def __init__(self, host='localhost', port=6379, password='',username='default', db=0, socket_timeout=None):
         self.redis = Redis(
             connection_pool=rConnectionPool(
                 host=host,
                 port=port,
-                db=db,
                 password=password,
+                username=username,
+                db=db,
                 socket_timeout=socket_timeout,
                 decode_responses=True
             )
@@ -40,20 +41,26 @@ class PyRedis:
             self,
             key: str | dict,
             value: int | float | str | list | tuple | set | frozenset | None,
+            get_old_value: bool = None,
+            convert_to_type_for_get: str = None,
             time_ms=None,
             time_s=None,
             if_exist: bool = None,
-            if_not_exist: bool = None
-    ) -> None:
+            if_not_exist: bool = None,
+            keep_ttl: bool = None
+    ) -> None | str:
         """
         Set a new key or override an existing one
         If both parameters (time_s, time_ms) are specified, the key will be deleted based on the smallest value.
         :param key:
         :param value: IMPORTANT: not considered if a dict type object was passed in key.
+        :param get_old_value: return the old value stored at key, or None if the key did not exist.
+        :param convert_to_type_for_get: parameter for 'get_old_value', similar to the action in the 'get' function
         :param time_ms: key lifetime in milliseconds.
         :param time_s: key lifetime in seconds.
         :param if_exist: set value only if such key already exists.
         :param if_not_exist: set value only if such key does not exist yet.
+        :param keep_ttl: retain the time to live associated with the key (only for bool/int/float/str).
         :return: None
         """
         if key is value is None:
@@ -66,6 +73,13 @@ class PyRedis:
         if time_s or time_ms:
             time_s, time_ms = None, PyRedis.compare_and_select_seconds_and_milliseconds(time_s, time_ms)
 
+        res = None
+        if get_old_value:
+            # Moved to a separate block, not as a parameter,
+            # because this library allows you to write after integer in this key, for example, list.
+            # Therefore, it is necessary to get the old value separately
+            res = self.r_get(key, convert_to_type=convert_to_type_for_get)
+
         if isinstance(key, dict):
             # TODO - key_exists if dict
             self.__r_set_dict_helper(key, time_ms=time_ms, if_exist=if_exist, if_not_exist=if_not_exist)
@@ -76,6 +90,7 @@ class PyRedis:
                 str(value) if isinstance(value, bool) else value,
                 nx=if_not_exist,
                 xx=if_exist,
+                keepttl=keep_ttl,
                 ex=time_s,
                 px=time_ms
             )
@@ -89,6 +104,8 @@ class PyRedis:
                 if_not_exist=if_not_exist,
                 key_exist=key_exist
             )
+
+        return res
 
     def __r_set_array_helper(
             self,

@@ -13,13 +13,24 @@ redis_psw: str = getenv('REDIS_PSW')
 redis_db: int = int(getenv('REDIS_DB'))
 redis_host: str = getenv('REDIS_HOST')
 redis_port: int = int(getenv('REDIS_PORT'))
+redis_username: str = str(getenv('REDIS_USERNAME'))
 
 
 class SmokeTests(unittest.TestCase):
+	"""
+	Required "quick" tests to check the functionality of the main library functions
+	"""
 	# def setUp(self):
 	# 	self.maxDiff = None
 
-	r = PyRedis(redis_host, redis_port, redis_psw, db=redis_db, socket_timeout=.1)  # .1 special for smoke tests
+	r = PyRedis(
+		host=redis_host,
+		port=redis_port,
+		password=redis_psw,
+		username=redis_username,
+		db=redis_db,
+		socket_timeout=.1
+	)
 
 	@staticmethod
 	def get_random_integer():
@@ -48,20 +59,20 @@ class SmokeTests(unittest.TestCase):
 		res_1 = SmokeTests.r.r_get(key)
 		self.assertEqual(int(res_1), value_1)
 
-		# rewrite
+		# rewrite (with 'get_old_value' param)
 		value_2: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
+		self.assertEqual(SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='int'), value_1)
 		res_2 = SmokeTests.r.r_get(key)
 		self.assertEqual(int(res_2), value_2)
 
-	def test_set_get_int_003(self): # convert_to_type
+	def test_set_get_int_003(self):  # convert_to_type
 		key: str = 'set_get_int_003'
 		value: int = SmokeTests.get_random_integer()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, value)
 
-	def test_set_get_int_004(self): # convert_to_type
+	def test_set_get_int_004(self):  # convert_to_type
 		key: str = 'set_get_int_004'
 		value: int = SmokeTests.get_random_integer()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
@@ -88,21 +99,21 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_get(key)
 		self.assertEqual(float(res_2), value_2)
 
-	def test_set_get_float_003(self): # convert_to_type
+	def test_set_get_float_003(self):  # convert_to_type
 		key: str = 'set_get_float_003'
 		value: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='float')
 		self.assertEqual(res, value)
 
-	def test_set_get_float_004(self): # convert_to_type
+	def test_set_get_float_004(self):  # convert_to_type
 		key: str = 'set_get_float_004'
 		value: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='double')
 		self.assertEqual(res, value)
 
-	def test_set_get_float_005(self): # convert_to_type
+	def test_set_get_float_005(self):  # convert_to_type
 		key: str = 'set_get_float_005'
 		value: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
@@ -129,14 +140,14 @@ class SmokeTests(unittest.TestCase):
 		res_2: str = SmokeTests.r.r_get(key)
 		self.assertEqual(res_2, value_2)
 
-	def test_set_get_bool_001(self): # convert_to_type
+	def test_set_get_bool_001(self):  # convert_to_type
 		key: str = 'set_get_bool_001'
 		value: bool = True
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='bool')
 		self.assertEqual(res, value)
 
-	def test_set_get_bool_002(self): # convert_to_type
+	def test_set_get_bool_002(self):  # convert_to_type
 		key: str = 'set_get_bool_002'
 		value: bool = False
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
@@ -157,14 +168,14 @@ class SmokeTests(unittest.TestCase):
 		res = SmokeTests.r.r_get(key, convert_to_type='bool')
 		self.assertEqual(res, bool(value))
 
-	def test_set_get_bool_005(self): # convert_to_type
+	def test_set_get_bool_005(self):  # convert_to_type
 		key: str = 'set_get_bool_005'
 		value: bool = True
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key)
 		self.assertEqual(res, str(value))
 
-	def test_set_get_bool_006(self): # convert_to_type
+	def test_set_get_bool_006(self):  # convert_to_type
 		key: str = 'set_get_bool_006'
 		value: bool = False
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
@@ -198,7 +209,7 @@ class SmokeTests(unittest.TestCase):
 		res: list = list(map(str, SmokeTests.r.r_get(key)))
 		self.assertEqual(res, value)
 
-	def test_set_get_list_004(self): # convert_to_type
+	def test_set_get_list_004(self):  # convert_to_type
 		key: str = 'set_get_list_004'
 		value: list[bool] = [bool(randint(0, 1)) for _ in range(randint(10, 50))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
@@ -232,30 +243,32 @@ class SmokeTests(unittest.TestCase):
 		res: tuple = tuple(map(str, SmokeTests.r.r_get(key)))
 		self.assertEqual(res, value)
 
-	def test_set_get_tuple_004(self): # convert_to_type
+	def test_set_get_tuple_004(self):  # convert_to_type
 		key: str = 'set_get_tuple_004'
 		value: tuple = tuple(SmokeTests.get_random_integer() for _ in range(randint(10, 50)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: tuple = tuple(SmokeTests.r.r_get(key, convert_to_type='int'))
 		self.assertEqual(res, value)
 
-	def test_set_get_tuple_005(self): # convert_to_type
+	def test_set_get_tuple_005(self):  # convert_to_type
 		key: str = 'set_get_tuple_005'
 		value: tuple = tuple(float(SmokeTests.get_random_integer()) for _ in range(randint(10, 25)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: tuple = tuple(SmokeTests.r.r_get(key, convert_to_type='float'))
 		self.assertEqual(res, value)
 
-	def test_set_get_tuple_006(self): # convert_to_type
+	def test_set_get_tuple_006(self):  # convert_to_type
 		key: str = 'set_get_tuple_006'
 		value_1: tuple = tuple(bool(randint(0, 1)) for _ in range(randint(50, 100)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
 		res_1: tuple = tuple(SmokeTests.r.r_get(key, convert_to_type='bool'))
 		self.assertEqual(res_1, value_1)
 
-		# rewrite (integer)
+		# rewrite (integer) (with 'get_old_value' param)
 		value_2: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
+		self.assertEqual(
+			tuple(SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='bool')), value_1
+		)
 		res_2: int = SmokeTests.r.r_get(key, convert_to_type='integer')
 		self.assertEqual(res_2, value_2)
 
@@ -281,7 +294,7 @@ class SmokeTests(unittest.TestCase):
 		res: set = set(SmokeTests.r.r_get(key))
 		self.assertEqual(res, value)
 
-	def test_set_get_set_003(self): # convert_to_type
+	def test_set_get_set_003(self):  # convert_to_type
 		key: str = 'set_get_set_003'
 		value: set = set(SmokeTests.get_random_string() for _ in range(randint(1, 10))).union(
 			set(SmokeTests.get_random_integer() for _ in range(randint(1, 10)))
@@ -290,7 +303,7 @@ class SmokeTests(unittest.TestCase):
 		res: set = set(SmokeTests.r.r_get(key, convert_to_type='int'))
 		self.assertEqual(res, value)
 
-	def test_set_get_set_004(self): # convert_to_type
+	def test_set_get_set_004(self):  # convert_to_type
 		key: str = 'set_get_set_004'
 		value: set = set(SmokeTests.get_random_integer() for _ in range(randint(50, 100)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
@@ -304,7 +317,7 @@ class SmokeTests(unittest.TestCase):
 		res: set = set(SmokeTests.r.r_get(key))
 		self.assertEqual(value, res)
 
-	def test_set_get_set_006(self): # convert_to_type
+	def test_set_get_set_006(self):  # convert_to_type
 		key: str = 'set_get_set_006'
 		value: set = set(SmokeTests.get_random_string() for _ in range(randint(25, 50)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
@@ -318,21 +331,21 @@ class SmokeTests(unittest.TestCase):
 		res: frozenset = frozenset(SmokeTests.r.r_get(key))
 		self.assertEqual(value, res)
 
-	def test_set_get_frozenset_002(self): # convert_to_type
+	def test_set_get_frozenset_002(self):  # convert_to_type
 		key: str = 'set_get_frozenset_002'
 		value: frozenset = frozenset(SmokeTests.get_random_integer() for _ in range(randint(50, 100)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: frozenset = frozenset(SmokeTests.r.r_get(key, convert_to_type='integer'))
 		self.assertEqual(value, res)
 
-	def test_set_get_frozenset_003(self): # convert_to_type
+	def test_set_get_frozenset_003(self):  # convert_to_type
 		key: str = 'set_get_frozenset_003'
 		value: frozenset = frozenset(float(SmokeTests.get_random_integer()) for _ in range(randint(25, 50)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: frozenset = frozenset(SmokeTests.r.r_get(key, convert_to_type='numeric'))
 		self.assertEqual(value, res)
 
-	def test_set_get_frozenset_004(self): # convert_to_type
+	def test_set_get_frozenset_004(self):  # convert_to_type
 		key: str = 'set_get_frozenset_004'
 		value_1: frozenset = frozenset(SmokeTests.get_random_integer() for _ in range(randint(50, 100)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
@@ -675,7 +688,9 @@ class SmokeTests(unittest.TestCase):
 
 if __name__ == '__main__':
 	from redis import Redis, ConnectionPool
-	_redis = Redis(connection_pool=ConnectionPool(host=redis_host,port=redis_port,db=0,password=redis_psw))
-	_redis.flushall()
+	_redis = Redis(connection_pool=ConnectionPool(
+		host=redis_host,port=redis_port,db=0,password=redis_psw, username=redis_username
+	))
+	_redis.flushall()  # clear the database before tests
 
 	unittest.main()
