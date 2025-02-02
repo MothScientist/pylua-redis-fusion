@@ -56,9 +56,9 @@ class SmokeTests(unittest.TestCase):
 		res_1 = SmokeTests.r.r_get(key)
 		self.assertEqual(int(res_1), value_1)
 
-		# rewrite
+		# rewrite (with 'get_old_value' param)
 		value_2: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
+		self.assertEqual(SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='int'), value_1)
 		res_2 = SmokeTests.r.r_get(key)
 		self.assertEqual(int(res_2), value_2)
 
@@ -261,9 +261,11 @@ class SmokeTests(unittest.TestCase):
 		res_1: tuple = tuple(SmokeTests.r.r_get(key, convert_to_type='bool'))
 		self.assertEqual(res_1, value_1)
 
-		# rewrite (integer)
+		# rewrite (integer) (with 'get_old_value' param)
 		value_2: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
+		self.assertEqual(
+			tuple(SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='bool')), value_1
+		)
 		res_2: int = SmokeTests.r.r_get(key, convert_to_type='integer')
 		self.assertEqual(res_2, value_2)
 
