@@ -29,6 +29,7 @@ class PyRedis:
         )
         self.lua_scripts = dict()  # storing registered lua scripts
         self.lua_scripts['rename_key'] = PyRedis.__load_lua_script('rename_key')
+        self.lua_scripts['remove_all_keys'] = PyRedis.__load_lua_script('remove_all_keys')
 
     def r_ping(self) -> bool:
         try:
@@ -258,12 +259,8 @@ class PyRedis:
         :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
         :return: count keys or None
         """
-        key_count: int | None = None
-        if get_count_keys:
-            key_count = self.redis.dbsize()
-
-        self.redis.flushall()
-        return key_count
+        script = self.lua_scripts['remove_all_keys']
+        return self.redis.eval(script, 0, '1' if get_count_keys else '0')
 
     def __register_lua_scripts(self, script_name: str):
         lua_script = self.lua_scripts.get(script_name)
