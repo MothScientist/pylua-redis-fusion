@@ -2,7 +2,7 @@
 Client for working with the Redis database
 Original library documentation: https://redis-py.readthedocs.io/en/stable/index.html
 """
-
+from os import path as os_path
 from redis import (
     Redis,
     ConnectionPool as rConnectionPool,
@@ -27,6 +27,8 @@ class PyRedis:
                 decode_responses=True
             )
         )
+        self.lua_scripts = dict()  # storing registered lua scripts
+        self.lua_scripts['rename_key'] = PyRedis.__load_lua_script('rename_key')
 
     def r_ping(self) -> bool:
         try:
@@ -187,10 +189,9 @@ class PyRedis:
         :param get_rename_status: get True if the key exists and has been renamed, False if there is no such key
         :return:
         """
-        if self.key_is_exist(key):
-            self.redis.rename(key, new_key)
-            return True if get_rename_status else None
-        return False if get_rename_status else None
+        script = self.__register_lua_scripts('rename_key')
+        rename_status = script(keys=[key, new_key])
+        return rename_status if get_rename_status else None
 
     def r_mass_delete(
             self,
@@ -264,6 +265,10 @@ class PyRedis:
         self.redis.flushall()
         return key_count
 
+    def __register_lua_scripts(self, script_name: str):
+        lua_script = self.lua_scripts.get(script_name)
+        return self.redis.register_script(lua_script)
+
     @staticmethod
     def convert_to_type(value: str | list[str], _type: str) -> str | bool | int | float | list:
         if isinstance(value, list):
@@ -301,3 +306,10 @@ class PyRedis:
         if isinstance(iterable_var, (set, frozenset)):
             return tuple(iterable_var)
         return tuple(set(iterable_var))
+
+    @staticmethod
+    def __load_lua_script(filename: str):
+        """ Load Lua script from a file """
+        curr_dir = os_path.dirname(__file__)
+        with open(os_path.join(curr_dir, f'scripts/{filename}.lua'), 'r') as lua_file:
+            return lua_file.read()
