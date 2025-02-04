@@ -1,3 +1,8 @@
+# <span style="color: white;">Installing with an external directory</span>
+Run the ```pyredis_install.sh``` script with the ```--requirements-install``` parameter.
+
+It will __clone the repository__, __install Lua5.4__ and, if the parameter is specified, __install the libraries__ required for operation.
+
 # <span style="color: white;">Install (pip)</span>
 
 `pip install git+https://github.com/MothScientist/SwiftPipRedis.git`
