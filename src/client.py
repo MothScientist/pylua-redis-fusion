@@ -47,9 +47,9 @@ class PyRedis:
             convert_to_type_for_get: str = None,
             time_ms=None,
             time_s=None,
-            if_exist: bool = None,
-            if_not_exist: bool = None,
-            keep_ttl: bool = None
+            if_exist: bool = False,
+            if_not_exist: bool = False,
+            keep_ttl: bool = False
     ) -> None | str:
         """
         Set a new key or override an existing one
@@ -73,7 +73,7 @@ class PyRedis:
             key_exist: bool = self.key_is_exist(key)
 
         if time_s or time_ms:
-            time_s, time_ms = None, PyRedis.compare_and_select_seconds_and_milliseconds(time_s, time_ms)
+            time_s, time_ms = None, PyRedis.__compare_and_select_sec_ms(time_s, time_ms)
 
         res = None
         if get_old_value:
@@ -162,9 +162,9 @@ class PyRedis:
         else:  # value_type = 'none'
             return default_value
 
-        return PyRedis.convert_to_type(res, convert_to_type) if convert_to_type else res
+        return PyRedis.__convert_to_type(res, convert_to_type) if convert_to_type else res
 
-    def r_delete(self, key, returning: bool = False, convert_to_type_for_return: str = None):
+    def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
         Delete a key
         'getdel' (from origin module) function is not suitable because it only works for string values
@@ -211,7 +211,7 @@ class PyRedis:
         if not keys:
             return (), (), {}
 
-        keys: tuple = PyRedis.remove_duplicates(keys)  # remove duplicates
+        keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
         return_exists: list | None = [] if return_exists else None
         return_non_exists: list | None = [] if return_non_exists else None
         get_dict_key_value_exists: dict | None = {} if get_dict_key_value_exists else None
@@ -238,7 +238,7 @@ class PyRedis:
         if not keys:
             return ()
 
-        keys: tuple = PyRedis.remove_duplicates(keys)  # remove duplicates
+        keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
         existing_keys = self.redis.mget(keys)
 
         # filter only those keys whose values is not None
@@ -248,7 +248,7 @@ class PyRedis:
         """
         Checks for the existence of keys in Redis and returns a dictionary of existing keys with their values
         """
-        keys: tuple = PyRedis.remove_duplicates(keys)  # remove duplicates
+        keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
         values = self.redis.mget(keys)  # later in the library the variable is converted to list
         return {keys[i]: value for i, value in enumerate(values) if value is not None}
 
@@ -270,7 +270,7 @@ class PyRedis:
         return self.redis.register_script(lua_script)
 
     @staticmethod
-    def convert_to_type(value: str | list[str], _type: str) -> str | bool | int | float | list:
+    def __convert_to_type(value: str | list[str], _type: str) -> str | bool | int | float | list:
         if isinstance(value, list):
             return [PyRedis.__helper_convert_to_type(i, _type) for i in value]
         else:
@@ -294,7 +294,7 @@ class PyRedis:
         return value
 
     @staticmethod
-    def compare_and_select_seconds_and_milliseconds(time_s: float, time_ms: float) -> float:
+    def __compare_and_select_sec_ms(time_s: float, time_ms: float) -> float:
         """
         If both seconds and milliseconds are specified,
         the time is converted to milliseconds and the smallest one is selected
@@ -302,7 +302,7 @@ class PyRedis:
         return min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
 
     @staticmethod
-    def remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
+    def __remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
         if isinstance(iterable_var, (set, frozenset)):
             return tuple(iterable_var)
         return tuple(set(iterable_var))
