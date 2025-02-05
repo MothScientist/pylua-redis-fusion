@@ -262,14 +262,13 @@ class PyRedis:
         :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
         :return: count keys or None
         """
-        script = self.lua_scripts['remove_all_keys']
-        count_keys = self.__register_lua_scripts(script, 0, '1' if get_count_keys else '0')
+        count_keys = self.__register_lua_scripts('remove_all_keys', 0, '1' if get_count_keys else '0')
         return int(count_keys) if count_keys else None
 
     def __register_lua_scripts(self, script_name: str, *args):
         lua_script = self.lua_scripts.get(script_name)
         if args:
-            return self.redis.eval(lua_script, 0, *args)
+            return self.redis.eval(lua_script, *args)
         return self.redis.register_script(lua_script)
 
     @staticmethod
