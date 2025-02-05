@@ -668,21 +668,46 @@ class SmokeTests(unittest.TestCase):
 	# remove all keys ##################################################################################################
 
 	def test_r_remove_all_keys_001(self):
+		""" Lua """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 		key_count: int = randint(100, 250)
 		for key in range(key_count):
 			SmokeTests.r.r_set(str(key), key)
 		res = SmokeTests.r.r_remove_all_keys(get_count_keys=True)
 		self.assertEqual(res, key_count)
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 
 	def test_r_remove_all_keys_002(self):
+		""" Lua """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 		key_count: int = randint(25, 50)
 		for key in range(key_count):
 			SmokeTests.r.r_set(str(key), [key])
 		res = SmokeTests.r.r_remove_all_keys(get_count_keys=True)
 		self.assertEqual(res, key_count)
+
+	def test_r_remove_all_keys_003(self):
+		""" Lua """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		key_count: int = randint(25, 50)
+		for key in range(key_count):
+			SmokeTests.r.r_set(str(key), str(key))
+		res = SmokeTests.r.r_remove_all_keys(get_count_keys=True)
+		self.assertEqual(res, key_count)
+
+	def test_r_remove_all_keys_004(self):
+		""" Lua  - integer - without get_count_keys param """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		key_count: int = randint(50, 100)
+		for key in range(key_count):
+			SmokeTests.r.r_set(str(key), key)
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+
+	def test_r_remove_all_keys_005(self):
+		""" Lua  - str - without get_count_keys param """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		key_count: int = randint(50, 100)
+		for key in range(key_count):
+			SmokeTests.r.r_set(str(key), str(key))
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 
 
