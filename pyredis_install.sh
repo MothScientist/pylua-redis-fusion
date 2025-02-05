@@ -10,11 +10,6 @@ echo "${COLOR_CYAN}SwiftPipRedis${COLOR_RESET}"
 echo "${COLOR_GREEN}Git clone${COLOR_RESET}"
 git clone https://github.com/MothScientist/SwiftPipRedis.git
 
-echo "${COLOR_GREEN}Install Lua 5.4${COLOR_RESET}"
-sudo add-apt-repository ppa:kevinhwang91/lua -y
-sudo apt update
-sudo apt install -y lua5.4
-
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
     echo "${COLOR_RED}Error installing Lua 5.4${COLOR_RESET}"

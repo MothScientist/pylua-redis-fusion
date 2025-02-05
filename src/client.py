@@ -80,7 +80,8 @@ class PyRedis:
         if get_old_value:
             # Moved to a separate block, not as a parameter,
             # because this library allows you to write after integer in this key, for example, list.
-            # Therefore, it is necessary to get the old value separately
+            # Therefore, it is necessary to get the old value separately,
+            # although the set function has a built-in parameter for this, it is not suitable for this function
             res = self.r_get(key, convert_to_type=convert_to_type_for_get)
 
         if isinstance(key, dict):
@@ -202,7 +203,9 @@ class PyRedis:
             get_dict_key_value_exists: bool | None = None
     ) -> tuple[tuple, tuple, dict]:
         """
-        Mass delete keys from a given iterable
+        Mass delete keys from a given iterable.
+        Uses the same function as regular r_delete,
+        but has a wrapper that allows you to get information about deleted keys.
         :param keys:
         :param return_exists: return keys that existed and were deleted
         :param return_non_exists: return keys that were not found
@@ -260,18 +263,20 @@ class PyRedis:
         :return: count keys or None
         """
         script = self.lua_scripts['remove_all_keys']
-        return self.redis.eval(script, 0, '1' if get_count_keys else '0')
+        count_keys = self.__register_lua_scripts(script, 0, '1' if get_count_keys else '0')
+        return int(count_keys) if count_keys else None
 
-    def __register_lua_scripts(self, script_name: str):
+    def __register_lua_scripts(self, script_name: str, *args):
         lua_script = self.lua_scripts.get(script_name)
+        if args:
+            return self.redis.eval(lua_script, 0, *args)
         return self.redis.register_script(lua_script)
 
     @staticmethod
     def __convert_to_type(value: str | list[str], _type: str) -> str | bool | int | float | list:
         if isinstance(value, list):
             return [PyRedis.__helper_convert_to_type(i, _type) for i in value]
-        else:
-            return PyRedis.__helper_convert_to_type(value, _type)
+        return PyRedis.__helper_convert_to_type(value, _type)
 
     @staticmethod
     def __helper_convert_to_type(value: str, _type: str) -> str | int | float:

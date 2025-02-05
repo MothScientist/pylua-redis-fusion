@@ -236,7 +236,7 @@ class SmokeTests(unittest.TestCase):
 		res_2: tuple = tuple(map(int, SmokeTests.r.r_get(key)))
 		self.assertEqual(res_2, value_2)
 
-	def test_set_get_tuple_003(self): # convert_to_type
+	def test_set_get_tuple_003(self):  # convert_to_type
 		key: str = 'set_get_tuple_003'
 		value: tuple = tuple(SmokeTests.get_random_string() for _ in range(randint(10, 50)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
