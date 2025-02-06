@@ -24,3 +24,4 @@ jobs:
           fail-on-severity: critical
           comment-summary-in-pr: always
           license-check: false
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
