@@ -25,3 +25,5 @@ jobs:
           comment-summary-in-pr: always
           license-check: false
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+          base_ref: master
+          head_ref: ${{ github.ref }}
