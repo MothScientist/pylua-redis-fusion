@@ -552,7 +552,7 @@ class SmokeTests(unittest.TestCase):
 	# rename ###########################################################################################################
 
 	def test_rename_key_001(self):
-		""" string """
+		""" Lua - string """
 		key: str = SmokeTests.get_random_string()
 		new_key: str = SmokeTests.get_random_string()
 		value: str = SmokeTests.get_random_string()
@@ -563,7 +563,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(self.r.r_get(new_key), value)
 
 	def test_rename_key_002(self):
-		""" boolean """
+		""" Lua - boolean """
 		key: str = SmokeTests.get_random_string()
 		new_key: str = SmokeTests.get_random_string()
 		value: bool = True if SmokeTests.get_random_integer() % 2 == 0 else False
@@ -574,7 +574,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(self.r.r_get(new_key, convert_to_type='bool'), value)
 
 	def test_rename_key_003(self):
-		""" integer """
+		""" Lua - integer """
 		key: str = SmokeTests.get_random_string()
 		new_key: str = SmokeTests.get_random_string()
 		value: int = SmokeTests.get_random_integer()
@@ -585,7 +585,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(self.r.r_get(new_key, convert_to_type='int'), value)
 
 	def test_rename_key_004(self):
-		""" float """
+		""" Lua - float """
 		key: str = SmokeTests.get_random_string()
 		new_key: str = SmokeTests.get_random_string()
 		value: float = float(SmokeTests.get_random_integer()) + random()
@@ -596,7 +596,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(self.r.r_get(new_key, convert_to_type='float'), value)
 
 	def test_rename_key_005(self):
-		""" list """
+		""" Lua - list """
 		key: str = SmokeTests.get_random_string()
 		new_key: str = SmokeTests.get_random_string()
 		value: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(10, 20))]
@@ -607,7 +607,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(self.r.r_get(new_key, convert_to_type='int'), value)
 
 	def test_rename_key_006(self):
-		""" tuple """
+		""" Lua - tuple """
 		key: str = SmokeTests.get_random_string()
 		new_key: str = SmokeTests.get_random_string()
 		value: tuple = tuple(float(SmokeTests.get_random_integer()) + random() for _ in range(randint(10, 20)))
@@ -618,7 +618,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(tuple(self.r.r_get(new_key, convert_to_type='float')), value)
 
 	def test_rename_key_007(self):
-		""" set """
+		""" Lua - set """
 		key: str = SmokeTests.get_random_string()
 		new_key: str = SmokeTests.get_random_string()
 		value: set = {SmokeTests.get_random_integer() for _ in range(randint(5, 10))}
@@ -629,7 +629,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(set(self.r.r_get(new_key, convert_to_type='int')), value)
 
 	def test_rename_key_008(self):
-		""" frozenset """
+		""" Lua - frozenset """
 		key: str = SmokeTests.get_random_string()
 		new_key: str = SmokeTests.get_random_string()
 		value: frozenset = frozenset(SmokeTests.get_random_string() for _ in range(randint(5, 10)))
@@ -709,6 +709,146 @@ class SmokeTests(unittest.TestCase):
 		for key in range(key_count):
 			SmokeTests.r.r_set(str(key), str(key))
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+
+	# check_keys_and_get_values ########################################################################################
+
+	def test_check_keys_and_get_values_001(self):
+		""" key is integer """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		exists_keys: tuple = tuple([i for i in range(randint(50, 100)) if i % randint(2, 5) == 0])
+		for key in exists_keys:
+			SmokeTests.r.r_set(str(key), key)
+		res: dict = SmokeTests.r.check_keys_and_get_values(exists_keys)
+		self.assertEqual(sorted(res.keys()), sorted(exists_keys))
+
+	def test_check_keys_and_get_values_002(self):
+		""" key is string """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		exists_keys: tuple = tuple([str(i) for i in range(randint(50, 100)) if i % randint(2, 5) == 0])
+		for key in exists_keys:
+			SmokeTests.r.r_set(key, key)
+		res: dict = SmokeTests.r.check_keys_and_get_values(exists_keys)
+		self.assertEqual(sorted(res.keys()), sorted(exists_keys))
+
+	def test_check_keys_and_get_values_003(self):
+		""" check each key - value """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		exists_keys: tuple = tuple([i for i in range(randint(50, 100)) if i % randint(2, 5) == 0])
+		for key in exists_keys:
+			SmokeTests.r.r_set(str(key), key)
+		res: dict = SmokeTests.r.check_keys_and_get_values(exists_keys)
+		self.assertEqual(sorted(res.keys()), sorted(exists_keys))
+		for key in res.keys():
+			self.assertEqual(str(key), res[key])
+
+	# r_mass_delete ####################################################################################################
+
+	def test_r_mass_delete_001(self):
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		for key in keys:
+			SmokeTests.r.r_set(str(key), key)
+		res = SmokeTests.r.r_mass_delete(keys)
+		self.assertEqual(res,  ((), (), dict()))
+
+	def test_r_mass_delete_002(self):
+		""" Don't write down all the keys """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
+		for str_key in keys[:randint(5, 10)]:
+			SmokeTests.r.r_set(str_key, str_key)
+		res = SmokeTests.r.r_mass_delete(keys)
+		self.assertEqual(res,  ((), (), dict()))
+
+	def test_r_mass_delete_003(self):
+		""" Don't write down all the keys """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
+		for str_key in keys[:len(keys)//2]:
+			SmokeTests.r.r_set(str_key, str_key)
+		res = SmokeTests.r.r_mass_delete(keys, return_non_exists=True)
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(res[0], ())
+		self.assertEqual(sorted(res[1]),  sorted(keys[len(keys)//2:]))
+		self.assertEqual(res[2], dict())
+
+	def test_r_mass_delete_004(self):
+		""" Don't write down all the keys """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		exists_keys: tuple = keys[:len(keys) // randint(2, 5)]
+		for key in exists_keys:
+			SmokeTests.r.r_set(str(key), key)
+		res = SmokeTests.r.r_mass_delete(keys, return_exists=True)
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(sorted(res[0]), sorted(exists_keys))
+		self.assertEqual(res[1], ())
+		self.assertEqual(res[2], dict())
+
+	def test_r_mass_delete_005(self):
+		""" Don't write down all the keys """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		_slice: int = randint(2, 5)
+		exists_keys: tuple = keys[:len(keys) // _slice]
+		key_value: dict = {key: SmokeTests.get_random_string() for key in exists_keys}
+		for key, value in key_value.items():
+			SmokeTests.r.r_set(str(key), value)
+
+		res = SmokeTests.r.r_mass_delete(
+			keys, return_exists=True, return_non_exists=True, get_dict_key_value_exists=True
+		)
+
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(sorted(res[0]), sorted(exists_keys))  # return_exists
+		self.assertEqual(sorted(res[1]),  sorted(keys[len(keys)//_slice:]))  # return_non_exists
+		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+
+	def test_r_mass_delete_006(self):
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		key_value: dict = {key: SmokeTests.get_random_string() for key in keys}
+		for key, value in key_value.items():
+			SmokeTests.r.r_set(str(key), value)
+
+		res = SmokeTests.r.r_mass_delete(
+			keys, return_exists=True, return_non_exists=True, get_dict_key_value_exists=True,
+		)
+
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(sorted(res[0]), sorted(keys))  # return_exists
+		self.assertEqual(res[1],  ())  # return_non_exists
+		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+
+	def test_r_mass_delete_007(self):
+		""" get key-value with converting type """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		key_value: dict = {key: SmokeTests.get_random_integer() for key in keys}
+		for key, value in key_value.items():
+			SmokeTests.r.r_set(str(key), value)
+
+		res = SmokeTests.r.r_mass_delete(keys, get_dict_key_value_exists=True, convert_to_type_dict_key='int')
+
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(res[0], ())  # return_exists
+		self.assertEqual(res[1], ())  # return_non_exists
+		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+
+	def test_r_mass_delete_008(self):
+		""" get key-value with converting type """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		key_value: dict = {key: bool(randint(0, 1)) for key in keys}
+		for key, value in key_value.items():
+			SmokeTests.r.r_set(str(key), value)
+
+		res = SmokeTests.r.r_mass_delete(keys, get_dict_key_value_exists=True, convert_to_type_dict_key='boolean')
+
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(res[0], ())  # return_exists
+		self.assertEqual(res[1], ())  # return_non_exists
+		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
 
 
 if __name__ == '__main__':
