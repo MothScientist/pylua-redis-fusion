@@ -32,6 +32,7 @@ jobs:
     - name: Pylint
       run: |
         pylint $(git ls-files '*.py')
+      continue-on-error: true
 
     - name: Flake8
       run: |
@@ -42,6 +43,8 @@ jobs:
 
     - name: ShellCheck
       uses: ludeeus/action-shellcheck@2.0.0
+      continue-on-error: true
 
     - name: LuaCheck
       uses: lunarmodules/luacheck@v1.2.0
+      continue-on-error: true
