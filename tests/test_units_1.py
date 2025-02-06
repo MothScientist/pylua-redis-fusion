@@ -646,7 +646,7 @@ class SmokeTests(unittest.TestCase):
 		for key in keys:
 			SmokeTests.r.r_set(key, randint(0, 10_000))
 		non_exist: tuple = tuple({SmokeTests.get_random_string(length=randint(1, 3)) for _ in range(randint(5, 10))})
-		res: list = list(SmokeTests.r.r_mass_check_keys_exists({*keys, *non_exist}))
+		res: list = list(SmokeTests.r.r_mass_check_keys_exists(set(keys).union(set(non_exist))))
 
 		keys.sort()
 		res.sort()
@@ -658,7 +658,7 @@ class SmokeTests(unittest.TestCase):
 		for key in keys:
 			SmokeTests.r.r_set(key, SmokeTests.get_random_string(length=randint(1, 100)))
 		non_exist: tuple = tuple({SmokeTests.get_random_string(length=randint(3, 5)) for _ in range(randint(5, 20))})
-		res: list = list(SmokeTests.r.r_mass_check_keys_exists({*keys, *non_exist}))
+		res: list = list(SmokeTests.r.r_mass_check_keys_exists(set(keys).union(set(non_exist))))
 
 		keys.sort()
 		res.sort()
