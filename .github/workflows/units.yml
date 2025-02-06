@@ -13,27 +13,17 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
+        redis-version: [ 7 ]
         python-version: [ '3.11', '3.12', '3.13' ]
         architecture: [ 'x64' ]
 
-    services:
-      redis:
-        image: redis:7.2-alpine
-        env:
-          REDIS_PSW: ${{ secrets.REDIS_PSW }}
-          REDIS_DB: ${{ secrets.REDIS_DB }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
-        ports:
-          - 6379:6379
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
+      - name: Redis
+        uses: supercharge/redis-github-action@1.7.0
+        with:
+          redis-version: ${{ matrix.redis-version }}
+          redis-password: ${{ secrets.REDIS_PSW }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -52,17 +42,11 @@ jobs:
       - name: Create .env file
         env:
           REDIS_PSW: ${{ secrets.REDIS_PSW }}
-          REDIS_DB: ${{ secrets.REDIS_DB }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
         run: |
           cd tests || exit 1
           echo "REDIS_PSW=${REDIS_PSW}" >> redis.env
-          echo "REDIS_DB=${REDIS_DB}" >> redis.env
-          echo "REDIS_HOST=${REDIS_HOST}" >> redis.env
-          echo "REDIS_PORT=${REDIS_PORT}" >> redis.env
 
       - name: Run UnitTests
         run: |
           cd tests || exit 1
-          python -m unittest test_units_1.py
+          python -m unittest test_units_1.py test_units_2.py test_units_3.py
