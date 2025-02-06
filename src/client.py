@@ -24,6 +24,7 @@ class PyRedis:
                 username=username,
                 db=db,
                 socket_timeout=socket_timeout,
+                encoding='utf-8',
                 decode_responses=True
             )
         )
@@ -198,9 +199,10 @@ class PyRedis:
     def r_mass_delete(
             self,
             keys: list | tuple | set | frozenset,
-            return_exists: bool | None = None,
-            return_non_exists: bool | None = None,
-            get_dict_key_value_exists: bool | None = None
+            return_exists: bool = False,
+            return_non_exists: bool = False,
+            get_dict_key_value_exists: bool = False,
+            convert_to_type_dict_key: str = None
     ) -> tuple[tuple, tuple, dict]:
         """
         Mass delete keys from a given iterable.
@@ -210,29 +212,29 @@ class PyRedis:
         :param return_exists: return keys that existed and were deleted
         :param return_non_exists: return keys that were not found
         :param get_dict_key_value_exists: get dictionary of remote keys with values
+        :param convert_to_type_dict_key: is type conversion needed for the returned dictionary
         :return: ((return_exists), (return_non_exists), {get_dict_key_value_exists})
         """
         if not keys:
-            return (), (), {}
+            return (), (), dict()
 
         keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
-        return_exists: list | None = [] if return_exists else None
-        return_non_exists: list | None = [] if return_non_exists else None
-        get_dict_key_value_exists: dict | None = {} if get_dict_key_value_exists else None
 
         # all parameters = None (None is None is None -> True)
-        if return_exists is return_non_exists is get_dict_key_value_exists:
+        if return_exists is return_non_exists is get_dict_key_value_exists is False:
             self.redis.delete(*keys)
-            return (), (), {}
+            return (), (), dict()
 
         # if one of the parameters is specified, then we collect a dictionary of existing key-values
-        exists_key_value: dict = self.check_keys_and_get_values(keys)
-        non_exists_keys: tuple = tuple(frozenset(keys).difference(frozenset(exists_key_value)))
+        exists_key_value: dict = self.check_keys_and_get_values(keys, convert_to_type_dict_key=convert_to_type_dict_key)
+        exists_keys: tuple = tuple(exists_key_value.keys())
+        non_exists_keys: tuple = tuple(frozenset(keys).difference(frozenset(exists_keys)))
+        self.redis.delete(*exists_keys)
 
         return (
+            exists_keys if return_exists else (),
             non_exists_keys if return_non_exists else (),
-            tuple(exists_key_value.keys()) if return_exists else (),
-            exists_key_value if get_dict_key_value_exists else {}
+            exists_key_value if get_dict_key_value_exists else dict()
         )
 
     def r_mass_check_keys_exists(self, keys: list | tuple | set | frozenset) -> tuple:
@@ -248,13 +250,17 @@ class PyRedis:
         # filter only those keys whose values is not None
         return tuple(keys[i] for i, value in enumerate(existing_keys) if value is not None)
 
-    def check_keys_and_get_values(self, keys: list | tuple | set | frozenset) -> dict:
+    def check_keys_and_get_values(
+            self, keys: list | tuple | set | frozenset,
+            convert_to_type_dict_key: str = None
+    ) -> dict:
         """
         Checks for the existence of keys in Redis and returns a dictionary of existing keys with their values
         """
         keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
         values = self.redis.mget(keys)  # later in the library the variable is converted to list
-        return {keys[i]: value for i, value in enumerate(values) if value is not None}
+        return {keys[i]: PyRedis.__helper_convert_to_type(value, convert_to_type_dict_key)
+                if convert_to_type_dict_key else value for i, value in enumerate(values) if value is not None}
 
     def r_remove_all_keys(self, get_count_keys: bool = False) -> int | None:
         """
