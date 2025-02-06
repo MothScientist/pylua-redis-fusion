@@ -850,6 +850,74 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(res[1], ())  # return_non_exists
 		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
 
+	def test_r_mass_delete_009(self):
+		""" get key-value with converting type """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		key_value: dict = {key: bool(randint(0, 1)) for key in keys}
+		for key, value in key_value.items():
+			SmokeTests.r.r_set(str(key), value)
+
+		res = SmokeTests.r.r_mass_delete(
+			keys, return_exists=True, get_dict_key_value_exists=True, convert_to_type_dict_key='bool'
+		)
+
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(res[0], keys)  # return_exists
+		self.assertEqual(res[1], ())  # return_non_exists
+		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+
+	def test_r_mass_delete_010(self):
+		""" get key-value with converting type """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		key_value: dict = {key: randint(0, 1_000) for key in keys}
+		for key, value in key_value.items():
+			SmokeTests.r.r_set(str(key), value)
+
+		res = SmokeTests.r.r_mass_delete(
+			keys, return_exists=True, get_dict_key_value_exists=True, convert_to_type_dict_key='integer'
+		)
+
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(res[0], keys)  # return_exists
+		self.assertEqual(res[1], ())  # return_non_exists
+		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+
+	def test_r_mass_delete_011(self):
+		""" get key-value with converting type (integer) and without other params """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		key_value: dict = {key: randint(0, 1_000) for key in keys}
+		for key, value in key_value.items():
+			SmokeTests.r.r_set(str(key), value)
+
+		res = SmokeTests.r.r_mass_delete(
+			keys, convert_to_type_dict_key='integer'
+		)
+
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(res[0], ())  # return_exists
+		self.assertEqual(res[1], ())  # return_non_exists
+		self.assertEqual(res[2], dict())  # get_dict_key_value_exists
+
+	def test_r_mass_delete_012(self):
+		""" get key-value with converting type (boolean) and without other params """
+		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		key_value: dict = {key: randint(0, 1_000) for key in keys}
+		for key, value in key_value.items():
+			SmokeTests.r.r_set(str(key), value)
+
+		res = SmokeTests.r.r_mass_delete(
+			keys, convert_to_type_dict_key='boolean'
+		)
+
+		self.assertTrue(isinstance(res, tuple))
+		self.assertEqual(res[0], ())  # return_exists
+		self.assertEqual(res[1], ())  # return_non_exists
+		self.assertEqual(res[2], dict())  # get_dict_key_value_exists
+
 
 if __name__ == '__main__':
 	from redis import Redis, ConnectionPool
