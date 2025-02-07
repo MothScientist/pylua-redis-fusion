@@ -18,7 +18,8 @@ redis_username: str = getenv('REDIS_USERNAME') or 'default'
 
 class TtlTests(unittest.TestCase):
 	"""
-	Tests to check the lifetime of keys, the sleep() function will be used, so all other parameters are optimized as much as possible
+	Tests to check the lifetime of keys, the sleep() function will be used,
+	so all other parameters are optimized as much as possible
 	"""
 	# def setUp(self):
 	# 	self.maxDiff = None

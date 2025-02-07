@@ -150,12 +150,12 @@ class PrivateStaticFuncTests(unittest.TestCase):
 		self.assertEqual(value, res)
 
 	def test_helper_convert_to_type_002(self):
-		value: int = 1
+		value: int = randint(1, 100)
 		res: int = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'int')
 		self.assertEqual(value, res)
 
 	def test_helper_convert_to_type_003(self):
-		value: int = 5
+		value: int = randint(1, 100)
 		res: int = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'integer')
 		self.assertEqual(value, res)
 

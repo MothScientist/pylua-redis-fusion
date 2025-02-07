@@ -216,14 +216,14 @@ class PyRedis:
         :return: ((return_exists), (return_non_exists), {get_dict_key_value_exists})
         """
         if not keys:
-            return (), (), dict()
+            return (), (), {}
 
         keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
 
         # all parameters = None (None is None is None -> True)
         if return_exists is return_non_exists is get_dict_key_value_exists is False:
             self.redis.delete(*keys)
-            return (), (), dict()
+            return (), (), {}
 
         # if one of the parameters is specified, then we collect a dictionary of existing key-values
         exists_key_value: dict = self.check_keys_and_get_values(keys, convert_to_type_dict_key=convert_to_type_dict_key)
@@ -234,7 +234,7 @@ class PyRedis:
         return (
             exists_keys if return_exists else (),
             non_exists_keys if return_non_exists else (),
-            exists_key_value if get_dict_key_value_exists else dict()
+            exists_key_value if get_dict_key_value_exists else {}
         )
 
     def r_mass_check_keys_exists(self, keys: list | tuple | set | frozenset) -> tuple:

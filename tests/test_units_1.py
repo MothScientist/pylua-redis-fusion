@@ -743,7 +743,7 @@ class SmokeTests(unittest.TestCase):
 		for key in keys:
 			SmokeTests.r.r_set(str(key), key)
 		res = SmokeTests.r.r_mass_delete(keys)
-		self.assertEqual(res,  ((), (), dict()))
+		self.assertEqual(res,  ((), (), {}))
 
 	def test_r_mass_delete_002(self):
 		""" Don't write down all the keys """
@@ -752,7 +752,7 @@ class SmokeTests(unittest.TestCase):
 		for str_key in keys[:randint(5, 10)]:
 			SmokeTests.r.r_set(str_key, str_key)
 		res = SmokeTests.r.r_mass_delete(keys)
-		self.assertEqual(res,  ((), (), dict()))
+		self.assertEqual(res,  ((), (), {}))
 
 	def test_r_mass_delete_003(self):
 		""" Don't write down all the keys """
@@ -764,7 +764,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertTrue(isinstance(res, tuple))
 		self.assertEqual(res[0], ())
 		self.assertEqual(sorted(res[1]),  sorted(keys[len(keys)//2:]))
-		self.assertEqual(res[2], dict())
+		self.assertEqual(res[2], {})
 
 	def test_r_mass_delete_004(self):
 		""" Don't write down all the keys """
@@ -777,7 +777,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertTrue(isinstance(res, tuple))
 		self.assertEqual(sorted(res[0]), sorted(exists_keys))
 		self.assertEqual(res[1], ())
-		self.assertEqual(res[2], dict())
+		self.assertEqual(res[2], {})
 
 	def test_r_mass_delete_005(self):
 		""" Don't write down all the keys """
@@ -893,7 +893,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertTrue(isinstance(res, tuple))
 		self.assertEqual(res[0], ())  # return_exists
 		self.assertEqual(res[1], ())  # return_non_exists
-		self.assertEqual(res[2], dict())  # get_dict_key_value_exists
+		self.assertEqual(res[2], {})  # get_dict_key_value_exists
 
 	def test_r_mass_delete_012(self):
 		""" get key-value with converting type (boolean) and without other params """
@@ -910,7 +910,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertTrue(isinstance(res, tuple))
 		self.assertEqual(res[0], ())  # return_exists
 		self.assertEqual(res[1], ())  # return_non_exists
-		self.assertEqual(res[2], dict())  # get_dict_key_value_exists
+		self.assertEqual(res[2], {})  # get_dict_key_value_exists
 
 
 if __name__ == '__main__':
