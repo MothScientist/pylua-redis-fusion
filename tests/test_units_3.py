@@ -358,10 +358,20 @@ class PrivateStaticFuncTests(unittest.TestCase):
 
 	def test_helper_convert_to_type_017(self):
 		value: float = float(0)
-		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'double')
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'float')
 		self.assertEqual(value, res)
 
 	def test_helper_convert_to_type_018(self):
+		value: float = float(0)
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'numeric')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_019(self):
+		value: float = float(0)
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'double')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_020(self):
 		value: float = random()
 		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'double')
 		self.assertEqual(value, res)
