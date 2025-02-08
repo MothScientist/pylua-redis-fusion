@@ -287,15 +287,21 @@ class PyRedis:
     def __helper_convert_to_type(value: str, _type: str) -> str | int | float:
         try:
             if _type in ('int', 'integer'):
+
                 if '.' in value:
                     # if it`s float, then before converting it`s necessary to slice the fractional part from the string
                     idx: int = value.find('.')
                     value: str = value[:idx]
+
                 value: int = int(value)
+
             elif _type in ('float', 'double', 'numeric'):
                 value: float = float(value)
+
             elif _type in ('bool', 'boolean'):
-                value: bool = True if value in ('1', 'True', 'true') else False
+                _true: tuple = ('1', 'True', 'true')
+                value: bool | str = (value in _true) if value in ('0', 'False', 'false', *_true) else value
+
         except ValueError:
             pass
         return value
