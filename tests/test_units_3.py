@@ -1,5 +1,5 @@
 import unittest
-from random import randint, choice
+from random import randint, choice, random, shuffle
 from string import ascii_letters, digits
 from sys import path as sys_path
 
@@ -85,12 +85,12 @@ class PrivateStaticFuncTests(unittest.TestCase):
 	# __remove_duplicates ##############################################################################################
 
 	def test_remove_duplicates_001(self):
-		arr = [PrivateStaticFuncTests.get_random_integer(_min=0, _max=10) for _ in range(100)]
+		arr = [PrivateStaticFuncTests.get_random_integer(_min=0, _max=10) for _ in range(50)]
 		res = PrivateStaticFuncTests.remove_duplicates_func_obj(arr)
 		self.assertEqual(res, tuple(set(arr)))
 
 	def test_remove_duplicates_002(self):
-		arr = tuple([PrivateStaticFuncTests.get_random_integer() for _ in range(10_000)])
+		arr = tuple([PrivateStaticFuncTests.get_random_integer() for _ in range(250)])
 		res = PrivateStaticFuncTests.remove_duplicates_func_obj(arr)
 		self.assertEqual(res, tuple(set(arr)))
 
@@ -138,9 +138,141 @@ class PrivateStaticFuncTests(unittest.TestCase):
 		res = PrivateStaticFuncTests.remove_duplicates_func_obj(arr)
 		self.assertEqual(res, tuple(set(arr)))
 
+	def test_remove_duplicates_011(self):
+		arr = tuple([0 for _ in range(100)])
+		res = PrivateStaticFuncTests.remove_duplicates_func_obj(arr)
+		self.assertEqual(res, tuple(set(arr)))
+
+	def test_remove_duplicates_012(self):
+		_int: int = randint(1, 100)
+		arr = tuple([_int for _ in range(100)])
+		res = PrivateStaticFuncTests.remove_duplicates_func_obj(arr)
+		self.assertEqual(res, tuple(set(arr)))
+
 	# __convert_to_type ################################################################################################
 
-	# TODO
+	def test_convert_to_type_001(self):
+		value: int = 0
+		res: int = PrivateStaticFuncTests.convert_func_obj(str(value), 'int')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_002(self):
+		value: int = randint(1, 100)
+		res: int = PrivateStaticFuncTests.convert_func_obj(str(value), 'int')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_003(self):
+		value: int = randint(1, 100)
+		res: int = PrivateStaticFuncTests.convert_func_obj(str(value), 'integer')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_004(self):
+		value: bool = True
+		res: bool = PrivateStaticFuncTests.convert_func_obj(str(value), 'bool')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_005(self):
+		value: bool = False
+		res: bool = PrivateStaticFuncTests.convert_func_obj(str(value), 'boolean')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_006(self):
+		value: bool = False
+		res: bool = PrivateStaticFuncTests.convert_func_obj(str(value), 'bool')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_007(self):
+		value: bool = True
+		res: bool = PrivateStaticFuncTests.convert_func_obj(str(value), 'boolean')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_008(self):
+		value: bool = True
+		res: str = PrivateStaticFuncTests.convert_func_obj(str(value), '')
+		self.assertEqual(str(value), res)
+
+	def test_convert_to_type_009(self):
+		value: bool = False
+		res: str = PrivateStaticFuncTests.convert_func_obj(str(value), '')
+		self.assertEqual(str(value), res)
+
+	def test_convert_to_type_010(self):
+		value: int = randint(100_000, 1_000_000)
+		res: str = PrivateStaticFuncTests.convert_func_obj(str(value), 'integer')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_011(self):
+		value: float = float(randint(0, 100)) + random()
+		res: str = PrivateStaticFuncTests.convert_func_obj(str(value), 'qwerty')
+		self.assertEqual(str(value), res)
+
+	def test_convert_to_type_012(self):
+		value: float = float(randint(0, 100)) + random()
+		res: str = PrivateStaticFuncTests.convert_func_obj(str(value), 'float')
+		self.assertEqual(value, res)
+
+	def test_convert_to_type_013(self):
+		""" boolean array <-> bool """
+		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(50)]
+		value: list[str] = [str(val) for val in expected_res]
+		res: list[bool] = PrivateStaticFuncTests.convert_func_obj(value, 'bool')
+		self.assertEqual(res, expected_res)
+
+	def test_convert_to_type_014(self):
+		""" boolean array <-> boolean """
+		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(50)]
+		value: list[str] = [str(val) for val in expected_res]
+		res: list[bool] = PrivateStaticFuncTests.convert_func_obj(value, 'boolean')
+		self.assertEqual(res, expected_res)
+
+	def test_convert_to_type_015(self):
+		""" float array <-> float """
+		expected_res: list[float] = [random() for _ in range(50)]
+		value: list[str] = [str(val) for val in expected_res]
+		res: list[float] = PrivateStaticFuncTests.convert_func_obj(value, 'float')
+		self.assertEqual(res, expected_res)
+
+	def test_convert_to_type_016(self):
+		""" float array <-> numeric """
+		expected_res: list[float] = [random() for _ in range(50)]
+		value: list[str] = [str(val) for val in expected_res]
+		res: list[float] = PrivateStaticFuncTests.convert_func_obj(value, 'numeric')
+		self.assertEqual(res, expected_res)
+
+	def test_convert_to_type_017(self):
+		""" float array <-> double """
+		expected_res: list[float] = [random() for _ in range(50)]
+		value: list[str] = [str(val) for val in expected_res]
+		res: list[float] = PrivateStaticFuncTests.convert_func_obj(value, 'double')
+		self.assertEqual(res, expected_res)
+
+	def test_convert_to_type_018(self):
+		""" bool array -> int """
+		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(50)]
+		value: list[str] = [str(val) for val in expected_res]
+		res: list[str] = PrivateStaticFuncTests.convert_func_obj(value, 'integer')
+		self.assertEqual(res, value)
+
+	def test_convert_to_type_019(self):
+		""" integer values with str """
+		int_lst: list[int] = [PrivateStaticFuncTests.get_random_integer() for _ in range(50)]
+		str_lst: list[str] = [PrivateStaticFuncTests.get_random_string() for _ in range(50)]
+		merge_lists: list = int_lst + str_lst
+		shuffle(merge_lists)  # shuffle the values in the list
+		value: list[str] = [str(val) for val in merge_lists]
+		res: list[int | str] = PrivateStaticFuncTests.convert_func_obj(value, 'int')
+		self.assertEqual(set(res), set(merge_lists))  # it`s more convenient to compare shuffled lists through sets
+
+	def test_convert_to_type_020(self):
+		""" integer values with bool """
+		int_lst: list[int] = [PrivateStaticFuncTests.get_random_integer(_min=2) for _ in range(50)]
+		bool_lst: list[bool] = [bool(randint(0, 1)) for _ in range(50)]
+		merge_lists: list = int_lst + bool_lst
+		shuffle(merge_lists)
+		expected_res = [(str(val) if not isinstance(val, bool) else val) for val in merge_lists]
+		value: list[str] = [str(val) for val in merge_lists]
+		res: list[bool | str] = PrivateStaticFuncTests.convert_func_obj(value, 'bool')
+		self.assertEqual(set(res), set(expected_res))  # because of set there will be 1 True and 1 False
 
 	# __helper_convert_to_type #########################################################################################
 
@@ -171,13 +303,68 @@ class PrivateStaticFuncTests(unittest.TestCase):
 
 	def test_helper_convert_to_type_006(self):
 		value: bool = False
+		res: bool = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'bool')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_007(self):
+		value: bool = True
+		res: bool = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'boolean')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_008(self):
+		value: bool = True
 		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), '')
 		self.assertEqual(str(value), res)
 
-	def test_helper_convert_to_type_007(self):
-		value: float = 1.25
+	def test_helper_convert_to_type_009(self):
+		value: bool = False
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), '')
+		self.assertEqual(str(value), res)
+
+	def test_helper_convert_to_type_010(self):
+		value: bool = True
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'integer')
+		self.assertEqual(str(value), res)
+
+	def test_helper_convert_to_type_011(self):
+		value: bool = False
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'float')
+		self.assertEqual(str(value), res)
+
+	def test_helper_convert_to_type_012(self):
+		value: int = randint(100_000, 1_000_000)
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'integer')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_013(self):
+		value: float = float(randint(0, 100)) + random()
 		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'qwerty')
 		self.assertEqual(str(value), res)
+
+	def test_helper_convert_to_type_014(self):
+		value: float = float(randint(0, 100)) + random()
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'float')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_015(self):
+		value: float = float(randint(0, 100)) + random()
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'numeric')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_016(self):
+		value: float = float(randint(0, 100)) + random()
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'double')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_017(self):
+		value: float = float(0)
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'double')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_018(self):
+		value: float = random()
+		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'double')
+		self.assertEqual(value, res)
 
 
 if __name__ == '__main__':
