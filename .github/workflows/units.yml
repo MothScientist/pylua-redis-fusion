@@ -61,4 +61,5 @@ jobs:
       - name: Run multiple CPUs UnitTests
         run: |
           cd tests || exit 1
-          pytest test_units_2.py -n auto
+          python -m unittest test_units_2.py
+          # pytest test_units_2.py -n auto
