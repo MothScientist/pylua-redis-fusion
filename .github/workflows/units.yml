@@ -44,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r dev-requirements.txt
 
       - name: Create .env file
         env:
@@ -56,4 +56,9 @@ jobs:
       - name: Run UnitTests
         run: |
           cd tests || exit 1
-          python -m unittest test_units_1.py test_units_2.py test_units_3.py
+          python -m unittest test_units_1.py test_units_3.py
+
+      - name: Run multiple CPUs UnitTests
+        run: |
+          cd tests || exit 1
+          pytest test_units_2.py -n auto
