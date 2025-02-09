@@ -312,8 +312,8 @@ class PyRedis:
         return tuple(set(iterable_var))
 
     @staticmethod
-    def __load_lua_script(filename: str):
+    def __load_lua_script(filename: str) -> str:
         """ Load Lua script from a file """
         curr_dir = os_path.dirname(__file__)
-        with open(os_path.join(curr_dir, f'scripts/{filename}.lua'), 'r') as lua_file:
+        with open(os_path.join(curr_dir, f'lua_scripts/{filename}.lua'), 'r') as lua_file:
             return lua_file.read()
