@@ -28,11 +28,14 @@ class PyRedis:
                 decode_responses=True
             )
         )
-        self.lua_scripts = dict()  # storing registered lua scripts
-        self.lua_scripts['rename_key'] = PyRedis.__load_lua_script('rename_key')
-        self.lua_scripts['remove_all_keys'] = PyRedis.__load_lua_script('remove_all_keys')
-        self.lua_scripts['rpush_helper'] = PyRedis.__load_lua_script('rpush_helper')
-        self.lua_scripts['get_helper'] = PyRedis.__load_lua_script('get_helper')
+
+        # storing registered lua scripts
+        self.lua_scripts = {
+            'rename_key': PyRedis.__load_lua_script('rename_key'),
+            'remove_all_keys': PyRedis.__load_lua_script('remove_all_keys'),
+            'rpush_helper': PyRedis.__load_lua_script('rpush_helper'),
+            'get_helper': PyRedis.__load_lua_script('get_helper')
+        }
 
     def r_ping(self) -> bool:
         try:
