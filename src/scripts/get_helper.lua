@@ -1,3 +1,4 @@
+-- function to get values by key
 local key = KEYS[1]
 local res
 
