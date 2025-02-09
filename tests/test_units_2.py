@@ -50,7 +50,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1))
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, value)
-		sleep(1)
+		sleep(2)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -60,7 +60,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=5))
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, value)
-		sleep(5)
+		sleep(6)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -70,7 +70,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1, time_ms=5000))
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, value)
-		sleep(1)
+		sleep(2)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -80,7 +80,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=10, time_ms=5000))
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, value)
-		sleep(5)
+		sleep(6)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -90,7 +90,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=0.1, time_ms=100))
 		res_1 = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, value)
-		sleep(1)
+		sleep(2)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -100,7 +100,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1))
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, str(value))
-		sleep(1)
+		sleep(2)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -110,7 +110,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=2))
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, str(value))
-		sleep(2)
+		sleep(3)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
