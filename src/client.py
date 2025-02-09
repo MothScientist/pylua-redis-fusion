@@ -47,14 +47,14 @@ class PyRedis:
             self,
             key: str | dict,
             value: int | float | str | list | tuple | set | frozenset | None,
-            get_old_value: bool = None,
+            get_old_value: bool = False,
             convert_to_type_for_get: str = None,
             time_ms=None,
             time_s=None,
             if_exist: bool = False,
             if_not_exist: bool = False,
             keep_ttl: bool = False
-    ) -> None | str:
+    ) -> None | str | int | float | bool | list:
         """
         Set a new key or override an existing one
         If both parameters (time_s, time_ms) are specified, the key will be deleted based on the smallest value.
@@ -71,10 +71,6 @@ class PyRedis:
         """
         if key is value is None:
             return
-
-        key_exist: bool | None = None
-        if (if_exist or if_not_exist) and not isinstance(key, dict):
-            key_exist: bool = self.key_is_exist(key)
 
         if time_s or time_ms:
             time_s, time_ms = None, PyRedis.__compare_and_select_sec_ms(time_s, time_ms)
