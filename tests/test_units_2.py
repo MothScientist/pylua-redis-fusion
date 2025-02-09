@@ -30,8 +30,7 @@ class TtlTests(unittest.TestCase):
 		port=redis_port,
 		password=redis_psw,
 		username=redis_username,
-		db=redis_db,
-		socket_timeout=.1
+		db=redis_db
 	)
 
 	def setUp(self):
