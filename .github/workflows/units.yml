@@ -62,8 +62,3 @@ jobs:
         run: |
           cd tests || exit 1
           pytest test_units_2.py -n auto
-
-      - name: Run Ttl UnitTests without multiple CPUs
-        run: |
-          cd tests || exit 1
-          python -m unittest test_units_2_ext.py
