@@ -31,6 +31,8 @@ class PyRedis:
         self.lua_scripts = dict()  # storing registered lua scripts
         self.lua_scripts['rename_key'] = PyRedis.__load_lua_script('rename_key')
         self.lua_scripts['remove_all_keys'] = PyRedis.__load_lua_script('remove_all_keys')
+        self.lua_scripts['rpush_helper'] = PyRedis.__load_lua_script('rpush_helper')
+        self.lua_scripts['get_helper'] = PyRedis.__load_lua_script('get_helper')
 
     def r_ping(self) -> bool:
         try:
@@ -106,8 +108,7 @@ class PyRedis:
                 value,
                 time_ms=time_ms,
                 if_exist=if_exist,
-                if_not_exist=if_not_exist,
-                key_exist=key_exist
+                if_not_exist=if_not_exist
             )
 
         return res
@@ -117,24 +118,16 @@ class PyRedis:
             key: str,
             value: list | tuple | set | frozenset,
             time_ms: int | None,
-            if_exist: bool | None,
-            if_not_exist: bool | None,
-            key_exist: bool | None
+            if_exist: bool,
+            if_not_exist: bool
     ) -> None:
-        # if such a key already exists, it must be cleared before writing, otherwise it will simply expand
-        key_exist: bool = self.key_is_exist(key) if key_exist is None else key_exist
-        if key_exist:
-            self.r_delete(key)
+        # if there are values of type bool, then we convert them to strings
+        value = tuple(str(element) if isinstance(element, bool) else element for element in value)
 
-        elif (if_exist and not key_exist) or (if_not_exist and key_exist):
-            return
-
-        if any(isinstance(element, bool) for element in value):
-            # if there are values of type bool, then we convert them to strings
-            value = tuple(str(element) if isinstance(element, bool) else element for element in value)
-        self.redis.rpush(key, *value)
-        if time_ms:
-            self.redis.pexpire(key, time_ms, if_exist, if_not_exist)
+        # values - the last parameter of the function!
+        self.__register_lua_scripts(
+            'rpush_helper', 1, key, str(time_ms or 0), str(int(if_exist)), str(int(if_not_exist)), *value
+        )
 
     def __r_set_dict_helper(
             self,
@@ -156,14 +149,7 @@ class PyRedis:
         if not key:
             return default_value  # default_value or None
 
-        value_type = self.redis.type(key)
-
-        if value_type == 'string':
-            res = self.redis.get(key) or None
-        elif value_type == 'list':
-            res = [byte for byte in self.redis.lrange(key, 0, -1)]
-        else:  # value_type = 'none'
-            return default_value
+        res = self.__register_lua_scripts('get_helper', 1, key) or default_value
 
         return PyRedis.__convert_to_type(res, convert_to_type) if convert_to_type else res
 
@@ -268,7 +254,7 @@ class PyRedis:
         :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
         :return: count keys or None
         """
-        count_keys = self.__register_lua_scripts('remove_all_keys', 0, '1' if get_count_keys else '0')
+        count_keys = self.__register_lua_scripts('remove_all_keys', 0, str(int(get_count_keys)))
         return int(count_keys) if count_keys else None
 
     def __register_lua_scripts(self, script_name: str, *args):
