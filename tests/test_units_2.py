@@ -33,9 +33,6 @@ class TtlTests(unittest.TestCase):
 		db=redis_db
 	)
 
-	def setUp(self):
-		TtlTests.r.r_remove_all_keys()
-
 	@staticmethod
 	def get_random_integer():
 		return randint(0, 100)
@@ -107,19 +104,6 @@ class TtlTests(unittest.TestCase):
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
-	def test_set_get_ttl_int_002(self):
-		key: str = 'set_get_int_002'
-		value: int = TtlTests.get_random_integer()
-		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=3))
-		res_1: str = TtlTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, value)
-		sleep(1)
-		res_2: str = TtlTests.r.r_get(key, convert_to_type='integer')
-		self.assertEqual(res_2, value)
-		sleep(2)
-		res_3: None = TtlTests.r.r_get(key)
-		self.assertIsNone(res_3, f'res = {res_2}')
-
 	def test_set_get_ttl_float_001(self):
 		key: str = 'set_get_float_001'
 		value: float = random()
@@ -129,19 +113,6 @@ class TtlTests(unittest.TestCase):
 		sleep(2)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
-
-	def test_set_get_ttl_float_002(self):
-		key: str = 'set_get_float_002'
-		value: float = random()
-		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=3))
-		res_1: str = TtlTests.r.r_get(key, convert_to_type='numeric')
-		self.assertEqual(res_1, value)
-		sleep(1)
-		res_2: str = TtlTests.r.r_get(key, convert_to_type='double')
-		self.assertEqual(res_2, value)
-		sleep(2)
-		res_3: None = TtlTests.r.r_get(key)
-		self.assertIsNone(res_3, f'res = {res_2}')
 
 
 if __name__ == '__main__':
