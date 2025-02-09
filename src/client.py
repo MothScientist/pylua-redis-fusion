@@ -98,8 +98,8 @@ class PyRedis:
                 nx=if_not_exist,
                 xx=if_exist,
                 keepttl=keep_ttl,
-                ex=time_s,
-                px=time_ms
+                ex=timedelta(seconds=time_s) if time_s else None,
+                px=timedelta(milliseconds=time_ms) if time_ms else None
             )
 
         elif isinstance(value, (list, tuple, set, frozenset)):

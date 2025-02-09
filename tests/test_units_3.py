@@ -376,6 +376,22 @@ class PrivateStaticFuncTests(unittest.TestCase):
 		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'double')
 		self.assertEqual(value, res)
 
+	# load_lua_func_obj ################################################################################################
+
+	def test_load_lua_func_obj_001(self):
+		res = PrivateStaticFuncTests.load_lua_func_obj('get_helper')
+		self.assertNotEqual(res, '')
+		self.assertTrue(isinstance(res, str))
+
+	def test_load_lua_func_obj_002(self):
+		res = PrivateStaticFuncTests.load_lua_func_obj('rpush_helper')
+		self.assertNotEqual(res, '')
+		self.assertTrue(isinstance(res, str))
+
+	def test_load_lua_func_obj_003(self):
+		with self.assertRaises(FileNotFoundError):
+			PrivateStaticFuncTests.load_lua_func_obj('unknown_script')
+
 
 if __name__ == '__main__':
 	unittest.main()
