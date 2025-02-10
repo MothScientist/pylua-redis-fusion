@@ -291,10 +291,10 @@ class PyRedis:
                 value: float = float(value)
 
             elif _type in ('bool', 'boolean'):
-                _true: tuple = ('1', 'True', 'true')
+                _true: tuple[str, str, str] = ('1', 'True', 'true')
                 value: bool | str = (value in _true) if value in ('0', 'False', 'false', *_true) else value
 
-        except ValueError:
+        except (ValueError, TypeError):
             pass
         return value
 
