@@ -157,7 +157,7 @@ class PyRedis:
 
         res = self.__register_lua_scripts('get_helper', 1, key) or default_value
 
-        return PyRedis.__convert_to_type(res, convert_to_type) if convert_to_type else res
+        return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
     def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
