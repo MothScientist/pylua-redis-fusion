@@ -51,8 +51,8 @@ class PrivateStaticFuncTests(unittest.TestCase):
 		self.assertEqual(res, 0)
 
 	def test_compare_and_select_sec_ms_007(self):
-		res = PrivateStaticFuncTests.time_func_obj(1.5, 1_550)
-		self.assertEqual(res, 1_500)
+		res = PrivateStaticFuncTests.time_func_obj(15, 1_550)
+		self.assertEqual(res, 1_550)
 
 	def test_compare_and_select_sec_ms_008(self):
 		res = PrivateStaticFuncTests.time_func_obj(1_000, 1_010)
@@ -63,24 +63,28 @@ class PrivateStaticFuncTests(unittest.TestCase):
 		self.assertEqual(res, 1_000_000)
 
 	def test_compare_and_select_sec_ms_010(self):
-		res = PrivateStaticFuncTests.time_func_obj(0.001, 1)
-		self.assertEqual(res, 1)
+		res = PrivateStaticFuncTests.time_func_obj(1, 2000)
+		self.assertEqual(res, 1000)
 
 	def test_compare_and_select_sec_ms_011(self):
-		res = PrivateStaticFuncTests.time_func_obj(0.0011, 1)
-		self.assertEqual(res, 1)
-
-	def test_compare_and_select_sec_ms_012(self):
-		res = PrivateStaticFuncTests.time_func_obj(0.001, 0.99)
-		self.assertEqual(res, 0.99)
-
-	def test_compare_and_select_sec_ms_013(self):
 		res = PrivateStaticFuncTests.time_func_obj(0, 1_000)
 		self.assertEqual(res, 1_000)
 
+	def test_compare_and_select_sec_ms_012(self):
+		res = PrivateStaticFuncTests.time_func_obj(1, 0)
+		self.assertEqual(res, 1000)
+
+	def test_compare_and_select_sec_ms_013(self):
+		res = PrivateStaticFuncTests.time_func_obj(1, None)
+		self.assertEqual(res, 1000)
+
 	def test_compare_and_select_sec_ms_014(self):
-		res = PrivateStaticFuncTests.time_func_obj(0.1, 0)
+		res = PrivateStaticFuncTests.time_func_obj(None, 100)
 		self.assertEqual(res, 100)
+
+	def test_compare_and_select_sec_ms_015(self):
+		res = PrivateStaticFuncTests.time_func_obj(None, None)
+		self.assertEqual(res, None)
 
 	# __remove_duplicates ##############################################################################################
 

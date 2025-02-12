@@ -91,8 +91,8 @@ class TtlTests(unittest.TestCase):
 	def test_set_get_ttl_str_005(self):
 		key: str = 'set_get_str_005'
 		value: str = TtlTests.get_random_string()
-		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=0.1, time_ms=100))
-		sleep(1)
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1, time_ms=1_000_000))
+		sleep(3)
 		res: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res, f'res = {res}')
 
@@ -175,6 +175,54 @@ class TtlTests(unittest.TestCase):
 		sleep(1)
 		res: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res, f'res = {res}')
+
+	def test_set_get_ttl_tuple_001(self):
+		key: str = 'set_get_tuple_001'
+		value: tuple[str, ...] = tuple([TtlTests.get_random_string() for _ in range(randint(10, 20))])
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=15, time_ms=50_000))
+
+		sleep(1)
+		res_1: tuple[str, ...] = tuple(TtlTests.r.r_get(key))
+		self.assertEqual(res_1, value)
+
+		sleep(20)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
+
+	def test_set_get_ttl_tuple_002(self):
+		key: str = 'set_get_tuple_002'
+		value: tuple[float, ...] = tuple([random() for _ in range(randint(10, 20))])
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=5))
+
+		sleep(10)
+		res: None = TtlTests.r.r_get(key, convert_to_type='float')
+		self.assertIsNone(res, f'res = {res}')
+
+	def test_set_get_ttl_set_001(self):
+		key: str = 'set_get_set_001'
+		value: set[float] = {random() for _ in range(randint(10, 20))}
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=15, time_ms=5_000_000))
+
+		sleep(5)
+		res_1: set[float] = set(TtlTests.r.r_get(key, convert_to_type='float'))
+		self.assertEqual(res_1, value)
+
+		sleep(15)
+		res_2: None = TtlTests.r.r_get(key)  # without convert_to_type
+		self.assertIsNone(res_2, f'res = {res_2}')
+		res_3: None = TtlTests.r.r_get(key, convert_to_type='float')
+		self.assertIsNone(res_3, f'res = {res_3}')
+
+	def test_set_get_ttl_set_002(self):
+		key: str = 'set_get_set_001'
+		value: set[str] = {TtlTests.get_random_string() for _ in range(randint(10, 20))}
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1))
+
+		sleep(5)
+		res_1: None = TtlTests.r.r_get(key)  # without convert_to_type
+		self.assertIsNone(res_1, f'res = {res_1}')
+		res_2: None = TtlTests.r.r_get(key, convert_to_type='integer')  # wrong type
+		self.assertIsNone(res_2, f'res = {res_2}')
 
 
 if __name__ == '__main__':

@@ -53,8 +53,8 @@ class PyRedis:
             value: int | float | str | list | tuple | set | frozenset | None,
             get_old_value: bool = False,
             convert_to_type_for_get: str = None,
-            time_ms=None,
-            time_s=None,
+            time_ms: int | None = None,
+            time_s: int | None = None,
             if_exist: bool = False,
             if_not_exist: bool = False,
             keep_ttl: bool = False
@@ -99,8 +99,8 @@ class PyRedis:
                 nx=if_not_exist,
                 xx=if_exist,
                 keepttl=keep_ttl,
-                ex=timedelta(seconds=time_s) if time_s else None,
-                px=timedelta(milliseconds=time_ms) if time_ms else None
+                ex=time_s,
+                px=time_ms
             )
 
         elif isinstance(value, (list, tuple, set, frozenset)):
@@ -299,12 +299,13 @@ class PyRedis:
         return value
 
     @staticmethod
-    def __compare_and_select_sec_ms(time_s: float, time_ms: float) -> float:
+    def __compare_and_select_sec_ms(time_s: int, time_ms: int) -> int:
         """
         If both seconds and milliseconds are specified,
         the time is converted to milliseconds and the smallest one is selected
         """
-        return min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
+        res = min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
+        return int(res) if isinstance(res, (int, float)) else None
 
     @staticmethod
     def __remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
