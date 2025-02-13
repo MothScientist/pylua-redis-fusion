@@ -529,6 +529,32 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(str(value), res, f'res = {res}; type(res) = {type(res)}')
 		self.assertTrue(isinstance(res, str), type(res))
 
+	# delete ###########################################################################################################
+
+	def test_delete_001(self):
+		key: str = 'delete_001'
+		# doesn't set the value
+		# delete
+		self.assertIsNone(SmokeTests.r.r_delete(key))
+
+	def test_delete_002(self):
+		key: str = 'delete_002'
+		# doesn't set the value
+		# delete
+		self.assertIsNone(SmokeTests.r.r_delete(key, returning=False))
+
+	def test_delete_003(self):
+		key: str = 'delete_003'
+		# doesn't set the value
+		# delete (with returning)
+		self.assertIsNone(SmokeTests.r.r_delete(key, returning=True))
+
+	def test_delete_004(self):
+		key: str = 'delete_004'
+		# doesn't set the value
+		# delete (with returning and convert)
+		self.assertIsNone(SmokeTests.r.r_delete(key, returning=True), None)
+
 	# set/get/delete ###################################################################################################
 
 	def test_set_get_delete_int_001(self):
@@ -635,6 +661,28 @@ class SmokeTests(unittest.TestCase):
 		# delete (without returning)
 		self.assertIsNone(SmokeTests.r.r_delete(key, convert_to_type_for_return='int'))
 
+	def test_set_get_delete_convert_004(self):
+		key: str = 'set_get_delete_convert_004'
+		value: list[int] = [1, 2, 3, 4, 5]
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res_1, value)
+
+		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='int')
+		self.assertEqual(res_2, value)
+
+	def test_set_get_delete_convert_005(self):
+		key: str = 'set_get_delete_convert_005'
+		value: set[int] = {1, 2, 3, 4, 5}
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(set(res_1), value)
+
+		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='int')
+		self.assertEqual(set(res_2), value)
+
 	def test_cycle_set_get_delete_001(self):
 		for value, key in enumerate([i for i in range(100_000_000, 100_000_000 + randint(25, 50))]):
 			key = str(key)
@@ -643,6 +691,34 @@ class SmokeTests(unittest.TestCase):
 			self.assertEqual(SmokeTests.r.r_get(key), str_value)
 			self.assertEqual(SmokeTests.r.r_delete(key, returning=True), str_value)
 			self.assertIsNone(SmokeTests.r.r_get(key))
+
+	# unlink ###########################################################################################################
+
+	def test_unlink_001(self):
+		key: str = 'unlink_001'
+		# doesn't set the value
+		# delete
+		self.assertIsNone(SmokeTests.r.r_unlink(key))
+
+	def test_unlink_002(self):
+		key: str = 'delete_002'
+		# doesn't set the value
+		# delete
+		self.assertIsNone(SmokeTests.r.r_unlink(key, returning=False))
+
+	def test_unlink_003(self):
+		key: str = 'delete_003'
+		# doesn't set the value
+		# delete (with returning)
+		self.assertIsNone(SmokeTests.r.r_unlink(key, returning=True))
+
+	def test_unlink_004(self):
+		key: str = 'delete_004'
+		# doesn't set the value
+		# delete (with returning and convert)
+		self.assertIsNone(SmokeTests.r.r_unlink(key, returning=True), None)
+
+	# set/get/unlink ###################################################################################################
 
 	# rename ###########################################################################################################
 

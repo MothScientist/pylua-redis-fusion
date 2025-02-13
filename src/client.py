@@ -35,7 +35,9 @@ class PyRedis:
             'rename_key': PyRedis.__load_lua_script('rename_key'),
             'remove_all_keys': PyRedis.__load_lua_script('remove_all_keys'),
             'rpush_helper': PyRedis.__load_lua_script('rpush_helper'),
-            'get_helper': PyRedis.__load_lua_script('get_helper')
+            'get_helper': PyRedis.__load_lua_script('get_helper'),
+            'delete_with_returning': PyRedis.__load_lua_script('delete_with_returning'),
+            'unlink_with_returning': PyRedis.__load_lua_script('unlink_with_returning')
         }
 
     def r_ping(self) -> bool:
@@ -170,13 +172,33 @@ class PyRedis:
         :return: value or None
         """
         if not key:
-            return None
+            return
 
-        value = self.r_get(key, convert_to_type=convert_to_type_for_return) if returning else None
-        self.redis.delete(key)
-        return value
+        value = self.__register_lua_scripts('delete_with_returning', 1, key, str(int(returning)))
 
-    def rename_key(self, key: str, new_key: str, get_rename_status: bool = None):  # TODO tests
+        if returning and value:
+            return PyRedis.__convert_to_type(value, convert_to_type_for_return) if convert_to_type_for_return else value
+        return
+
+    def r_unlink(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
+        """
+        unlinks is very similar to r_delete: it removes the specified keys.
+        The command just unlinks the keys from the keyspace. The actual removal will happen later asynchronously.
+        :param key:
+        :param returning: return the value the key had before deletion
+        :param convert_to_type_for_return: what type the return value should be converted to (if returning=True)
+        :return: value or None
+        """
+        if not key:
+            return
+
+        value = self.__register_lua_scripts('unlink_with_returning', 1, key, str(int(returning)))
+
+        if returning and value:
+            return PyRedis.__convert_to_type(value, convert_to_type_for_return) if convert_to_type_for_return else value
+        return
+
+    def rename_key(self, key: str, new_key: str, get_rename_status: bool = None):
         """
         Change key name
         :param key: current key name
