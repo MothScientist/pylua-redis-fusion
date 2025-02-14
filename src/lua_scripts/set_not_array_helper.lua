@@ -1,12 +1,12 @@
--- Set function for writing arrays (RPUSH)
 local key = KEYS[1]
 local get_old_value = tonumber(ARGV[1])
 local time_ms = tonumber(ARGV[2])
 local if_exist = tonumber(ARGV[3])
 local if_not_exist = tonumber(ARGV[4])
-local values = {unpack(ARGV, 4, #ARGV)}  -- the second parameter is the number of the last variable!
+local value = ARGV[5]
 
 local res = nil
+
 
 local key_exist = redis.call("EXISTS", key)
 
@@ -32,7 +32,7 @@ if key_exist == 1 then
   redis.call("DEL", key)
 end
 
-redis.call("RPUSH", key, unpack(values))
+redis.call("SET", key, value)
 
 -- if the key lifetime is defined
 if time_ms and time_ms > 0 then

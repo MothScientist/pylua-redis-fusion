@@ -82,69 +82,30 @@ class PyRedis:
             time_s, time_ms = None, PyRedis.__compare_and_select_sec_ms(time_s, time_ms)
 
         res = None
-        # for array values, the function to get the old value is built into the Lua script
-        if get_old_value and not isinstance(value, (list, tuple, set, frozenset)):
-            # Moved to a separate block, not as a parameter,
-            # because this library allows you to write after integer in this key, for example, list.
-            # Therefore, it is necessary to get the old value separately,
-            # although the set function has a built-in parameter for this, it is not suitable for this function
-            res = self.r_get(key, convert_to_type=convert_to_type_for_get)
 
         if isinstance(key, dict):
-            # TODO - key_exists if dict
-            self.__r_set_dict_helper(key, time_ms=time_ms, if_exist=if_exist, if_not_exist=if_not_exist)
+            # TODO - key_exists if dict + get_old_value
+            pass
 
         elif isinstance(value, (bool, int, float, str)):
-            self.redis.set(
-                key,
-                str(value) if isinstance(value, bool) else value,
-                nx=if_not_exist,
-                xx=if_exist,
-                keepttl=keep_ttl,
-                ex=time_s,
-                px=time_ms
+            res = self.__register_lua_scripts(
+                'set_not_array_helper', 1, key,
+                str(int(get_old_value)),
+                str(time_ms or 0),
+                str(int(if_exist)),
+                str(int(if_not_exist)),
+                str(value)
             )
 
         elif isinstance(value, (list, tuple, set, frozenset)):
-            res = self.__r_set_array_helper(
-                key,
-                value,
-                time_ms=time_ms,
-                if_exist=if_exist,
-                if_not_exist=if_not_exist,
-                get_old_value=get_old_value
+            value = tuple(str(element) for element in value)
+            res = self.__register_lua_scripts(
+                'rpush_helper', 1, key,
+                str(int(get_old_value)), str(time_ms or 0), str(int(if_exist)), str(int(if_not_exist)),
+                *value
             )
-            res = PyRedis.__convert_to_type(res, convert_to_type_for_get) if convert_to_type_for_get else res
 
-        return res
-
-    def __r_set_array_helper(
-            self,
-            key: str,
-            value: list | tuple | set | frozenset,
-            time_ms: int | None,
-            if_exist: bool,
-            if_not_exist: bool,
-            get_old_value: bool
-    ) -> None | str | int | float | bool | list:
-        # if there are values of type bool, then we convert them to strings
-        value = tuple(str(element) if isinstance(element, bool) else element for element in value)
-
-        # values - the last parameter of the function!
-        return self.__register_lua_scripts(
-            'rpush_helper', 1, key,
-            str(int(get_old_value)), str(time_ms or 0), str(int(if_exist)), str(int(if_not_exist)),
-            *value
-        )
-
-    def __r_set_dict_helper(
-            self,
-            key: dict,
-            time_ms: int | None,
-            if_exist: bool | None,
-            if_not_exist: bool | None
-    ) -> None:
-        pass  # TODO
+        return PyRedis.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
 
     def r_get(self, key: str, default_value=None, convert_to_type: str = None):
         """
