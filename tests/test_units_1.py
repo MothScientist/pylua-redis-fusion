@@ -49,6 +49,146 @@ class SmokeTests(unittest.TestCase):
 		""" Service is available """
 		self.assertTrue(SmokeTests.r.r_ping())
 
+	# key_is_exist #####################################################################################################
+
+	def test_key_is_exist_int_001(self):
+		key: str = 'key_is_exist_int_001'
+		value: int = SmokeTests.get_random_integer()
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_int_002(self):
+		key: str = 'key_is_exist_int_002'
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_float_001(self):
+		key: str = 'key_is_exist_float_001'
+		value: float = random()
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_float_002(self):
+		key: str = 'key_is_exist_float_002'
+		value: float = float(SmokeTests.get_random_integer())
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_float_003(self):
+		key: str = 'key_is_exist_float_003'
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_str_001(self):
+		key: str = 'key_is_exist_str_001'
+		value: str = SmokeTests.get_random_string()
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_str_002(self):
+		key: str = 'key_is_exist_str_002'
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_bool_001(self):
+		key: str = 'key_is_exist_bool_001'
+		SmokeTests.r.r_set(key, True)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_bool_002(self):
+		key: str = 'key_is_exist_bool_002'
+		SmokeTests.r.r_set(key, False)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_bool_003(self):
+		key: str = 'key_is_exist_bool_003'
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_none_001(self):
+		key: str = 'key_is_exist_none_001'
+		SmokeTests.r.r_set(key, None)
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_list_001(self):
+		key: str = 'key_is_exist_list_001'
+		value: list = [SmokeTests.get_random_integer() for _ in range(randint(10, 20))]
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_list_002(self):
+		key: str = 'key_is_exist_list_002'
+		SmokeTests.r.r_set(key, [])
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_list_003(self):
+		key: str = 'key_is_exist_list_003'
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_tuple_001(self):
+		key: str = 'key_is_exist_tuple_001'
+		value: tuple = tuple([SmokeTests.get_random_string() for _ in range(randint(10, 20))])
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_tuple_002(self):
+		key: str = 'key_is_exist_tuple_002'
+		SmokeTests.r.r_set(key, tuple())
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_tuple_003(self):
+		key: str = 'key_is_exist_tuple_003'
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_set_001(self):
+		key: str = 'key_is_exist_set_001'
+		value: set = {SmokeTests.get_random_string() for _ in range(randint(10, 20))}
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_set_002(self):
+		key: str = 'key_is_exist_set_002'
+		SmokeTests.r.r_set(key, set())
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_set_003(self):
+		key: str = 'key_is_exist_set_003'
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_frozenset_001(self):
+		key: str = 'key_is_exist_set_001'
+		value: frozenset = frozenset({SmokeTests.get_random_string() for _ in range(randint(10, 20))})
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_frozenset_002(self):
+		key: str = 'key_is_exist_frozenset_002'
+		SmokeTests.r.r_set(key, frozenset())
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_frozenset_003(self):
+		key: str = 'key_is_exist_frozenset_003'
+		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	# get_count_of_keys ################################################################################################
+
+	def test_get_count_of_keys_001(self):
+		""" get_count_of_keys() == dbsize() """
+		original_res: int = original_redis.dbsize()
+		library_res: int = SmokeTests.r.get_count_of_keys()
+		self.assertEqual(original_res, library_res)
+
+	def test_get_count_of_keys_002(self):
+		original_redis.flushall()
+
+		count_of_keys: int = randint(50, 100)
+		for i in range(count_of_keys):
+			SmokeTests.r.r_set(str(i), i)
+		res: int = SmokeTests.r.get_count_of_keys()
+		self.assertEqual(count_of_keys, res)
+
+		original_redis.flushall()
+
+	# get_type_value_of_key ############################################################################################
+
+	# TODO
+
 	# set/get ##########################################################################################################
 
 	def test_set_get_int_001(self):
