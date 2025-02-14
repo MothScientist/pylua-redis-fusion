@@ -16,7 +16,10 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    def __init__(self, host='localhost', port=6379, password='',username='default', db=0, socket_timeout=None):
+    def __init__(
+            self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
+            socket_timeout: int | float = 0.1, retry_on_timeout: bool = True
+    ):
         self.redis = Redis(
             connection_pool=rConnectionPool(
                 host=host,
@@ -26,7 +29,8 @@ class PyRedis:
                 db=db,
                 socket_timeout=socket_timeout,
                 encoding='utf-8',
-                decode_responses=True
+                decode_responses=True,
+                retry_on_timeout=retry_on_timeout
             )
         )
 
