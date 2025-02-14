@@ -37,7 +37,8 @@ class PyRedis:
             'rpush_helper': PyRedis.__load_lua_script('rpush_helper'),
             'get_helper': PyRedis.__load_lua_script('get_helper'),
             'delete_with_returning': PyRedis.__load_lua_script('delete_with_returning'),
-            'unlink_with_returning': PyRedis.__load_lua_script('unlink_with_returning')
+            'unlink_with_returning': PyRedis.__load_lua_script('unlink_with_returning'),
+            'set_not_array_helper': PyRedis.__load_lua_script('set_not_array_helper')
         }
 
     def r_ping(self) -> bool:
