@@ -22,7 +22,7 @@ class TtlTests(unittest.TestCase):
 	Tests to check the service life of keys, the sleep() function will be used,
 	so the tests are run in parallel on all processor cores
 
-	Timings for the sleep function are always greater than the key lifetime -
+	!!! Warning: Timings for the sleep function are always greater than the key lifetime -
 	this is done to eliminate errors when calculating the key lifetime when
 	writing to Redis and the start of the sleep() function count in Python
 	"""
@@ -46,6 +46,7 @@ class TtlTests(unittest.TestCase):
 		return ''.join(choice(ascii_letters + digits) for _ in range(length))
 
 	def test_ping(self):
+		""" Service is available """
 		self.assertTrue(TtlTests.r.r_ping())
 
 	def test_set_get_ttl_str_001(self):
