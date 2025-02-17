@@ -50,7 +50,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertTrue(SmokeTests.r.r_ping())
 
 	def test_ping_002(self):
-		wrong_r = PyRedis()
+		wrong_r = PyRedis(host='unknown')
 		self.assertFalse(wrong_r.r_ping())
 
 	# key_is_exist #####################################################################################################
