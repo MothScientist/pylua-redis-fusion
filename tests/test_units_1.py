@@ -912,6 +912,180 @@ class SmokeTests(unittest.TestCase):
 
 	# set/get/unlink ###################################################################################################
 
+	def test_set_get_unlink_str_001(self):
+		""" without returning """
+		key: str = 'set_get_unlink_str_001'
+		value: str = SmokeTests.get_random_string()
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: str = SmokeTests.r.r_get(key)
+		self.assertEqual(res_1, value)
+
+		# delete (without returning - None)
+		self.assertIsNone(SmokeTests.r.r_unlink(key))
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_str_002(self):
+		""" with returning """
+		key: str = 'set_get_unlink_str_002'
+		value: str = SmokeTests.get_random_string()
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: str = SmokeTests.r.r_get(key)
+		self.assertEqual(res_1, value)
+
+		# delete (without returning - None)
+		res_2: str = SmokeTests.r.r_unlink(key, returning=True)
+		self.assertEqual(res_1, res_2)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_str_003(self):
+		""" with returning and convert to wrong type """
+		key: str = 'set_get_unlink_str_003'
+		value: str = SmokeTests.get_random_string()
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: str = SmokeTests.r.r_get(key, convert_to_type='numeric')
+		self.assertEqual(res_1, value)
+
+		# delete (with returning)
+		res_2: str = SmokeTests.r.r_unlink(key, returning=True)
+		self.assertEqual(res_1, res_2)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_int_001(self):
+		""" without returning """
+		key: str = 'set_get_unlink_int_001'
+		value: int = SmokeTests.get_random_integer()
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: str = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res_1, value)
+
+		# delete (without returning - None)
+		self.assertIsNone(SmokeTests.r.r_unlink(key))
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_int_002(self):
+		""" with returning """
+		key: str = 'set_get_unlink_int_002'
+		value: int = SmokeTests.get_random_integer()
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: str = SmokeTests.r.r_get(key)
+		self.assertEqual(res_1, str(value))
+
+		# delete (with returning)
+		res_2: int = SmokeTests.r.r_unlink(key, returning=True)
+		self.assertEqual(res_1, res_2)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_int_003(self):
+		""" with returning and convert """
+		key: str = 'set_get_unlink_int_003'
+		value: int = SmokeTests.get_random_integer()
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: int = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res_1, value)
+
+		# delete (with returning)
+		res_2: int = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='integer')
+		self.assertEqual(res_1, res_2)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_int_004(self):
+		""" with returning and convert to wrong type """
+		key: str = 'set_get_unlink_int_004'
+		value: int = SmokeTests.get_random_integer()
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: str = SmokeTests.r.r_get(key)
+		self.assertEqual(res_1, str(value))
+
+		# delete (with returning)
+		res_2: int = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='123')
+		self.assertEqual(res_1, res_2)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_float_001(self):
+		""" without returning """
+		key: str = 'set_get_unlink_float_001'
+		value: float = float(SmokeTests.get_random_integer())
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: float = SmokeTests.r.r_get(key, convert_to_type='float')
+		self.assertEqual(res_1, value)
+
+		# delete (without returning - None)
+		self.assertIsNone(SmokeTests.r.r_unlink(key))
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_float_002(self):
+		""" with returning """
+		key: str = 'set_get_unlink_float_002'
+		value: float = float(SmokeTests.get_random_integer())
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: float = SmokeTests.r.r_get(key, convert_to_type='float')
+		self.assertEqual(res_1, value)
+
+		res_2: str = SmokeTests.r.r_unlink(key, returning=True)
+		self.assertEqual(res_2, str(value))
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_float_003(self):
+		""" with returning and convert """
+		key: str = 'set_get_unlink_float_003'
+		value: float = float(SmokeTests.get_random_integer())
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: float = SmokeTests.r.r_get(key, convert_to_type='float')
+		self.assertEqual(res_1, value)
+
+		res_2: str = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='double')
+		self.assertEqual(res_2, value)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_float_004(self):
+		""" with returning and convert to wrong type """
+		key: str = 'set_get_unlink_float_004'
+		value: float = float(SmokeTests.get_random_integer())
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: float = SmokeTests.r.r_get(key, convert_to_type='float')
+		self.assertEqual(res_1, value)
+
+		res_2: str = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='wrong type')
+		self.assertEqual(res_2, str(value))
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_bool_001(self):
+		key: str = 'set_get_unlink_bool_001'
+		value: bool = True
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: bool = SmokeTests.r.r_get(key, convert_to_type='bool')
+		self.assertEqual(res_1, value)
+
+		res_2: str = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='boolean')
+		self.assertEqual(res_2, value)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_set_get_unlink_bool_002(self):
+		key: str = 'set_get_unlink_bool_002'
+		value: bool = False
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1: bool = SmokeTests.r.r_get(key, convert_to_type='bool')
+		self.assertEqual(res_1, value)
+
+		res_2: str = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='boolean')
+		self.assertEqual(res_2, value)
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	# TODO - set_get_unlink for arrays
+
 	# rename ###########################################################################################################
 
 	def test_rename_key_001(self):
