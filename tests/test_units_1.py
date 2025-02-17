@@ -1004,25 +1004,34 @@ class SmokeTests(unittest.TestCase):
 
 	# mass check keys ##################################################################################################
 
-	def test_r_mass_check_keys_exists_001(self):
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
+	def test_keys_is_exist_001(self):
+		original_redis.flushall()
+
 		keys: set = {SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(25, 50))}
 		for key in keys:
 			SmokeTests.r.r_set(key, randint(0, 10_000))
-		non_exist: set = {SmokeTests.get_random_string(length=randint(1, 3)) for _ in range(randint(5, 10))}
-		res: tuple = SmokeTests.r.r_mass_check_keys_exists(keys.union(non_exist))
+		self.assertEqual(len(keys), SmokeTests.r.keys_is_exist(keys))
 
-		self.assertTrue(set(res) == set(keys), f'len(res) = {len(res)}; len(keys) = {len(keys)}')
+		original_redis.flushall()
 
-	def test_r_mass_check_keys_exists_002(self):
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: set = {SmokeTests.get_random_string(length=randint(10, 20)) for _ in range(randint(25, 50))}
+	def test_keys_is_exist_002(self):
+		original_redis.flushall()
+
+		keys: set = {SmokeTests.get_random_integer() for _ in range(randint(250, 500))}
 		for key in keys:
-			SmokeTests.r.r_set(key, SmokeTests.get_random_string(length=randint(1, 100)))
-		non_exist: set = {SmokeTests.get_random_string(length=randint(3, 5)) for _ in range(randint(5, 20))}
-		res: tuple = SmokeTests.r.r_mass_check_keys_exists(keys.union(non_exist))
+			SmokeTests.r.r_set(str(key), SmokeTests.get_random_string())
+		self.assertEqual(len(keys), SmokeTests.r.keys_is_exist(keys))
 
-		self.assertTrue(set(res) == set(keys), f'len(res) = {len(res)}; len(keys) = {len(keys)}')
+		original_redis.flushall()
+
+	def test_keys_is_exist_003(self):
+		""" keys_is_exist without set keys """
+		original_redis.flushall()
+
+		keys: set = {SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(25, 50))}
+		self.assertEqual(SmokeTests.r.keys_is_exist(keys), 0)
+
+		original_redis.flushall()
 
 	# remove all keys ##################################################################################################
 
