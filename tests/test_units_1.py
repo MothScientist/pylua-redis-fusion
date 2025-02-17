@@ -1460,6 +1460,10 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(res[1], ())  # return_non_exists
 		self.assertEqual(res[2], {})  # get_dict_key_value_exists
 
+	# r_mass_unlink ####################################################################################################
+
+	# TODO
+
 	# r_set function with 'if_exists' parameter ########################################################################
 
 	def test_r_set_if_exists_001(self):
