@@ -132,6 +132,9 @@ class PyRedis:
         """
         Set a new key or override an existing one
         If both parameters (time_s, time_ms) are specified, the key will be deleted based on the smallest value.
+
+        WARNING: If keep_ttl is specified, time_ms and time_s will be ignored if such a key exists,
+        if such a key did not exist before, time_ms and time_s will work as usual.
         :param key:
         :param value: IMPORTANT: not considered if a dict type object was passed in key.
         :param get_old_value: return the old value stored at key, or None if the key did not exist.
@@ -140,7 +143,7 @@ class PyRedis:
         :param time_s: key lifetime in seconds.
         :param if_exist: set value only if such key already exists.
         :param if_not_exist: set value only if such key does not exist yet.
-        :param keep_ttl: retain the time to live associated with the key (only for bool/int/float/str).
+        :param keep_ttl: retain the time to live associated with the key.  # TODO - tests
         :return: None
         """
         if key is value is None:
@@ -162,6 +165,7 @@ class PyRedis:
                 str(time_ms or 0),
                 str(int(if_exist)),
                 str(int(if_not_exist)),
+                str(int(keep_ttl)),
                 str(value)
             )
 
@@ -170,6 +174,7 @@ class PyRedis:
             res = self.__register_lua_scripts(
                 'rpush_helper', 1, key,
                 str(int(get_old_value)), str(time_ms or 0), str(int(if_exist)), str(int(if_not_exist)),
+                str(int(keep_ttl)),
                 *value
             )
 

@@ -4,11 +4,16 @@ local get_old_value = tonumber(ARGV[1])
 local time_ms = tonumber(ARGV[2])
 local if_exist = tonumber(ARGV[3])
 local if_not_exist = tonumber(ARGV[4])
-local values = {unpack(ARGV, 4, #ARGV)}  -- the second parameter is the number of the last variable!
+local keep_ttl = tonumber(ARGV[5])
+local values = {unpack(ARGV, 5, #ARGV)}  -- the second parameter is the number of the last argument!
 
 local res = nil
 
 local key_exist = redis.call("EXISTS", key)
+
+if key_exist == 1 and keep_ttl == 1 then
+  time_ms = redis.call("PTTL", key)
+end
 
 
 if (key_exist == 0 and if_exist == 1) or (key_exist == 1 and if_not_exist == 1) then
@@ -35,7 +40,7 @@ end
 redis.call("RPUSH", key, unpack(values))
 
 -- if the key lifetime is defined
-if time_ms and time_ms > 0 then
+if time_ms > 0 then
    redis.call("PEXPIRE", key, time_ms)
 end
 
