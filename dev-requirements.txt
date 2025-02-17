@@ -1,4 +1,5 @@
 colorama==0.4.6
+coverage==7.6.12
 execnet==2.1.1
 iniconfig==2.0.0
 packaging==24.2
