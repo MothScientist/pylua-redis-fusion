@@ -187,7 +187,52 @@ class SmokeTests(unittest.TestCase):
 
 	# get_type_value_of_key ############################################################################################
 
-	# TODO
+	def test_get_type_value_of_key_str_001(self):
+		key: str = 'get_type_value_of_key_str_001'
+		value: str = SmokeTests.get_random_string()
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
+
+	def test_get_type_value_of_key_int_001(self):
+		key: str = 'get_type_value_of_key_int_001'
+		value: int = SmokeTests.get_random_integer()
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
+
+	def test_get_type_value_of_key_float_001(self):
+		""" 0.x """
+		key: str = 'get_type_value_of_key_float_001'
+		value: float = random()
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
+
+	def test_get_type_value_of_key_float_002(self):
+		""" x.0 """
+		key: str = 'get_type_value_of_key_float_002'
+		value: float = float(SmokeTests.get_random_integer())
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
+
+	def test_get_type_value_of_key_float_003(self):
+		""" x.x """
+		key: str = 'get_type_value_of_key_float_003'
+		value: float = float(SmokeTests.get_random_integer()) + random()
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
+
+	def test_get_type_value_of_key_bool_001(self):
+		""" True """
+		key: str = 'get_type_value_of_key_bool_001'
+		value: bool = True
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
+
+	def test_get_type_value_of_key_bool_002(self):
+		""" False """
+		key: str = 'get_type_value_of_key_bool_002'
+		value: bool = False
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
 
 	# set/get ##########################################################################################################
 
