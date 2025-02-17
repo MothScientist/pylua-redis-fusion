@@ -7,8 +7,6 @@ local if_not_exist = tonumber(ARGV[4])
 local keep_ttl = tonumber(ARGV[5])
 local values = {unpack(ARGV, 5, #ARGV)}  -- the second parameter is the number of the last argument!
 
-local res = nil
-
 local key_exist = redis.call("EXISTS", key)
 
 if key_exist == 1 and keep_ttl == 1 then

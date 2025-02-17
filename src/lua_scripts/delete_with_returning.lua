@@ -1,6 +1,6 @@
 local key = KEYS[1]
 local returning = ARGV[1] == "1"
-local value = nil
+local value
 
 if returning then
   local value_type = redis.call("TYPE", key) -- determine what type the value stored in this key is

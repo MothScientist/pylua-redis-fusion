@@ -6,9 +6,6 @@ local if_not_exist = tonumber(ARGV[4])
 local keep_ttl = tonumber(ARGV[5])
 local value = ARGV[6]
 
-local res = nil
-
-
 local key_exist = redis.call("EXISTS", key)
 
 
