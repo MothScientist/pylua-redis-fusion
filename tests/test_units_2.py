@@ -49,6 +49,8 @@ class TtlTests(unittest.TestCase):
 		""" Service is available """
 		self.assertTrue(TtlTests.r.r_ping())
 
+	# set_get_ttl  #####################################################################################################
+
 	def test_set_get_ttl_str_001(self):
 		key: str = 'set_get_str_001'
 		value: str = TtlTests.get_random_string()
@@ -224,6 +226,26 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res_1, f'res = {res_1}')
 		res_2: None = TtlTests.r.r_get(key, convert_to_type='integer')  # wrong type
 		self.assertIsNone(res_2, f'res = {res_2}')
+
+	# 	# set_key_ttl ##################################################################################################
+
+	# TODO
+
+	# set_keys_ttl #####################################################################################################
+
+	# TODO
+
+	# get_key_ttl ######################################################################################################
+
+	# TODO
+
+	# drop_key_ttl #####################################################################################################
+
+	# TODO
+
+	# drop_keys_ttl ####################################################################################################
+
+	# TODO
 
 
 if __name__ == '__main__':
