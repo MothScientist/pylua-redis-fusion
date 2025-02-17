@@ -45,9 +45,13 @@ class SmokeTests(unittest.TestCase):
 	def get_random_string(length: int = randint(10, 20)):
 		return ''.join(choice(ascii_letters + digits) for _ in range(length))
 
-	def test_ping(self):
+	def test_ping_001(self):
 		""" Service is available """
 		self.assertTrue(SmokeTests.r.r_ping())
+
+	def test_ping_002(self):
+		wrong_r = PyRedis()
+		self.assertFalse(wrong_r.r_ping())
 
 	# key_is_exist #####################################################################################################
 
@@ -233,6 +237,42 @@ class SmokeTests(unittest.TestCase):
 		value: bool = False
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
+
+	# set ##############################################################################################################
+
+	def test_set_001(self):
+		key: str = ''
+		value: int = SmokeTests.get_random_integer()
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+
+	def test_set_002(self):
+		key: str = SmokeTests.get_random_string()
+		value: None = None
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+
+	def test_set_003(self):
+		key: str = ''
+		value: None = None
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+
+	# get ##############################################################################################################
+
+	def test_get_001(self):
+		self.assertIsNone(SmokeTests.r.r_get(''))
+
+	def test_get_002(self):
+		default_value = 'example_default_value'
+		self.assertEqual(default_value, SmokeTests.r.r_get('', default_value=default_value))
+
+	# delete ###########################################################################################################
+
+	def test_delete_001(self):
+		self.assertIsNone(SmokeTests.r.r_delete(''))
+
+	# unlink ###########################################################################################################
+
+	def test_unlink_001(self):
+		self.assertIsNone(SmokeTests.r.r_unlink(''))
 
 	# set/get ##########################################################################################################
 
@@ -1460,9 +1500,31 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(res[1], ())  # return_non_exists
 		self.assertEqual(res[2], {})  # get_dict_key_value_exists
 
+	def test_r_mass_delete_013(self):
+		self.assertEqual(SmokeTests.r.r_mass_delete([]), ((), (), {}))
+
+	def test_r_mass_delete_014(self):
+		self.assertEqual(SmokeTests.r.r_mass_delete(tuple()), ((), (), {}))
+
+	def test_r_mass_delete_015(self):
+		self.assertEqual(SmokeTests.r.r_mass_delete(set()), ((), (), {}))
+
+	def test_r_mass_delete_016(self):
+		self.assertEqual(SmokeTests.r.r_mass_delete(frozenset()), ((), (), {}))
+
 	# r_mass_unlink ####################################################################################################
 
-	# TODO
+	def test_r_mass_unlink_001(self):
+		self.assertEqual(SmokeTests.r.r_mass_unlink([]), ((), (), {}))
+
+	def test_r_mass_unlink_002(self):
+		self.assertEqual(SmokeTests.r.r_mass_unlink(tuple()), ((), (), {}))
+
+	def test_r_mass_unlink_003(self):
+		self.assertEqual(SmokeTests.r.r_mass_unlink(set()), ((), (), {}))
+
+	def test_r_mass_unlink_004(self):
+		self.assertEqual(SmokeTests.r.r_mass_unlink(frozenset()), ((), (), {}))
 
 	# r_set function with 'if_exists' parameter ########################################################################
 

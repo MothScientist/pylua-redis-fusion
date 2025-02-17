@@ -146,7 +146,7 @@ class PyRedis:
         :param keep_ttl: retain the time to live associated with the key.  # TODO - tests
         :return: None
         """
-        if key is value is None:
+        if not key or value is None:
             return
 
         if time_s or time_ms:
