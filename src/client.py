@@ -185,7 +185,8 @@ class PyRedis:
         Used both to get a value by key and to check for its existence
         :param key:
         :param default_value: value that will be returned if there is no such key.
-        :param convert_to_type: bool/int/float (by default all output data is of type str after decode() function)
+        :param convert_to_type: bool/int/float (by default all output data is of type str after decode() function);
+        For float -> int: rounds down to integer part number (drops fractional part)
         :return: value, none or default_value
         """
         if not key:
