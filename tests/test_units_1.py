@@ -264,16 +264,6 @@ class SmokeTests(unittest.TestCase):
 		default_value = 'example_default_value'
 		self.assertEqual(default_value, SmokeTests.r.r_get('', default_value=default_value))
 
-	# delete ###########################################################################################################
-
-	def test_delete_001(self):
-		self.assertIsNone(SmokeTests.r.r_delete(''))
-
-	# unlink ###########################################################################################################
-
-	def test_unlink_001(self):
-		self.assertIsNone(SmokeTests.r.r_unlink(''))
-
 	# set/get ##########################################################################################################
 
 	def test_set_get_int_001(self):
@@ -787,6 +777,9 @@ class SmokeTests(unittest.TestCase):
 		# delete (with returning and convert)
 		self.assertIsNone(SmokeTests.r.r_delete(key, returning=True), None)
 
+	def test_delete_005(self):
+		self.assertIsNone(SmokeTests.r.r_delete(''))
+
 	# set/get/delete ###################################################################################################
 
 	def test_set_get_delete_int_001(self):
@@ -949,6 +942,9 @@ class SmokeTests(unittest.TestCase):
 		# doesn't set the value
 		# delete (with returning and convert)
 		self.assertIsNone(SmokeTests.r.r_unlink(key, returning=True), None)
+
+	def test_unlink_005(self):
+		self.assertIsNone(SmokeTests.r.r_unlink(''))
 
 	# set/get/unlink ###################################################################################################
 
