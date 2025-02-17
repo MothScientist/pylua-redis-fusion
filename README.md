@@ -1,6 +1,6 @@
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)
 
-![Test coverage](https://img.shields.io/badge/Test_coverage-85%25-green) [![UnitTests](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/units.yml/badge.svg)](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/units.yml) ![Static Badge](https://img.shields.io/badge/Test_coverage-95%25)
+![Test coverage](https://img.shields.io/badge/Test_coverage-85%25-green) [![UnitTests](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/units.yml/badge.svg)](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/units.yml)
  [![CodeQL Advanced](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/codeql.yml/badge.svg)](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/codeql.yml) [![Dependabot Updates](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/dependabot/dependabot-updates)
 
 Python version: <span style="color: aqua;">__3.13__</span> (Support includes Python <span style="color: white;">__3.11__</span> and <span style="color: white;">__3.12__</span>)
