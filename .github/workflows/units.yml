@@ -53,12 +53,17 @@ jobs:
           cd tests || exit 1
           echo "REDIS_PSW=${REDIS_PSW}" >> redis.env
 
-      - name: Run UnitTests
+      - name: Run UnitTests (Smoke tests)
         run: |
           cd tests || exit 1
-          python -m unittest test_units_1.py test_units_3.py
+          python -m unittest test_units_1.py
 
       - name: Run multiple CPUs UnitTests (Ttl)
         run: |
           cd tests || exit 1
           pytest test_units_2.py -n auto
+
+      - name: Unit tests for helper functions
+        run: |
+          cd tests || exit 1
+          python -m unittest test_units_3.py
