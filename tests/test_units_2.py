@@ -67,7 +67,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_ms=10_000))
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, value)
-		sleep(15)
+		sleep(20)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -227,13 +227,205 @@ class TtlTests(unittest.TestCase):
 		res_2: None = TtlTests.r.r_get(key, convert_to_type='integer')  # wrong type
 		self.assertIsNone(res_2, f'res = {res_2}')
 
-	# 	# set_key_ttl ##################################################################################################
+	# set_key_ttl ##################################################################################################
 
-	# TODO
+	def test_set_key_ttl_001(self):
+		key: str = 'set_key_ttl_001'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=5)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		sleep(10)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_key_ttl_002(self):
+		key: str = 'set_key_ttl_002'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_ms=10_000)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		sleep(15)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_key_ttl_003(self):
+		key: str = 'set_key_ttl_003'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_ms=50_000, ttl_sec=5)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		sleep(10)
+		self.assertIsNone(TtlTests.r.r_get(key))
 
 	# set_keys_ttl #####################################################################################################
 
-	# TODO
+	def test_set_keys_ttl_001(self):
+		""" List - 001 - 009 """
+		keys: list = [f'set_keys_ttl_00{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+		TtlTests.r.set_keys_ttl(keys, ttl_sec=1)
+
+		sleep(3)
+
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_keys_ttl_002(self):
+		""" List - 011 - 019 """
+		keys: list = [f'set_keys_ttl_01{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
+
+		sleep(10)
+
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_keys_ttl_003(self):
+		""" List - 021 - 029 """
+		keys: list = [f'set_keys_ttl_02{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000, ttl_sec=1_000)
+
+		sleep(10)
+
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_keys_ttl_004(self):
+		""" Tuple - 031 - 039 """
+		keys: tuple = tuple([f'set_keys_ttl_03{i}' for i in range(1, 10)])
+		for key in keys:
+			TtlTests.r.r_set(key, key)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
+
+		sleep(10)
+
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_keys_ttl_005(self):
+		""" Set - 041 - 049 """
+		keys: set = set([f'set_keys_ttl_04{i}' for i in range(1, 10)])
+		for key in keys:
+			TtlTests.r.r_set(key, key)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
+
+		sleep(10)
+
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_keys_ttl_006(self):
+		""" Frozenset - 051 - 059 """
+		keys: frozenset = frozenset([f'set_keys_ttl_05{i}' for i in range(1, 10)])
+		for key in keys:
+			TtlTests.r.r_set(key, key)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
+
+		sleep(10)
+
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_keys_ttl_007(self):
+		""" List - 061 - 069 """
+		keys: list = [f'set_keys_ttl_06{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+		TtlTests.r.set_keys_ttl(keys)
+
+		sleep(15)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+	def test_set_keys_ttl_008(self):
+		""" List - 071 - 079 """
+		keys: list = [f'set_keys_ttl_07{i}' for i in range(1, 10)]
+		for key in keys:
+			if int(key[-1]) % 2 == 0:
+				TtlTests.r.r_set(key, key)
+			else:
+				TtlTests.r.r_set(key, [key])
+
+		for key in keys:
+			if int(key[-1]) % 2 == 0:
+				self.assertEqual(TtlTests.r.r_get(key), key)
+			else:
+				self.assertEqual(TtlTests.r.r_get(key), [key])
+
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=None, ttl_sec=1)
+
+		sleep(5)
+
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_keys_ttl_009(self):
+		""" List - 081 - 089 + unknown keys """
+		keys: list = [f'set_keys_ttl_08{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
+
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
+
+		keys.extend([TtlTests.get_random_string() for _ in range(randint(5, 10))])
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000, ttl_sec=None)
+
+		sleep(10)
+
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
 
 	# get_key_ttl ######################################################################################################
 
@@ -241,7 +433,73 @@ class TtlTests(unittest.TestCase):
 
 	# drop_key_ttl #####################################################################################################
 
-	# TODO
+	def test_drop_key_ttl_001(self):
+		key: str = 'drop_key_ttl_001'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_ms=15_000)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		TtlTests.r.drop_key_ttl(key)
+		sleep(20)
+		res_3: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_3)
+
+	def test_drop_key_ttl_002(self):
+		key: str = 'drop_key_ttl_002'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=10)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		TtlTests.r.drop_key_ttl(key)
+		sleep(15)
+		res_3: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_3)
+
+	def test_drop_key_ttl_003(self):
+		key: str = 'drop_key_ttl_003'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=10)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		TtlTests.r.drop_key_ttl('')  # unknown key
+		sleep(20)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_drop_key_ttl_004(self):
+		""" drop ttl without ttl for key """
+		key: str = 'drop_key_ttl_004'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		TtlTests.r.drop_key_ttl(key)
+		sleep(10)
+		res_3: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_3)
 
 	# drop_keys_ttl ####################################################################################################
 
