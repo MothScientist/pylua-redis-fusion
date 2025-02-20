@@ -3,7 +3,6 @@ Client for working with the Redis database
 Original library documentation: https://redis-py.readthedocs.io/en/stable/index.html
 """
 from os import path as os_path
-from datetime import timedelta
 from redis import (
     Redis,
     ConnectionPool as rConnectionPool,
