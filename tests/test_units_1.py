@@ -1325,7 +1325,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 		keys: tuple = tuple([i for i in range(randint(50, 100))])
 		for key in keys:
-			SmokeTests.r.r_set(str(key), key)
+			SmokeTests.r.r_set(key, int(key))
 		res = SmokeTests.r.r_mass_delete(keys)
 		self.assertEqual(res,  ((), (), {}))
 
@@ -1333,8 +1333,8 @@ class SmokeTests(unittest.TestCase):
 		""" Don't write down all the keys """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		for str_key in keys[:randint(5, 10)]:
-			SmokeTests.r.r_set(str_key, str_key)
+		for key in keys[:randint(5, 10)]:
+			SmokeTests.r.r_set(key, key)
 		res = SmokeTests.r.r_mass_delete(keys)
 		self.assertEqual(res,  ((), (), {}))
 
@@ -1342,8 +1342,8 @@ class SmokeTests(unittest.TestCase):
 		""" Don't write down all the keys """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
 		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		for str_key in keys[:len(keys)//2]:
-			SmokeTests.r.r_set(str_key, str_key)
+		for key in keys[:len(keys)//2]:
+			SmokeTests.r.r_set(key, key)
 		res = SmokeTests.r.r_mass_delete(keys, return_non_exists=True)
 		self.assertTrue(isinstance(res, tuple))
 		self.assertEqual(res[0], ())
@@ -1353,7 +1353,7 @@ class SmokeTests(unittest.TestCase):
 	def test_r_mass_delete_004(self):
 		""" Don't write down all the keys """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		exists_keys: tuple = keys[:len(keys) // randint(2, 5)]
 		for key in exists_keys:
 			SmokeTests.r.r_set(str(key), key)
@@ -1366,12 +1366,12 @@ class SmokeTests(unittest.TestCase):
 	def test_r_mass_delete_005(self):
 		""" Don't write down all the keys """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		_slice: int = randint(2, 5)
 		exists_keys: tuple = keys[:len(keys) // _slice]
 		key_value: dict = {key: SmokeTests.get_random_string() for key in exists_keys}
 		for key, value in key_value.items():
-			SmokeTests.r.r_set(str(key), value)
+			SmokeTests.r.r_set(key, value)
 
 		res = SmokeTests.r.r_mass_delete(
 			keys, return_exists=True, return_non_exists=True, get_dict_key_value_exists=True
@@ -1384,10 +1384,10 @@ class SmokeTests(unittest.TestCase):
 
 	def test_r_mass_delete_006(self):
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		key_value: dict = {key: SmokeTests.get_random_string() for key in keys}
 		for key, value in key_value.items():
-			SmokeTests.r.r_set(str(key), value)
+			SmokeTests.r.r_set(key, value)
 
 		res = SmokeTests.r.r_mass_delete(
 			keys, return_exists=True, return_non_exists=True, get_dict_key_value_exists=True,
@@ -1401,7 +1401,7 @@ class SmokeTests(unittest.TestCase):
 	def test_r_mass_delete_007(self):
 		""" get key-value with converting type """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		key_value: dict = {key: SmokeTests.get_random_integer() for key in keys}
 		for key, value in key_value.items():
 			SmokeTests.r.r_set(str(key), value)
@@ -1416,10 +1416,10 @@ class SmokeTests(unittest.TestCase):
 	def test_r_mass_delete_008(self):
 		""" get key-value with converting type """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		key_value: dict = {key: bool(randint(0, 1)) for key in keys}
 		for key, value in key_value.items():
-			SmokeTests.r.r_set(str(key), value)
+			SmokeTests.r.r_set(key, value)
 
 		res = SmokeTests.r.r_mass_delete(keys, get_dict_key_value_exists=True, convert_to_type_dict_key='boolean')
 
@@ -1431,44 +1431,44 @@ class SmokeTests(unittest.TestCase):
 	def test_r_mass_delete_009(self):
 		""" get key-value with converting type """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		key_value: dict = {key: bool(randint(0, 1)) for key in keys}
 		for key, value in key_value.items():
-			SmokeTests.r.r_set(str(key), value)
+			SmokeTests.r.r_set(key, value)
 
 		res = SmokeTests.r.r_mass_delete(
 			keys, return_exists=True, get_dict_key_value_exists=True, convert_to_type_dict_key='bool'
 		)
 
 		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], keys)  # return_exists
+		self.assertEqual(res[0], tuple(sorted(list(keys))))  # return_exists
 		self.assertEqual(res[1], ())  # return_non_exists
 		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
 
 	def test_r_mass_delete_010(self):
 		""" get key-value with converting type """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		key_value: dict = {key: randint(0, 1_000) for key in keys}
 		for key, value in key_value.items():
-			SmokeTests.r.r_set(str(key), value)
+			SmokeTests.r.r_set(key, value)
 
 		res = SmokeTests.r.r_mass_delete(
 			keys, return_exists=True, get_dict_key_value_exists=True, convert_to_type_dict_key='integer'
 		)
 
 		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], keys)  # return_exists
+		self.assertEqual(res[0], tuple(sorted(list(keys))))  # return_exists
 		self.assertEqual(res[1], ())  # return_non_exists
 		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
 
 	def test_r_mass_delete_011(self):
 		""" get key-value with converting type (integer) and without other params """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		key_value: dict = {key: randint(0, 1_000) for key in keys}
 		for key, value in key_value.items():
-			SmokeTests.r.r_set(str(key), value)
+			SmokeTests.r.r_set(key, value)
 
 		res = SmokeTests.r.r_mass_delete(
 			keys, convert_to_type_dict_key='integer'
@@ -1482,10 +1482,10 @@ class SmokeTests(unittest.TestCase):
 	def test_r_mass_delete_012(self):
 		""" get key-value with converting type (boolean) and without other params """
 		self.assertIsNone(SmokeTests.r.r_remove_all_keys())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
+		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
 		key_value: dict = {key: randint(0, 1_000) for key in keys}
 		for key, value in key_value.items():
-			SmokeTests.r.r_set(str(key), value)
+			SmokeTests.r.r_set(key, value)
 
 		res = SmokeTests.r.r_mass_delete(
 			keys, convert_to_type_dict_key='boolean'

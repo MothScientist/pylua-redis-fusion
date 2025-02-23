@@ -1,5 +1,6 @@
 local key = KEYS[1]
 local returning = ARGV[1] == "1"
+local delete_or_unlink = ARGV[2]
 local value
 
 if returning then
@@ -12,7 +13,12 @@ if returning then
   end
 end
 
-redis.call("DEL", key)
+if delete_or_unlink == 'delete' then
+  redis.call("DEL", key)
+else
+  redis.call("UNLINK", key)
+end
+  
 
 if returning then
   return value

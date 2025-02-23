@@ -3,6 +3,7 @@ Client for working with the Redis database
 Original library documentation: https://redis-py.readthedocs.io/en/stable/index.html
 """
 from os import path as os_path
+from json import loads as json_loads
 from redis import (
     Redis,
     ConnectionPool as rConnectionPool,
@@ -39,11 +40,11 @@ class PyRedis:
             'remove_all_keys': PyRedis.__load_lua_script('remove_all_keys'),
             'rpush_helper': PyRedis.__load_lua_script('rpush_helper'),
             'get_helper': PyRedis.__load_lua_script('get_helper'),
-            'delete_with_returning': PyRedis.__load_lua_script('delete_with_returning'),
-            'unlink_with_returning': PyRedis.__load_lua_script('unlink_with_returning'),
+            'delete_or_unlink_with_returning': PyRedis.__load_lua_script('delete_or_unlink_with_returning'),
             'set_not_array_helper': PyRedis.__load_lua_script('set_not_array_helper'),
             'set_keys_ttl': PyRedis.__load_lua_script('set_keys_ttl'),
             'drop_keys_ttl': PyRedis.__load_lua_script('drop_keys_ttl'),
+            'r_mass_delete_or_unlink': PyRedis.__load_lua_script('r_mass_delete_or_unlink'),
         }
 
     def r_ping(self) -> bool:
@@ -205,28 +206,44 @@ class PyRedis:
         :param convert_to_type_for_return: what type the return value should be converted to (if returning=True)
         :return: value or None
         """
-        if not key:
-            return
-
-        value = self.__register_lua_scripts('delete_with_returning', 1, key, str(int(returning)))
-
-        if returning and value:
-            return PyRedis.__convert_to_type(value, convert_to_type_for_return) if convert_to_type_for_return else value
-        return
+        return self.__helper_delete_or_unlink(
+            False, key=key, returning=returning, convert_to_type_for_return=convert_to_type_for_return
+        )
 
     def r_unlink(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
-        unlinks is very similar to r_delete: it removes the specified keys.
+        Unlink a key.
+        r_unlink is very similar to r_delete: it removes the specified keys.
         The command just unlinks the keys from the keyspace. The actual removal will happen later asynchronously.
         :param key:
         :param returning: return the value the key had before deletion
         :param convert_to_type_for_return: what type the return value should be converted to (if returning=True)
         :return: value or None
         """
+        return self.__helper_delete_or_unlink(
+            True, key=key, returning=returning, convert_to_type_for_return=convert_to_type_for_return
+        )
+
+    def __helper_delete_or_unlink(
+            self,
+            command: bool,
+            key: str,
+            returning: bool = False,
+            convert_to_type_for_return: str = None
+    ):
+        """
+        :param command: False - delete / True - unlink
+        :param key:
+        :param returning:
+        :param convert_to_type_for_return:
+        :return:
+        """
         if not key:
             return
 
-        value = self.__register_lua_scripts('unlink_with_returning', 1, key, str(int(returning)))
+        value = self.__register_lua_scripts(
+            'delete_or_unlink_with_returning', 1, key, str(int(returning)), 'unlink' if command else 'delete'
+        )
 
         if returning and value:
             return PyRedis.__convert_to_type(value, convert_to_type_for_return) if convert_to_type_for_return else value
@@ -254,7 +271,7 @@ class PyRedis:
     ) -> tuple[tuple, tuple, dict]:
         """
         Mass delete keys from a given iterable.
-        Uses the same function as regular r_delete,
+        Uses the same function as regular r_delete/r_unlink,
         but has a wrapper that allows you to get information about deleted keys.
         :param keys:
         :param return_exists: return keys that existed and were deleted
@@ -263,26 +280,13 @@ class PyRedis:
         :param convert_to_type_dict_key: is type conversion needed for the returned dictionary
         :return: ((return_exists), (return_non_exists), {get_dict_key_value_exists})
         """
-        if not keys:
-            return (), (), {}
-
-        keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
-
-        # all parameters = None (None is None is None -> True)
-        if return_exists is return_non_exists is get_dict_key_value_exists is False:
-            self.redis.delete(*keys)
-            return (), (), {}
-
-        # if one of the parameters is specified, then we collect a dictionary of existing key-values
-        exists_key_value: dict = self.check_keys_and_get_values(keys, convert_to_type_dict_key=convert_to_type_dict_key)
-        exists_keys: tuple = tuple(exists_key_value.keys())
-        non_exists_keys: tuple = tuple(frozenset(keys).difference(frozenset(exists_keys)))
-        self.redis.delete(*exists_keys)
-
-        return (
-            exists_keys if return_exists else (),
-            non_exists_keys if return_non_exists else (),
-            exists_key_value if get_dict_key_value_exists else {}
+        return self.__helper_mass_delete_or_unlink(
+            False,
+            keys=keys,
+            return_exists=return_exists,
+            return_non_exists=return_non_exists,
+            get_dict_key_value_exists=get_dict_key_value_exists,
+            convert_to_type_dict_key=convert_to_type_dict_key
         )
 
     def r_mass_unlink(
@@ -292,7 +296,45 @@ class PyRedis:
             return_non_exists: bool = False,
             get_dict_key_value_exists: bool = False,
             convert_to_type_dict_key: str = None
-    ) -> tuple[tuple, tuple, dict]:  # TODO - Lua
+    ) -> tuple[tuple, tuple, dict]:
+        """
+        Mass unlink keys from a given iterable.
+        Uses the same function as regular r_delete/r_unlink,
+        but has a wrapper that allows you to get information about deleted keys.
+        :param keys:
+        :param return_exists: return keys that existed and were deleted
+        :param return_non_exists: return keys that were not found
+        :param get_dict_key_value_exists: get dictionary of remote keys with values
+        :param convert_to_type_dict_key: is type conversion needed for the returned dictionary
+        :return: ((return_exists), (return_non_exists), {get_dict_key_value_exists})
+        """
+        return self.__helper_mass_delete_or_unlink(
+            True,
+            keys=keys,
+            return_exists=return_exists,
+            return_non_exists=return_non_exists,
+            get_dict_key_value_exists=get_dict_key_value_exists,
+            convert_to_type_dict_key=convert_to_type_dict_key
+        )
+
+    def __helper_mass_delete_or_unlink(
+            self,
+            command: bool,
+            keys: list | tuple | set | frozenset,
+            return_exists: bool = False,
+            return_non_exists: bool = False,
+            get_dict_key_value_exists: bool = False,
+            convert_to_type_dict_key: str = None
+    ) -> tuple[tuple, tuple, dict]:
+        """
+        :param command: False - delete / True - unlink
+        :param keys:
+        :param return_exists:
+        :param return_non_exists:
+        :param get_dict_key_value_exists:
+        :param convert_to_type_dict_key:
+        :return:
+        """
         if not keys:
             return (), (), {}
 
@@ -300,14 +342,21 @@ class PyRedis:
 
         # all parameters = None (None is None is None -> True)
         if return_exists is return_non_exists is get_dict_key_value_exists is False:
-            self.redis.unlink(*keys)
+            self.redis.unlink(*keys) if command else self.redis.delete(*keys)
             return (), (), {}
 
         # if one of the parameters is specified, then we collect a dictionary of existing key-values
-        exists_key_value: dict = self.check_keys_and_get_values(keys, convert_to_type_dict_key=convert_to_type_dict_key)
-        exists_keys: tuple = tuple(exists_key_value.keys())
-        non_exists_keys: tuple = tuple(frozenset(keys).difference(frozenset(exists_keys)))
-        self.redis.unlink(*exists_keys)
+        exists_key_value: dict = json_loads(
+            self.__register_lua_scripts('r_mass_delete_or_unlink', len(keys), *keys, 'unlink' if command else 'delete')
+        )
+        exists_keys: tuple = tuple(sorted(exists_key_value.keys()))
+        non_exists_keys: tuple = tuple(sorted(set(keys) - set(exists_keys)))
+
+        # convert_to_type_dict_key
+        exists_key_value = {
+            key: PyRedis.__helper_convert_to_type(value, convert_to_type_dict_key)
+            for key, value in exists_key_value.items()
+        } if convert_to_type_dict_key else exists_key_value
 
         return (
             exists_keys if return_exists else (),
