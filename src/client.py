@@ -8,7 +8,8 @@ from redis import (
     Redis,
     ConnectionPool as rConnectionPool,
     ConnectionError as rConnectionError,
-    TimeoutError as rTimeoutError
+    TimeoutError as rTimeoutError,
+    RedisError as rRedisError
 )
 
 
@@ -16,6 +17,8 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
+    __slots__ = ('redis', '__lua_scripts')
+
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
             socket_timeout: int | float = 0.1, retry_on_timeout: bool = True
@@ -35,7 +38,7 @@ class PyRedis:
         )
 
         # storing registered lua scripts
-        self.lua_scripts = {
+        self.__lua_scripts = {
             'rename_key': PyRedis.__load_lua_script('rename_key'),
             'remove_all_keys': PyRedis.__load_lua_script('remove_all_keys'),
             'rpush_helper': PyRedis.__load_lua_script('rpush_helper'),
@@ -46,6 +49,23 @@ class PyRedis:
             'drop_keys_ttl': PyRedis.__load_lua_script('drop_keys_ttl'),
             'r_mass_delete_or_unlink': PyRedis.__load_lua_script('r_mass_delete_or_unlink'),
         }
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Closing connection when exiting context manager 'with'
+        """
+        self.redis.quit()
+
+    def __del__(self):
+        """ "Lifebuoy" if the user did not use the context manager """
+        try:
+            self.redis.quit()
+        except rRedisError:
+            pass
+            # TODO - logging
 
     def r_ping(self) -> bool:
         try:
@@ -386,7 +406,7 @@ class PyRedis:
         return int(count_keys) if count_keys else None
 
     def __register_lua_scripts(self, script_name: str, *args):
-        lua_script = self.lua_scripts.get(script_name)
+        lua_script = self.__lua_scripts.get(script_name)
         if args:
             return self.redis.eval(lua_script, *args)
         return self.redis.register_script(lua_script)
