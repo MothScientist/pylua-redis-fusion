@@ -40,6 +40,7 @@ class PyRedis:
         # storing registered lua scripts
         self.__lua_scripts = {
             'rename_key': PyRedis.__load_lua_script('rename_key'),
+            'remove_all_keys_local': PyRedis.__load_lua_script('remove_all_keys_local'),
             'remove_all_keys': PyRedis.__load_lua_script('remove_all_keys'),
             'rpush_helper': PyRedis.__load_lua_script('rpush_helper'),
             'get_helper': PyRedis.__load_lua_script('get_helper'),
@@ -395,6 +396,15 @@ class PyRedis:
         values = self.redis.mget(keys)  # later in the library the variable is converted to list
         return {keys[i]: PyRedis.__helper_convert_to_type(value, convert_to_type_dict_key)
                 if convert_to_type_dict_key else value for i, value in enumerate(values) if value is not None}
+
+    def r_remove_all_keys_local(self, get_count_keys: bool = False) -> int | None:
+        """
+        Delete all keys in current database
+        :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
+        :return: count keys or None
+        """
+        count_keys = self.__register_lua_scripts('remove_all_keys_local', 0, str(int(get_count_keys)))
+        return int(count_keys) if count_keys else None
 
     def r_remove_all_keys(self, get_count_keys: bool = False) -> int | None:
         """
