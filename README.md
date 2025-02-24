@@ -1,18 +1,18 @@
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)
 
-![Test coverage](https://img.shields.io/badge/Test_coverage-85%25-green) [![UnitTests](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/units.yml/badge.svg)](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/units.yml)
- [![CodeQL Advanced](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/codeql.yml/badge.svg)](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/codeql.yml) [![Dependabot Updates](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/MothScientist/SwiftPipRedis/actions/workflows/dependabot/dependabot-updates)
+![Test coverage](https://img.shields.io/badge/Test_coverage-85%25-green) [![UnitTests](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml)
+ [![CodeQL Advanced](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/codeql.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/codeql.yml) [![Dependabot Updates](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates)
 
 Python version: <span style="color: aqua;">__3.13__</span> (Support includes Python <span style="color: white;">__3.11__</span> and <span style="color: white;">__3.12__</span>)
 ## <span style="color: white;">Installing with an external directory</span>
 
-```git clone https://github.com/MothScientist/SwiftPipRedis.git```
+```git clone https://github.com/MothScientist/pylua-redis-fusion.git```
 
 ## <span style="color: white;">Install (pip)</span>
 
-`pip install git+https://github.com/MothScientist/SwiftPipRedis.git`</br></br>
+`pip install git+https://github.com/MothScientist/pylua-redis-fusion.git`</br></br>
 
-#### Future updates are described in detail in the [roadmap.md](https://github.com/MothScientist/SwiftPipRedis/blob/master/roadmap.md) file
+#### Future updates are described in detail in the [roadmap.md](https://github.com/MothScientist/pylua-redis-fusion/blob/master/roadmap.md) file
 
 ### <span style="color: white;">How does this library differ from [redis-py](https://github.com/redis/redis-py), on which it is built?</span>
 
