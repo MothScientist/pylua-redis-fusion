@@ -4,6 +4,7 @@
  [![CodeQL Advanced](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/codeql.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/codeql.yml) [![Dependabot Updates](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates)
 
 Python version: <span style="color: aqua;">__3.13__</span> (Support includes Python <span style="color: white;">__3.11__</span> and <span style="color: white;">__3.12__</span>)
+#### The library is very limited in functions compared to [redis-py](https://github.com/redis/redis-py), but has a wide functionality if you need a minimal set of commands to work with the database.
 ## <span style="color: white;">Installing with an external directory</span>
 
 ```git clone https://github.com/MothScientist/pylua-redis-fusion.git```
