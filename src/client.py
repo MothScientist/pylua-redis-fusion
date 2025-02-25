@@ -47,7 +47,6 @@ class PyRedis:
             'get_helper': PyRedis.__load_lua_script('get_helper'),
             'delete_or_unlink_with_returning': PyRedis.__load_lua_script('delete_or_unlink_with_returning'),
             'remove_all_keys_local': PyRedis.__load_lua_script('remove_all_keys_local'),
-            'remove_all_keys': PyRedis.__load_lua_script('remove_all_keys'),
             'r_mass_delete_or_unlink': PyRedis.__load_lua_script('r_mass_delete_or_unlink'),
         }
 
@@ -414,9 +413,22 @@ class PyRedis:
         Delete all keys in all databases on the current host
         :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
         :return: count keys or None
+
+        Why isn't this function written in Lua?
+        Redis requires that all actions remain within the same database during a single script execution session.
+        The prohibition on SELECT in Lua is due to the fact that in Redis,
+        a single Lua script can only change the data of the current database to which the connection is connected.
         """
-        count_keys = self.__register_lua_scripts('remove_all_keys', 0, str(int(get_count_keys)))
-        return int(count_keys) if count_keys else None
+        total_keys = 0
+        databases = int(self.redis.config_get('databases')['databases'])  # Get the number of databases
+        for db in range(databases):
+            self.redis.execute_command("SELECT", db)
+            if get_count_keys:
+                total_keys += self.redis.dbsize()
+
+        self.redis.flushall()
+
+        return int(total_keys) if get_count_keys else None
 
     def __register_lua_scripts(self, script_name: str, *args):
         lua_script = self.__lua_scripts.get(script_name)
