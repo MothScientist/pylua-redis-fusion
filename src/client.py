@@ -40,14 +40,14 @@ class PyRedis:
         # storing registered lua scripts
         self.__lua_scripts = {
             'rename_key': PyRedis.__load_lua_script('rename_key'),
-            'remove_all_keys_local': PyRedis.__load_lua_script('remove_all_keys_local'),
-            'remove_all_keys': PyRedis.__load_lua_script('remove_all_keys'),
-            'rpush_helper': PyRedis.__load_lua_script('rpush_helper'),
-            'get_helper': PyRedis.__load_lua_script('get_helper'),
-            'delete_or_unlink_with_returning': PyRedis.__load_lua_script('delete_or_unlink_with_returning'),
-            'set_not_array_helper': PyRedis.__load_lua_script('set_not_array_helper'),
             'set_keys_ttl': PyRedis.__load_lua_script('set_keys_ttl'),
             'drop_keys_ttl': PyRedis.__load_lua_script('drop_keys_ttl'),
+            'set_not_array_helper': PyRedis.__load_lua_script('set_not_array_helper'),
+            'arrays_helper': PyRedis.__load_lua_script('arrays_helper'),
+            'get_helper': PyRedis.__load_lua_script('get_helper'),
+            'delete_or_unlink_with_returning': PyRedis.__load_lua_script('delete_or_unlink_with_returning'),
+            'remove_all_keys_local': PyRedis.__load_lua_script('remove_all_keys_local'),
+            'remove_all_keys': PyRedis.__load_lua_script('remove_all_keys'),
             'r_mass_delete_or_unlink': PyRedis.__load_lua_script('r_mass_delete_or_unlink'),
         }
 
@@ -167,7 +167,8 @@ class PyRedis:
         :param keep_ttl: retain the time to live associated with the key.  # TODO - tests
         :return: None
         """
-        if not key or value is None:
+        if not key or (not value and value not in (False, 0)):
+            # Writing empty objects is not supported
             return
 
         if time_s or time_ms:
@@ -191,11 +192,11 @@ class PyRedis:
             )
 
         elif isinstance(value, (list, tuple, set, frozenset)):
-            value = tuple(str(element) for element in value)
+            value = type(value)(str(element) for element in value)
             res = self.__register_lua_scripts(
-                'rpush_helper', 1, key,
+                'arrays_helper', 1, key,
                 str(int(get_old_value)), str(time_ms or 0), str(int(if_exist)), str(int(if_not_exist)),
-                str(int(keep_ttl)),
+                str(int(keep_ttl)), 'rpush' if isinstance(value, (list, tuple)) else 'sadd',
                 *value
             )
 
@@ -213,7 +214,8 @@ class PyRedis:
         if not key:
             return default_value  # default_value or None
 
-        res = self.__register_lua_scripts('get_helper', 1, key) or default_value
+        res = self.__register_lua_scripts('get_helper', 1, key)
+        res = (set(res[0]) if res[1] == 'set' else res[0]) if res else default_value
 
         return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
@@ -262,12 +264,13 @@ class PyRedis:
         if not key:
             return
 
-        value = self.__register_lua_scripts(
+        res = self.__register_lua_scripts(
             'delete_or_unlink_with_returning', 1, key, str(int(returning)), 'unlink' if command else 'delete'
         )
+        res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
 
-        if returning and value:
-            return PyRedis.__convert_to_type(value, convert_to_type_for_return) if convert_to_type_for_return else value
+        if returning and res:
+            return PyRedis.__convert_to_type(res, convert_to_type_for_return) if convert_to_type_for_return else res
         return
 
     def rename_key(self, key: str, new_key: str, get_rename_status: bool = None):
@@ -422,9 +425,10 @@ class PyRedis:
         return self.redis.register_script(lua_script)
 
     @staticmethod
-    def __convert_to_type(value: str | list[str], _type: str) -> str | bool | int | float | list:
-        if isinstance(value, list):
-            return [PyRedis.__helper_convert_to_type(i, _type) for i in value]
+    def __convert_to_type(value: str | list[str] | set[str], _type: str) -> str | bool | int | float | list | set:
+        if isinstance(value, (list, set)):
+            return [PyRedis.__helper_convert_to_type(i, _type) for i in value] if isinstance(value, list) \
+                else {PyRedis.__helper_convert_to_type(i, _type) for i in value}
         return PyRedis.__helper_convert_to_type(value, _type)
 
     @staticmethod

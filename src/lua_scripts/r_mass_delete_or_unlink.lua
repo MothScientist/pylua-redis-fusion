@@ -10,7 +10,9 @@ for _, key in ipairs(keys) do
     if value_type.ok == 'string' then -- if value: bool/int/float/str
       value = redis.call("GET", key)
     elseif value_type.ok == 'list' then -- to get lists we use another function
-      value = redis.call("LRANGE", key, 1, -1) -- special attention is required for the range
+      value = redis.call("LRANGE", key, 0, -1) -- special attention is required for the range
+    elseif value_type.ok == 'set' then
+      value = redis.call("SMEMBERS", key)
     end
 
     if value then
