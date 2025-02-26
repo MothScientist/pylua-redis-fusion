@@ -17,7 +17,7 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', '__lua_scripts')
+    __slots__ = ('redis', 'eval_status')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
@@ -36,19 +36,7 @@ class PyRedis:
                 retry_on_timeout=retry_on_timeout
             )
         )
-
-        # storing registered lua scripts
-        self.__lua_scripts = {
-            'rename_key': PyRedis.__load_lua_script('rename_key'),
-            'set_keys_ttl': PyRedis.__load_lua_script('set_keys_ttl'),
-            'drop_keys_ttl': PyRedis.__load_lua_script('drop_keys_ttl'),
-            'set_not_array_helper': PyRedis.__load_lua_script('set_not_array_helper'),
-            'arrays_helper': PyRedis.__load_lua_script('arrays_helper'),
-            'get_helper': PyRedis.__load_lua_script('get_helper'),
-            'delete_or_unlink_with_returning': PyRedis.__load_lua_script('delete_or_unlink_with_returning'),
-            'remove_all_keys_local': PyRedis.__load_lua_script('remove_all_keys_local'),
-            'r_mass_delete_or_unlink': PyRedis.__load_lua_script('r_mass_delete_or_unlink'),
-        }
+        self.eval_status: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
 
     def __enter__(self):
         return self
@@ -280,8 +268,7 @@ class PyRedis:
         :param get_rename_status: get True if the key exists and has been renamed, False if there is no such key
         :return:
         """
-        script = self.__register_lua_scripts('rename_key')
-        rename_status = script(keys=[key, new_key])
+        rename_status = self.__register_lua_scripts('rename_key', 2, key, new_key)
         return rename_status if get_rename_status else None
 
     def r_mass_delete(
@@ -430,11 +417,11 @@ class PyRedis:
 
         return int(total_keys) if get_count_keys else None
 
-    def __register_lua_scripts(self, script_name: str, *args):
-        lua_script = self.__lua_scripts.get(script_name)
-        if args:
-            return self.redis.eval(lua_script, *args)
-        return self.redis.register_script(lua_script)
+    def __register_lua_scripts(self, script_name: str, *args, read_only: bool = False):
+        if script_name not in self.eval_status:
+            lua_script = PyRedis.__load_lua_script(script_name)
+            self.eval_status[script_name] = self.redis.script_load(lua_script)
+        return self.redis.evalsha(self.eval_status[script_name], *args)
 
     @staticmethod
     def __convert_to_type(value: str | list[str] | set[str], _type: str) -> str | bool | int | float | list | set:
