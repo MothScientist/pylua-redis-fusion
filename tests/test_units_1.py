@@ -16,10 +16,6 @@ redis_host: str = getenv('REDIS_HOST') or 'localhost'
 redis_port: int = int(getenv('REDIS_PORT') or 6379)
 redis_username: str = getenv('REDIS_USERNAME') or 'default'
 
-original_redis = Redis(connection_pool=ConnectionPool(
-		host=redis_host, port=redis_port, db=0, password=redis_psw, username=redis_username
-	))
-
 
 class SmokeTests(unittest.TestCase):
 	"""
@@ -36,6 +32,18 @@ class SmokeTests(unittest.TestCase):
 		db=redis_db,
 		socket_timeout=.1
 	)
+
+	original_redis = Redis(connection_pool=ConnectionPool(
+		host=redis_host, port=redis_port, db=redis_db, password=redis_psw, username=redis_username
+	))
+
+	@classmethod
+	def setUpClass(cls):
+		SmokeTests.original_redis.flushdb()  # clear the database after tests
+
+	@classmethod
+	def tearDownClass(cls):
+		SmokeTests.original_redis.flushdb()  # clear the database before tests
 
 	@staticmethod
 	def get_random_integer():
@@ -174,12 +182,12 @@ class SmokeTests(unittest.TestCase):
 
 	def test_get_count_of_keys_001(self):
 		""" get_count_of_keys() == dbsize() """
-		original_res: int = original_redis.dbsize()
+		original_res: int = SmokeTests.original_redis.dbsize()
 		library_res: int = SmokeTests.r.get_count_of_keys()
 		self.assertEqual(original_res, library_res)
 
 	def test_get_count_of_keys_002(self):
-		original_redis.flushdb()
+		SmokeTests.original_redis.flushdb()
 
 		count_of_keys: int = randint(50, 100)
 		for i in range(count_of_keys):
@@ -187,7 +195,7 @@ class SmokeTests(unittest.TestCase):
 		res: int = SmokeTests.r.get_count_of_keys()
 		self.assertEqual(count_of_keys, res)
 
-		original_redis.flushdb()
+		SmokeTests.original_redis.flushdb()
 
 	# get_type_value_of_key ############################################################################################
 
@@ -1215,33 +1223,33 @@ class SmokeTests(unittest.TestCase):
 	# mass check keys ##################################################################################################
 
 	def test_keys_is_exist_001(self):
-		original_redis.flushdb()
+		SmokeTests.original_redis.flushdb()
 
 		keys: set = {SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(25, 50))}
 		for key in keys:
 			SmokeTests.r.r_set(key, randint(0, 10_000))
 		self.assertEqual(len(keys), SmokeTests.r.keys_is_exist(keys))
 
-		original_redis.flushdb()
+		SmokeTests.original_redis.flushdb()
 
 	def test_keys_is_exist_002(self):
-		original_redis.flushdb()
+		SmokeTests.original_redis.flushdb()
 
 		keys: set = {SmokeTests.get_random_integer() for _ in range(randint(250, 500))}
 		for key in keys:
 			SmokeTests.r.r_set(str(key), SmokeTests.get_random_string())
 		self.assertEqual(len(keys), SmokeTests.r.keys_is_exist(keys))
 
-		original_redis.flushdb()
+		SmokeTests.original_redis.flushdb()
 
 	def test_keys_is_exist_003(self):
 		""" keys_is_exist without set keys """
-		original_redis.flushdb()
+		SmokeTests.original_redis.flushdb()
 
 		keys: set = {SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(25, 50))}
 		self.assertEqual(SmokeTests.r.keys_is_exist(keys), 0)
 
-		original_redis.flushdb()
+		SmokeTests.original_redis.flushdb()
 
 	# remove all keys ##################################################################################################
 
@@ -1587,6 +1595,4 @@ class SmokeTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	original_redis.flushall()  # clear the database before tests
-
 	unittest.main()
