@@ -47,14 +47,6 @@ class PyRedis:
         """
         self.redis.quit()
 
-    def __del__(self):
-        """ "Lifebuoy" if the user did not use the context manager """
-        try:
-            self.redis.quit()
-        except rRedisError:
-            pass
-            # TODO - logging
-
     def r_ping(self) -> bool:
         try:
             return self.redis.ping()
