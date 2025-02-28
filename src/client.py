@@ -70,6 +70,17 @@ class PyRedis:
         """
         return self.redis.exists(*keys) if keys else 0
 
+    def get_key_memory_usage(self, key: str):
+        """
+        The MEMORY USAGE command reports the number of bytes that a key and its value require to be stored in RAM.
+        The reported usage is the total of memory allocations for data and administrative
+        overheads that a key and its value require.
+        SAMPLES option is set to 0.
+        :param key:
+        :return: [integer] the memory usage in bytes
+        """
+        self.redis.memory_usage(key, samples=0)
+
     def get_count_of_keys(self) -> int:
         """ Returns the number of keys in the current database """
         return self.redis.dbsize()
