@@ -17,7 +17,7 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', 'eval_status')
+    __slots__ = ('redis', 'eval_status', 'static_redis_server_info')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
@@ -36,7 +36,10 @@ class PyRedis:
                 retry_on_timeout=retry_on_timeout
             )
         )
-        self.eval_status: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
+
+        # to save memory, initialize with None (dict() = 64 bytes, None = 16 bytes)
+        self.eval_status: dict | None = None  # saving SHA1 hash of Lua scripts  # TODO - tests
+        self.static_redis_server_info: dict | None = None  # Storing static information about a Redis server
 
     def __enter__(self):
         return self
@@ -52,6 +55,56 @@ class PyRedis:
             return self.redis.ping()
         except (rConnectionError, rTimeoutError):
             return False
+
+    # Redis INFO #######################################################################################################
+
+    def get_redis_info(self) -> dict:
+        """
+        If you do not have enough built-in library functions to get data about the Redis server,
+        use this function and select the fields you need.
+        """
+        return self.redis.info()
+
+    def check_redis_static_info(self, data_key: str) -> dict:
+        if not self.static_redis_server_info:
+            data: dict = self.redis.info()
+            data_keys: tuple = ('arch_bits', 'redis_version')
+            self.static_redis_server_info: dict = {key: data.get(key) for key in data_keys}
+        return self.static_redis_server_info.get(data_key)
+
+    # Static data
+
+    def get_redis_server_architecture(self):
+        """
+        arch_bits
+        :return: Architecture (32 or 64 bits)
+        """
+        return self.check_redis_static_info('arch_bits')
+
+    def get_redis_version(self):
+        return self.check_redis_static_info('redis_version')
+
+    # Dynamic data
+
+    def get_redis_used_memory_vm_eval(self):
+        """
+        For Redis >= 7.0
+        Number of bytes used by the script VM engines for EVAL framework (not part of used_memory)
+        """
+        return self.redis.info().get('used_memory_vm_eval')
+
+    def get_redis_number_of_cached_scripts(self):
+        """
+        For Redis >= 7.0
+        The number of EVAL scripts cached by the server
+        """
+        return self.redis.info().get('number_of_cached_scripts')
+
+    def get_redis_uptime(self, in_days: bool = False):
+        data: dict = self.redis.info()
+        return data.get('uptime_in_days') if in_days else data.get('uptime_in_seconds')
+
+    ####################################################################################################################
 
     def key_is_exist(self, key: str) -> bool | None:
         return bool(self.redis.exists(key)) if key else None
@@ -421,7 +474,7 @@ class PyRedis:
         return int(total_keys) if get_count_keys else None
 
     def __register_lua_scripts(self, script_name: str, *args, read_only: bool = False):
-        if script_name not in self.eval_status:
+        if not self.eval_status or script_name not in self.eval_status:
             lua_script = PyRedis.__load_lua_script(script_name)
             self.eval_status[script_name] = self.redis.script_load(lua_script)
         return self.redis.evalsha(self.eval_status[script_name], *args)
