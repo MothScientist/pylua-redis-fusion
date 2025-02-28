@@ -37,8 +37,8 @@ class PyRedis:
             )
         )
 
+        self.eval_status: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
         # to save memory, initialize with None (dict() = 64 bytes, None = 16 bytes)
-        self.eval_status: dict | None = None  # saving SHA1 hash of Lua scripts  # TODO - tests
         self.static_redis_server_info: dict | None = None  # Storing static information about a Redis server
 
     def __enter__(self):
@@ -474,7 +474,7 @@ class PyRedis:
         return int(total_keys) if get_count_keys else None
 
     def __register_lua_scripts(self, script_name: str, *args, read_only: bool = False):
-        if not self.eval_status or script_name not in self.eval_status:
+        if script_name not in self.eval_status:
             lua_script = PyRedis.__load_lua_script(script_name)
             self.eval_status[script_name] = self.redis.script_load(lua_script)
         return self.redis.evalsha(self.eval_status[script_name], *args)
