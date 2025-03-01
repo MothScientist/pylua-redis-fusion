@@ -49,3 +49,7 @@ class ContextManagerTests(unittest.TestCase):
 			key: str = 'RedisContextManager'
 			redis_conn.r_set(key, key)
 			self.assertEqual(redis_conn.r_get(key), key)
+
+
+if __name__ == '__main__':
+	unittest.main()
