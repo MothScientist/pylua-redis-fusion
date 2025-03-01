@@ -76,7 +76,7 @@ class PyRedis:
         :param key:
         :return: [integer] the memory usage in bytes
         """
-        return self.redis.memory_usage(key, samples=0)
+        return self.redis.memory_usage(key, samples=0) or 0
 
     def flush_lua_scripts(self):
         self.lua_scripts_sha: dict = {}
