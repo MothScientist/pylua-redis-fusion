@@ -76,7 +76,7 @@ class PyRedis:
         :param key:
         :return: [integer] the memory usage in bytes
         """
-        self.redis.memory_usage(key, samples=0)
+        return self.redis.memory_usage(key, samples=0)
 
     def key_is_exist(self, key: str) -> bool | None:
         return bool(self.redis.exists(key)) if key else None
