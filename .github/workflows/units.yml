@@ -58,10 +58,10 @@ jobs:
           cd tests || exit 1
           python -m unittest test_units_0.py test_units_3.py test_units_4.py
 
-      - name: Run multiple CPUs UnitTests (Ttl)
+      - name: Run Ttl UnitTests
         run: |
           cd tests || exit 1
-          pytest test_units_1.py -n 2 # no more than 2 cores to avoid problems with process concurrency
+          python -m unittest test_units_1.py
 
       - name: Multiple databases tests
         run: |
