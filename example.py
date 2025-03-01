@@ -24,15 +24,62 @@ def get_cache(key: str, convert_to_type=None):
     return redis_connection().r_get(key, convert_to_type=convert_to_type)
 
 
+def decorator():
+    easy_set_cache('1', 'Decorator')
+    easy_set_cache('2', 1.5)
+    print(f'\tGet value: {easy_get_cache('1')}')
+    res = easy_get_cache('2', convert_to_type="float")
+    print(f'\tGet value: {res} / type = {type(res)}')
+
+    res: int = easy_delete_all_keys(get_count_keys=True)
+    print(f'\tDelete {res} keys')
+    res = easy_get_cache('1')
+    print(f'\teasy_1 key = {res}')
+
+
 def main():
     set_cache('1', 'cache')
-    set_cache('2', (1, 2, 3, 4, 5))
-    print(f"--- Simple set/get: {get_cache('1')}")
-    data_1: tuple = get_cache('2', convert_to_type='int')
-    print(f"--- tuple[int] set/get: {data_1} / type(tuple[0]) = {type(data_1[0])}")
+    print(f"\tSimple set/get: {get_cache('1')}")
+    set_cache('1', [1, 2, 3, 4, 5])
+    res: tuple = get_cache('1', convert_to_type='int')
+    print(f"\tList[int] set/get: {res} / type(res) = {type(res)} / type(res[0]) = {type(res[0])}")
+    set_cache('1', True)
+    res: bool = get_cache('1', convert_to_type='bool')
+    print(f"\tSet/get bool type: {res} / type = {type(res)}")
+    set_cache('1', {'ASCII', 'UTF-8', 'UTF-16'})
+    res: set = get_cache('1')
+    print(f"\tSet/get set type: {res} / type = {type(res)}")
+
+
+def memory():
+    r = redis_connection()
+    r.flush_lua_scripts()  # clean up lua scripts sha before example
+    set_cache('1', [1, 2, 3, 4, 5])
+    set_cache('2', 1)
     set_cache('3', True)
-    data_2: bool = get_cache('3', convert_to_type='bool')
-    print(f"--- Set/get bool type: {data_2} / type = {type(data_2)}")
+    set_cache('4', {1, 2, 3, 4, 5, 5, 5})
+    res: dict = r.get_redis_info()
+    print(f"\tused_memory_vm_eval: {res.get('used_memory_vm_eval')} /"
+          f" number_of_cached_scripts = {res.get('number_of_cached_scripts')}")
+    r.flush_lua_scripts()
+    print('\tflush_lua_scripts()')
+    res = r.get_redis_info()
+    print(f"\tused_memory_vm_eval: {res.get('used_memory_vm_eval')} /"
+          f" number_of_cached_scripts = {res.get('number_of_cached_scripts')}")
+    print('\n')
+    print('\tLet\'s write a simple string into the key value:')
+    set_cache('1', '1')
+    res: int = r.get_key_memory_usage('1')
+    print(f'\t\tget_key_memory_usage(key) = {res}')
+    print('\tLet\'s write a list of 1000 elements into the key value:')
+    set_cache('1', [i for i in range(0, 1_000)])
+    res: int = r.get_key_memory_usage('1')
+    print(f'\t\tget_key_memory_usage(key) = {res}')
+    print('\tLet\'s delete the key:')
+    r.r_delete('1')
+    res: int = r.get_key_memory_usage('1')
+    print(f'\t\tget_key_memory_usage(key) = {res}')
+
 
 ########################################################################################################################
 # Works with the help of a decorator
@@ -53,29 +100,22 @@ def easy_set_cache(r, key, value):
 
 
 @redis
-def easy_get_cache(r, key, convert_to_type=None):
-    return r.r_get(key, convert_to_type=convert_to_type)
+def easy_get_cache(r, key, **kwargs):
+    return r.r_get(key, **kwargs)
 
 
 @redis
-def easy_delete_all_keys(r, get_count_keys=None):
-    return r.r_remove_all_keys(get_count_keys=get_count_keys)
+def easy_delete_all_keys(r, **kwargs):
+    return r.r_remove_all_keys_local(**kwargs)
 
 #######################################################################################################################
 
 
 if __name__ == '__main__':
-    main()
-    print('\n')
+    easy_delete_all_keys()  # delete keys from database before example
     print('Example with decorator @redis (set + get):')
-
-    easy_set_cache('easy_1', 'Decorator')
-    easy_set_cache('easy_2', 1.5)
-    print(f'Get value: {easy_get_cache('easy_1')}')
-    easy_2 = easy_get_cache('easy_2', convert_to_type="float")
-    print(f'Get value: {easy_2} / type = {type(easy_2)}')
-
-    easy_delete: int = easy_delete_all_keys(get_count_keys=True)
-    print(f'Delete {easy_delete} keys')
-    easy_1 = easy_get_cache('easy_1')
-    print(f'easy_1 key = {easy_1}')
+    decorator()
+    print('\nMain:')
+    main()
+    print('\nMemory:')
+    memory()
