@@ -16,7 +16,7 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', 'eval_status')
+    __slots__ = ('redis', 'lua_scripts_sha')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
@@ -36,7 +36,7 @@ class PyRedis:
                 socket_keepalive=socket_keepalive
             )
         )
-        self.eval_status: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
+        self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
 
     def __enter__(self):
         return self
@@ -77,6 +77,10 @@ class PyRedis:
         :return: [integer] the memory usage in bytes
         """
         return self.redis.memory_usage(key, samples=0)
+
+    def flush_lua_scripts(self):
+        self.lua_scripts_sha: dict = {}
+        self.redis.script_flush()
 
     def key_is_exist(self, key: str) -> bool | None:
         return bool(self.redis.exists(key)) if key else None
@@ -435,10 +439,10 @@ class PyRedis:
         return int(total_keys) if get_count_keys else None
 
     def __register_lua_scripts(self, script_name: str, *args, read_only: bool = False):
-        if script_name not in self.eval_status:
+        if script_name not in self.lua_scripts_sha:
             lua_script = PyRedis.__load_lua_script(script_name)
-            self.eval_status[script_name] = self.redis.script_load(lua_script)
-        return self.redis.evalsha(self.eval_status[script_name], *args)
+            self.lua_scripts_sha[script_name] = self.redis.script_load(lua_script)
+        return self.redis.evalsha(self.lua_scripts_sha[script_name], *args)
 
     @staticmethod
     def __convert_to_type(value: str | list[str] | set[str], _type: str) -> str | bool | int | float | list | set:
