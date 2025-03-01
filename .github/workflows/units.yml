@@ -56,10 +56,7 @@ jobs:
       - name: Run UnitTests (Smoke tests)
         run: |
           cd tests || exit 1
-          python -m unittest \
-          test_units_0.py \      # SmokeTests
-          test_units_3.py \      # ContextManagerTests
-          test_units_4.py        # LuaScriptsSHATests
+          python -m unittest test_units_0.py test_units_3.py test_units_4.py
 
       - name: Run multiple CPUs UnitTests (Ttl)
         run: |
