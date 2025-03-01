@@ -1,1597 +1,517 @@
 import unittest
 from redis import Redis, ConnectionPool
-from dotenv import load_dotenv
-from os import getenv
 from random import randint, choice, random
 from string import ascii_letters, digits
 from sys import path as sys_path
+from time import sleep
 
 sys_path.append('../')
 from src.client import PyRedis
+from tests.connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 
-load_dotenv('../src/redis.env')  # Load environment variables from redis.env file
-redis_psw: str = getenv('REDIS_PSW')
-redis_db: int = 0
-redis_host: str = getenv('REDIS_HOST') or 'localhost'
-redis_port: int = int(getenv('REDIS_PORT') or 6379)
-redis_username: str = getenv('REDIS_USERNAME') or 'default'
+redis_db: int = 1
 
 
-class SmokeTests(unittest.TestCase):
+class TtlTests(unittest.TestCase):
 	"""
-	Required "quick" tests to check the functionality of the main library functions
+	Tests to check the service life of keys, the sleep() function will be used,
+	so the tests are run in parallel on all processor cores
+
+	!!! Warning: Timings for the sleep function are always greater than the key lifetime -
+	this is done to eliminate errors when calculating the key lifetime when
+	writing to Redis and the start of the sleep() function count in Python
 	"""
 	# def setUp(self):
 	# 	self.maxDiff = None
 
 	r = PyRedis(
-		host=redis_host,
-		port=redis_port,
-		password=redis_psw,
-		username=redis_username,
+		host=REDIS_HOST,
+		port=REDIS_PORT,
+		password=REDIS_PWS,
+		username=REDIS_USERNAME,
 		db=redis_db,
 		socket_timeout=.1
 	)
 
 	original_redis = Redis(connection_pool=ConnectionPool(
-		host=redis_host, port=redis_port, db=redis_db, password=redis_psw, username=redis_username
+		host=REDIS_HOST, port=REDIS_PORT, db=redis_db, password=REDIS_PWS, username=REDIS_USERNAME
 	))
 
 	@classmethod
 	def setUpClass(cls):
-		SmokeTests.original_redis.flushdb()  # clear the database after tests
+		TtlTests.original_redis.flushdb()  # clear the database after tests
 
 	@classmethod
 	def tearDownClass(cls):
-		SmokeTests.original_redis.flushdb()  # clear the database before tests
+		TtlTests.original_redis.flushdb()  # clear the database before tests
 
 	@staticmethod
-	def get_random_integer():
-		return randint(0, 1_000_000)
+	def get_random_integer(_min: int = 0, _max: int = 100):
+		return randint(0, 100)
 
 	@staticmethod
-	def get_random_string(length: int = randint(10, 20)):
+	def get_random_string(length: int = randint(5, 10)):
 		return ''.join(choice(ascii_letters + digits) for _ in range(length))
 
-	def test_ping_001(self):
+	def test_ping(self):
 		""" Service is available """
-		self.assertTrue(SmokeTests.r.r_ping())
+		self.assertTrue(TtlTests.r.r_ping())
 
-	def test_ping_002(self):
-		wrong_r = PyRedis(host='unknown')
-		self.assertFalse(wrong_r.r_ping())
+	# set_get_ttl  #####################################################################################################
 
-	# key_is_exist #####################################################################################################
-
-	def test_key_is_exist_int_001(self):
-		key: str = 'key_is_exist_int_001'
-		value: int = SmokeTests.get_random_integer()
-		SmokeTests.r.r_set(key, value)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_int_002(self):
-		key: str = 'key_is_exist_int_002'
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_float_001(self):
-		key: str = 'key_is_exist_float_001'
-		value: float = random()
-		SmokeTests.r.r_set(key, value)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_float_002(self):
-		key: str = 'key_is_exist_float_002'
-		value: float = float(SmokeTests.get_random_integer())
-		SmokeTests.r.r_set(key, value)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_float_003(self):
-		key: str = 'key_is_exist_float_003'
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_str_001(self):
-		key: str = 'key_is_exist_str_001'
-		value: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_str_002(self):
-		key: str = 'key_is_exist_str_002'
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_bool_001(self):
-		key: str = 'key_is_exist_bool_001'
-		SmokeTests.r.r_set(key, True)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_bool_002(self):
-		key: str = 'key_is_exist_bool_002'
-		SmokeTests.r.r_set(key, False)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_bool_003(self):
-		key: str = 'key_is_exist_bool_003'
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_none_001(self):
-		key: str = 'key_is_exist_none_001'
-		SmokeTests.r.r_set(key, None)
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_list_001(self):
-		key: str = 'key_is_exist_list_001'
-		value: list = [SmokeTests.get_random_integer() for _ in range(randint(10, 20))]
-		SmokeTests.r.r_set(key, value)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_list_002(self):
-		key: str = 'key_is_exist_list_002'
-		SmokeTests.r.r_set(key, [])
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_list_003(self):
-		key: str = 'key_is_exist_list_003'
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_tuple_001(self):
-		key: str = 'key_is_exist_tuple_001'
-		value: tuple = tuple([SmokeTests.get_random_string() for _ in range(randint(10, 20))])
-		SmokeTests.r.r_set(key, value)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_tuple_002(self):
-		key: str = 'key_is_exist_tuple_002'
-		SmokeTests.r.r_set(key, tuple())
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_tuple_003(self):
-		key: str = 'key_is_exist_tuple_003'
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_set_001(self):
-		key: str = 'key_is_exist_set_001'
-		value: set = {SmokeTests.get_random_string() for _ in range(randint(10, 20))}
-		SmokeTests.r.r_set(key, value)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_set_002(self):
-		key: str = 'key_is_exist_set_002'
-		SmokeTests.r.r_set(key, set())
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_set_003(self):
-		key: str = 'key_is_exist_set_003'
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_frozenset_001(self):
-		key: str = 'key_is_exist_set_001'
-		value: frozenset = frozenset({SmokeTests.get_random_string() for _ in range(randint(10, 20))})
-		SmokeTests.r.r_set(key, value)
-		self.assertTrue(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_frozenset_002(self):
-		key: str = 'key_is_exist_frozenset_002'
-		SmokeTests.r.r_set(key, frozenset())
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	def test_key_is_exist_frozenset_003(self):
-		key: str = 'key_is_exist_frozenset_003'
-		self.assertFalse(SmokeTests.r.key_is_exist(key))
-
-	# get_count_of_keys ################################################################################################
-
-	def test_get_count_of_keys_001(self):
-		""" get_count_of_keys() == dbsize() """
-		original_res: int = SmokeTests.original_redis.dbsize()
-		library_res: int = SmokeTests.r.get_count_of_keys()
-		self.assertEqual(original_res, library_res)
-
-	def test_get_count_of_keys_002(self):
-		SmokeTests.original_redis.flushdb()
-
-		count_of_keys: int = randint(50, 100)
-		for i in range(count_of_keys):
-			SmokeTests.r.r_set(str(i), i)
-		res: int = SmokeTests.r.get_count_of_keys()
-		self.assertEqual(count_of_keys, res)
-
-		SmokeTests.original_redis.flushdb()
-
-	# get_type_value_of_key ############################################################################################
-
-	def test_get_type_value_of_key_str_001(self):
-		key: str = 'get_type_value_of_key_str_001'
-		value: str = SmokeTests.get_random_string()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
-
-	def test_get_type_value_of_key_int_001(self):
-		key: str = 'get_type_value_of_key_int_001'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
-
-	def test_get_type_value_of_key_float_001(self):
-		""" 0.x """
-		key: str = 'get_type_value_of_key_float_001'
-		value: float = random()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
-
-	def test_get_type_value_of_key_float_002(self):
-		""" x.0 """
-		key: str = 'get_type_value_of_key_float_002'
-		value: float = float(SmokeTests.get_random_integer())
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
-
-	def test_get_type_value_of_key_float_003(self):
-		""" x.x """
-		key: str = 'get_type_value_of_key_float_003'
-		value: float = float(SmokeTests.get_random_integer()) + random()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
-
-	def test_get_type_value_of_key_bool_001(self):
-		""" True """
-		key: str = 'get_type_value_of_key_bool_001'
-		value: bool = True
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
-
-	def test_get_type_value_of_key_bool_002(self):
-		""" False """
-		key: str = 'get_type_value_of_key_bool_002'
-		value: bool = False
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
-
-	# set ##############################################################################################################
-
-	def test_set_001(self):
-		key: str = ''
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-
-	def test_set_002(self):
-		key: str = SmokeTests.get_random_string()
-		value: None = None
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-
-	def test_set_003(self):
-		key: str = ''
-		value: None = None
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-
-	# get ##############################################################################################################
-
-	def test_get_001(self):
-		self.assertIsNone(SmokeTests.r.r_get(''))
-
-	def test_get_002(self):
-		default_value = 'example_default_value'
-		self.assertEqual(default_value, SmokeTests.r.r_get('', default_value=default_value))
-
-	# set/get ##########################################################################################################
-
-	def test_set_get_int_001(self):
-		key: str = 'set_get_int_001'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key)
-		self.assertEqual(int(res), value)
-
-	def test_set_get_int_002(self):
-		""" get_old_value """
-		key: str = 'set_get_int_002'
-		value_1: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1 = SmokeTests.r.r_get(key)
-		self.assertEqual(int(res_1), value_1)
-
-		# rewrite (with 'get_old_value' param)
-		value_2: int = SmokeTests.get_random_integer()
-		self.assertEqual(SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='int'), value_1)
-		res_2 = SmokeTests.r.r_get(key)
-		self.assertEqual(int(res_2), value_2)
-
-	def test_set_get_int_003(self):  # convert_to_type
-		key: str = 'set_get_int_003'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res, value)
-
-	def test_set_get_int_004(self):  # convert_to_type
-		key: str = 'set_get_int_004'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='integer')
-		self.assertEqual(res, value)
-
-	def test_set_get_float_001(self):
-		key: str = 'set_get_float_001'
-		value: float = float(SmokeTests.get_random_integer())
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key)
-		self.assertEqual(float(res), value)
-
-	def test_set_get_float_002(self):
-		key: str = 'set_get_float_002'
-		value_1: float = float(SmokeTests.get_random_integer())
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1 = SmokeTests.r.r_get(key)
-		self.assertEqual(float(res_1), value_1)
-
-		# rewrite
-		value_2: float = float(SmokeTests.get_random_integer())
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
-		res_2 = SmokeTests.r.r_get(key)
-		self.assertEqual(float(res_2), value_2)
-
-	def test_set_get_float_003(self):  # convert_to_type
-		key: str = 'set_get_float_003'
-		value: float = float(SmokeTests.get_random_integer())
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res, value)
-
-	def test_set_get_float_004(self):  # convert_to_type
-		key: str = 'set_get_float_004'
-		value: float = float(SmokeTests.get_random_integer())
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='double')
-		self.assertEqual(res, value)
-
-	def test_set_get_float_005(self):  # convert_to_type
-		key: str = 'set_get_float_005'
-		value: float = float(SmokeTests.get_random_integer())
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='numeric')
-		self.assertEqual(res, value)
-
-	def test_set_get_str_001(self):
+	def test_set_get_ttl_str_001(self):
 		key: str = 'set_get_str_001'
-		value: str = SmokeTests.get_random_string()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key)
-		self.assertEqual(res, value)
+		value: str = TtlTests.get_random_string()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=5))
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(res_1, value)
+		sleep(10)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
 
-	def test_set_get_str_002(self):
+	def test_set_get_ttl_str_002(self):
 		key: str = 'set_get_str_002'
-		value_1: str = SmokeTests.get_random_string()
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res_1, value_1)
+		value: str = TtlTests.get_random_string()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_ms=10_000))
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(res_1, value)
+		sleep(20)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
 
-		# rewrite
-		value_2: str = SmokeTests.get_random_string()
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
-		res_2: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res_2, value_2)
+	def test_set_get_ttl_str_003(self):
+		key: str = 'set_get_str_003'
+		value: str = TtlTests.get_random_string()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=3, time_ms=100_000))
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(res_1, value)
+		sleep(5)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
 
-	def test_set_get_bool_001(self):  # convert_to_type
+	def test_set_get_ttl_str_004(self):
+		key: str = 'set_get_str_004'
+		value: str = TtlTests.get_random_string()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=10000, time_ms=5_000))
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(res_1, value)
+		sleep(10)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
+
+	def test_set_get_ttl_str_005(self):
+		key: str = 'set_get_str_005'
+		value: str = TtlTests.get_random_string()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1, time_ms=1_000_000))
+		sleep(3)
+		res: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res, f'res = {res}')
+
+	def test_set_get_ttl_int_001(self):
+		key: str = 'set_get_int_001'
+		value: int = TtlTests.get_random_integer()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=10, time_ms=100))
+		sleep(1)
+		res: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res, f'res = {res}')
+
+	def test_set_get_ttl_int_002(self):
+		key: str = 'set_get_int_002'
+		value: int = TtlTests.get_random_integer()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=15))
+		res_1: str = TtlTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res_1, value)
+		sleep(5)
+		res_2: str = TtlTests.r.r_get(key, convert_to_type='integer')
+		self.assertEqual(res_2, value)
+		sleep(15)
+		res_3: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_3, f'res = {res_2}')
+
+	def test_set_get_ttl_float_001(self):
+		key: str = 'set_get_float_001'
+		value: float = random()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=5))
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(res_1, str(value))
+		sleep(10)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
+
+	def test_set_get_ttl_float_002(self):
+		key: str = 'set_get_float_002'
+		value: float = random()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=20))
+		res_1: str = TtlTests.r.r_get(key, convert_to_type='numeric')
+		self.assertEqual(res_1, value)
+		sleep(10)
+		res_2: str = TtlTests.r.r_get(key, convert_to_type='double')
+		self.assertEqual(res_2, value)
+		sleep(15)
+		res_3: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_3, f'res = {res_2}')
+
+	def test_set_get_ttl_bool_001(self):
 		key: str = 'set_get_bool_001'
-		value: bool = True
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='bool')
-		self.assertEqual(res, value)
+		value: bool = bool(randint(0, 1))
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=10))
+		res_1: str = TtlTests.r.r_get(key, convert_to_type='boolean')
+		self.assertEqual(res_1, value)
+		sleep(15)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
 
-	def test_set_get_bool_002(self):  # convert_to_type
+	def test_set_get_ttl_bool_002(self):
 		key: str = 'set_get_bool_002'
-		value: bool = False
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='bool')
-		self.assertEqual(res, value)
+		value: bool = bool(randint(0, 1))
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_ms=10))
+		sleep(1)
+		res: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res, f'res = {res}')
 
-	def test_set_get_bool_003(self):  # convert_to_type
-		key: str = 'set_get_bool_003'
-		value: int = 1
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='bool')
-		self.assertEqual(res, bool(value))
-
-	def test_set_get_bool_004(self):  # convert_to_type
-		key: str = 'set_get_bool_004'
-		value: int = 0
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key, convert_to_type='bool')
-		self.assertEqual(res, bool(value))
-
-	def test_set_get_bool_005(self):
-		key: str = 'set_get_bool_005'
-		value: bool = True
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key)
-		self.assertEqual(res, str(value))
-
-	def test_set_get_bool_006(self):
-		key: str = 'set_get_bool_006'
-		value: bool = False
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res = SmokeTests.r.r_get(key)
-		self.assertEqual(res, str(value))
-
-	def test_set_get_list_001(self):
-		""" integer """
+	def test_set_get_ttl_list_001(self):
 		key: str = 'set_get_list_001'
-		value: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(10, 15))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: list = list(map(int, SmokeTests.r.r_get(key)))
-		self.assertEqual(res, value)
+		value: list[str] = [TtlTests.get_random_string() for _ in range(randint(10, 20))]
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=10))
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(res_1, value)
+		sleep(15)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
 
-	def test_set_get_list_002(self):
-		""" integer """
+	def test_set_get_ttl_list_002(self):
 		key: str = 'set_get_list_002'
-		value_1: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(10, 25))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1: list = list(map(int, SmokeTests.r.r_get(key)))
-		self.assertEqual(res_1, value_1)
+		value: list[str] = [TtlTests.get_random_string() for _ in range(randint(10, 20))]
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_ms=10))
+		sleep(1)
+		res: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res, f'res = {res}')
 
-		# rewrite
-		value_2: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(10, 15))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
-		res_2: list = list(map(int, SmokeTests.r.r_get(key)))
-		self.assertEqual(res_2, value_2)
-
-	def test_set_get_list_003(self):
-		""" string """
-		key: str = 'set_get_list_003'
-		value: list[str] = [SmokeTests.get_random_string() for _ in range(randint(10, 50))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: list[str] = list(map(str, SmokeTests.r.r_get(key)))
-		self.assertEqual(res, value)
-
-	def test_set_get_list_004(self):  # convert_to_type
-		""" boolean """
-		key: str = 'set_get_list_004'
-		value: list[bool] = [bool(randint(0, 1)) for _ in range(randint(10, 50))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: list[bool] = list(SmokeTests.r.r_get(key, convert_to_type='boolean'))
-		self.assertEqual(res, value)
-
-	def test_set_get_list_005(self):
-		""" float """
-		key: str = 'set_get_list_005'
-		value: list[float] = [random() for _ in range(randint(10, 15))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: list[float] = list(map(float, SmokeTests.r.r_get(key)))
-		self.assertEqual(res, value)
-
-	def test_set_get_list_006(self):
-		""" float """
-		key: str = 'set_get_list_006'
-		value: list[float] = [float(SmokeTests.get_random_integer()) for _ in range(randint(10, 15))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: list[float] = list(map(float, SmokeTests.r.r_get(key)))
-		self.assertEqual(res, value)
-
-	def test_set_get_list_007(self):  # convert_to_type
-		""" float """
-		key: str = 'set_get_list_007'
-		value: list[float] = [random() for _ in range(randint(10, 15))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: list[float] = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res, value)
-
-	def test_set_get_list_008(self):  # convert_to_type
-		""" float """
-		key: str = 'set_get_list_008'
-		value: list[float] = [float(SmokeTests.get_random_integer()) for _ in range(randint(10, 15))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: list[float] = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res, value)
-
-	def test_set_get_list_009(self):
-		""" boolean """
-		key: str = 'set_get_list_009'
-		value: list[bool] = [bool(randint(0, 1)) for _ in range(randint(10, 50))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: list[bool] = [True if item in ('1', 'true', 'True') else False for item in SmokeTests.r.r_get(key)]
-		self.assertEqual(res, value)
-
-	def test_set_get_list_010(self):
-		""" integer + get_old_value + convert_to_type_for_get """
-		key: str = 'set_get_list_010'
-		value_1: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(5, 10))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, value_1)
-
-		# rewrite
-		value_2: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(20, 25))]
-		old_value = SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='integer')
-		self.assertEqual(old_value, value_1)
-		res_2: list[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
-		self.assertEqual(res_2, value_2)
-
-	def test_set_get_list_011(self):
-		""" string + get_old_value """
-		key: str = 'set_get_list_010'
-		value_1: list[str] = [SmokeTests.get_random_string() for _ in range(randint(5, 10))]
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1: list[str] = SmokeTests.r.r_get(key)
-		self.assertEqual(res_1, value_1)
-
-		# rewrite
-		value_2: list[str] = [SmokeTests.get_random_string() for _ in range(randint(20, 25))]
-		old_value: list[str] = SmokeTests.r.r_set(key, value_2, get_old_value=True)
-		self.assertEqual(old_value, value_1)
-		res_2: list[str] = SmokeTests.r.r_get(key)
-		self.assertEqual(res_2, value_2)
-
-	def test_set_get_tuple_001(self):
-		""" integer """
+	def test_set_get_ttl_tuple_001(self):
 		key: str = 'set_get_tuple_001'
-		value: tuple[int, ...] = tuple(SmokeTests.get_random_integer() for _ in range(randint(10, 25)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: tuple[int, ...] = tuple(map(int, SmokeTests.r.r_get(key)))
-		self.assertEqual(res, value)
+		value: tuple[str, ...] = tuple([TtlTests.get_random_string() for _ in range(randint(10, 20))])
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=15, time_ms=50_000))
 
-	def test_set_get_tuple_002(self):
-		""" integer """
+		sleep(1)
+		res_1: tuple[str, ...] = tuple(TtlTests.r.r_get(key))
+		self.assertEqual(res_1, value)
+
+		sleep(20)
+		res_2: None = TtlTests.r.r_get(key)
+		self.assertIsNone(res_2, f'res = {res_2}')
+
+	def test_set_get_ttl_tuple_002(self):
 		key: str = 'set_get_tuple_002'
-		value_1: tuple[int, ...] = tuple(SmokeTests.get_random_integer() for _ in range(randint(10, 25)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1: tuple[int, ...] = tuple(map(int, SmokeTests.r.r_get(key)))
-		self.assertEqual(res_1, value_1)
+		value: tuple[float, ...] = tuple([random() for _ in range(randint(10, 20))])
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=5))
 
-		# rewrite
-		value_2: tuple = tuple(SmokeTests.get_random_integer() for _ in range(randint(10, 15)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
-		res_2: tuple = tuple(map(int, SmokeTests.r.r_get(key)))
-		self.assertEqual(res_2, value_2)
+		sleep(10)
+		res: None = TtlTests.r.r_get(key, convert_to_type='float')
+		self.assertIsNone(res, f'res = {res}')
 
-	def test_set_get_tuple_003(self):  # convert_to_type
-		""" string """
-		key: str = 'set_get_tuple_003'
-		value: tuple[str, ...] = tuple(SmokeTests.get_random_string() for _ in range(randint(10, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: tuple = tuple(map(str, SmokeTests.r.r_get(key)))
-		self.assertEqual(res, value)
-
-	def test_set_get_tuple_004(self):  # convert_to_type
-		""" integer """
-		key: str = 'set_get_tuple_004'
-		value: tuple[int, ...] = tuple(SmokeTests.get_random_integer() for _ in range(randint(10, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: tuple = tuple(SmokeTests.r.r_get(key, convert_to_type='int'))
-		self.assertEqual(res, value)
-
-	def test_set_get_tuple_005(self):  # convert_to_type
-		""" float """
-		key: str = 'set_get_tuple_005'
-		value: tuple[float, ...] = tuple(float(SmokeTests.get_random_integer()) for _ in range(randint(10, 25)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: tuple = tuple(SmokeTests.r.r_get(key, convert_to_type='float'))
-		self.assertEqual(res, value)
-
-	def test_set_get_tuple_006(self):  # convert_to_type
-		""" boolean + get_old_value """
-		key: str = 'set_get_tuple_006'
-		value_1: tuple[bool, ...] = tuple(bool(randint(0, 1)) for _ in range(randint(25, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1: tuple = tuple(SmokeTests.r.r_get(key, convert_to_type='bool'))
-		self.assertEqual(res_1, value_1)
-
-		# rewrite (integer) (with 'get_old_value' param)
-		value_2: int = SmokeTests.get_random_integer()
-		self.assertEqual(
-			tuple(SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='bool')), value_1
-		)
-		res_2: int = SmokeTests.r.r_get(key, convert_to_type='integer')
-		self.assertEqual(res_2, value_2)
-
-		# rewrite (str)
-		value_3: str = SmokeTests.get_random_string()
-		self.assertIsNone(SmokeTests.r.r_set(key, value_3))
-		res_3: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res_3, value_3)
-
-	def test_set_get_tuple_007(self):
-		""" integer + get_old_value + convert_to_type_for_get """
-		key: str = 'set_get_tuple_007'
-		value_1: tuple[int, ...] = tuple([SmokeTests.get_random_integer() for _ in range(randint(5, 10))])
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1: tuple[int, ...] = tuple(SmokeTests.r.r_get(key, convert_to_type='int'))
-		self.assertEqual(res_1, value_1)
-
-		# rewrite
-		value_2: tuple[int, ...] = tuple([SmokeTests.get_random_integer() for _ in range(randint(20, 25))])
-		old_value: tuple[int, ...] = tuple(SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='integer'))
-		self.assertEqual(old_value, value_1)
-		res_2: tuple[int, ...] = tuple(SmokeTests.r.r_get(key, convert_to_type='integer'))
-		self.assertEqual(res_2, value_2)
-
-	def test_set_get_set_001(self):
+	def test_set_get_ttl_set_001(self):
 		key: str = 'set_get_set_001'
-		value: set[int] = set(SmokeTests.get_random_integer() for _ in range(randint(1, 25)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set = set(map(int, SmokeTests.r.r_get(key)))
-		self.assertEqual(res, value)
+		value: set[float] = {random() for _ in range(randint(10, 20))}
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=15, time_ms=5_000_000))
 
-	def test_set_get_set_002(self):
-		key: str = 'set_get_set_002'
-		value: set[str] = set(SmokeTests.get_random_string() for _ in range(randint(1, 25))).union(
-			set(str(SmokeTests.get_random_integer()) for _ in range(randint(1, 25)))
-		)
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set = set(SmokeTests.r.r_get(key))
-		self.assertEqual(res, value)
-
-	def test_set_get_set_003(self):  # convert_to_type
-		key: str = 'set_get_set_003'
-		value: set[str] = set(SmokeTests.get_random_string() for _ in range(randint(1, 10))).union(
-			set(SmokeTests.get_random_integer() for _ in range(randint(1, 10)))
-		)
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set[int] = SmokeTests.r.r_get(key, convert_to_type='int')  # str -> int = str
-		self.assertEqual(res, value)
-
-	def test_set_get_set_004(self):  # convert_to_type
-		key: str = 'set_get_set_004'
-		value: set[int] = set(SmokeTests.get_random_integer() for _ in range(randint(25, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set[int] = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(value, res)
-
-	def test_set_get_set_005(self):
-		key: str = 'set_get_set_005'
-		value: set[str] = set(SmokeTests.get_random_string() for _ in range(randint(25, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set[str] = SmokeTests.r.r_get(key)
-		self.assertEqual(value, res)
-
-	def test_set_get_set_006(self):  # convert_to_type
-		key: str = 'set_get_set_006'
-		value: set[str] = set(SmokeTests.get_random_string() for _ in range(randint(25, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set[str] = SmokeTests.r.r_get(key, convert_to_type='float')  # str -> float = str
-		self.assertEqual(value, res)
-
-	def test_set_get_frozenset_001(self):
-		key: str = 'set_get_frozenset_001'
-		value: frozenset[str] = frozenset(SmokeTests.get_random_string() for _ in range(randint(5, 10)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set[str] = SmokeTests.r.r_get(key)
-		self.assertEqual(set(value), res)
-
-	def test_set_get_frozenset_002(self):  # convert_to_type
-		key: str = 'set_get_frozenset_002'
-		value: frozenset[int] = frozenset(SmokeTests.get_random_integer() for _ in range(randint(25, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
-		self.assertEqual(set(value), res)
-
-	def test_set_get_frozenset_003(self):  # convert_to_type
-		key: str = 'set_get_frozenset_003'
-		value: frozenset[float] = frozenset(float(SmokeTests.get_random_integer()) for _ in range(randint(25, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set[float] = SmokeTests.r.r_get(key, convert_to_type='numeric')
-		self.assertEqual(set(value), res)
-
-	def test_set_get_frozenset_004(self):  # convert_to_type
-		key: str = 'set_get_frozenset_004'
-		value_1: frozenset[int] = frozenset(SmokeTests.get_random_integer() for _ in range(randint(25, 50)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
-		res_1: set[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
-		self.assertEqual(set(value_1), res_1, f'len(value_1) = {len(value_1)}; len(res_1) = {len(res_1)}')
-
-		# rewrite
-		value_2: frozenset[str] = frozenset(SmokeTests.get_random_string() for _ in range(randint(5, 10)))
-		self.assertIsNone(SmokeTests.r.r_set(key, value_2))
-		res_2: set[str] = SmokeTests.r.r_get(key)
-		self.assertEqual(set(value_2), res_2)
-
-	# change type, example: set (float) -> get (int) / set (list) -> get (tuple) #######################################
-
-	def test_change_set_get_type_001(self):
-		key: str = 'change_set_get_type_001'
-		value: float = float(SmokeTests.get_random_integer()) + random()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: int = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(int(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, int), type(res))
-
-	def test_change_set_get_type_002(self):
-		key: str = 'change_set_get_type_002'
-		value: float = float(SmokeTests.get_random_integer() + random())
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: int = SmokeTests.r.r_get(key, convert_to_type='integer')
-		self.assertEqual(int(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, int), type(res))
-
-	def test_change_set_get_type_003(self):
-		key: str = 'change_set_get_type_003'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: float = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(float(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, float), type(res))
-
-	def test_change_set_get_type_004(self):
-		key: str = 'change_set_get_type_004'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: float = SmokeTests.r.r_get(key, convert_to_type='numeric')
-		self.assertEqual(float(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, float), type(res))
-
-	def test_change_set_get_type_005(self):
-		key: str = 'change_set_get_type_005'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: float = SmokeTests.r.r_get(key, convert_to_type='double')
-		self.assertEqual(float(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, float), type(res))
-
-	def test_change_set_get_type_006(self):
-		key: str = 'change_set_get_type_006'
-		value: int = 0
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: bool = SmokeTests.r.r_get(key, convert_to_type='bool')
-		self.assertEqual(bool(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, bool), type(res))
-
-	def test_change_set_get_type_007(self):
-		key: str = 'change_set_get_type_007'
-		value: int = 1
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: bool = SmokeTests.r.r_get(key, convert_to_type='boolean')
-		self.assertEqual(bool(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, bool), type(res))
-
-	def test_change_set_get_type_008(self):
-		""" Wrong type to convert """
-		key: str = 'change_set_get_type_008'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: str = SmokeTests.r.r_get(key, convert_to_type='float1')
-		self.assertEqual(str(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, str), type(res))
-
-	def test_change_set_get_type_009(self):
-		""" Wrong type to convert """
-		key: str = 'change_set_get_type_009'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: str = SmokeTests.r.r_get(key, convert_to_type='bigint')
-		self.assertEqual(str(value), res, f'res = {res}; type(res) = {type(res)}')
-		self.assertTrue(isinstance(res, str), type(res))
-
-	# delete ###########################################################################################################
-
-	def test_delete_001(self):
-		key: str = 'delete_001'
-		# doesn't set the value
-		# delete
-		self.assertIsNone(SmokeTests.r.r_delete(key))
-
-	def test_delete_002(self):
-		key: str = 'delete_002'
-		# doesn't set the value
-		# delete
-		self.assertIsNone(SmokeTests.r.r_delete(key, returning=False))
-
-	def test_delete_003(self):
-		key: str = 'delete_003'
-		# doesn't set the value
-		# delete (with returning)
-		self.assertIsNone(SmokeTests.r.r_delete(key, returning=True))
-
-	def test_delete_004(self):
-		key: str = 'delete_004'
-		# doesn't set the value
-		# delete (with returning and convert)
-		self.assertIsNone(SmokeTests.r.r_delete(key, returning=True), None)
-
-	def test_delete_005(self):
-		self.assertIsNone(SmokeTests.r.r_delete(''))
-
-	# set/get/delete ###################################################################################################
-
-	def test_set_get_delete_int_001(self):
-		key: str = 'set_get_delete_int_001'
-		value: int = SmokeTests.get_random_integer()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key)
-		self.assertEqual(int(res_1), value)
-
-		# delete (without returning - None)
-		self.assertIsNone(SmokeTests.r.r_delete(key))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_delete_int_002(self):
-		key: str = 'set_get_delete_int_002'
-		value: int = SmokeTests.get_random_integer()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key)
-		self.assertEqual(int(res_1), value)
-
-		# delete (without returning - False)
-		self.assertIsNone(SmokeTests.r.r_delete(key, returning=False))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_delete_int_003(self):
-		key: str = 'set_get_delete_int_003'
-		value: int = SmokeTests.get_random_integer()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key)
-		self.assertEqual(res_1, str(value))
-
-		# delete (with returning)
-		self.assertEqual(SmokeTests.r.r_delete(key, returning=True), str(value))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_delete_str_001(self):
-		key: str = 'set_get_delete_str_001'
-		value: str = SmokeTests.get_random_string()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key)
+		sleep(5)
+		res_1: set[float] = set(TtlTests.r.r_get(key, convert_to_type='float'))
 		self.assertEqual(res_1, value)
 
-		# delete (without returning - False)
-		self.assertIsNone(SmokeTests.r.r_delete(key, returning=False))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_delete_str_002(self):
-		key: str = 'set_get_delete_str_002'
-		value: str = SmokeTests.get_random_string()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key)
-		self.assertEqual(res_1, value)
-
-		# delete (with returning)
-		self.assertEqual(SmokeTests.r.r_delete(key, returning=True), value)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_delete_convert_001(self):
-		key: str = 'set_get_delete_convert_001'
-		value: int = SmokeTests.get_random_integer()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, value)
-
-		res_2 = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res_2, float(value))
-
-		# delete (with returning)
-		return_value = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='float')
-		self.assertEqual(return_value, float(value))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_delete_convert_002(self):
-		key: str = 'set_get_delete_convert_002'
-		value: float = float(SmokeTests.get_random_integer())
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, int(value))
-
-		res_2 = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res_2, value)
-
-		# delete (with returning)
-		return_value = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='float')
-		self.assertEqual(return_value, value)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_delete_convert_003(self):
-		""" use convert to type without returning """
-		key: str = 'set_get_delete_convert_003'
-		value: list[int] = [1, 2, 3, 4, 5]
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, value)
-
-		# delete (without returning)
-		self.assertIsNone(SmokeTests.r.r_delete(key, convert_to_type_for_return='int'))
-
-	def test_set_get_delete_convert_004(self):
-		key: str = 'set_get_delete_convert_004'
-		value: list[int] = [1, 2, 3, 4, 5]
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, value)
-
-		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='int')
-		self.assertEqual(res_2, value)
-
-	def test_set_get_delete_convert_005(self):
-		key: str = 'set_get_delete_convert_005'
-		value: set[int] = {1, 2, 3, 4, 5}
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1 = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, value)
-
-		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='int')
-		self.assertEqual(res_2, value)
-
-	def test_cycle_set_get_delete_001(self):
-		for value, key in enumerate([i for i in range(100_000_000, 100_000_000 + randint(25, 50))]):
-			key = str(key)
-			str_value = str(value)
-			self.assertIsNone(SmokeTests.r.r_set(key, value))
-			self.assertEqual(SmokeTests.r.r_get(key), str_value)
-			self.assertEqual(SmokeTests.r.r_delete(key, returning=True), str_value)
-			self.assertIsNone(SmokeTests.r.r_get(key))
-
-	# unlink ###########################################################################################################
-
-	def test_unlink_001(self):
-		key: str = 'unlink_001'
-		# doesn't set the value
-		# delete
-		self.assertIsNone(SmokeTests.r.r_unlink(key))
-
-	def test_unlink_002(self):
-		key: str = 'delete_002'
-		# doesn't set the value
-		# delete
-		self.assertIsNone(SmokeTests.r.r_unlink(key, returning=False))
-
-	def test_unlink_003(self):
-		key: str = 'delete_003'
-		# doesn't set the value
-		# delete (with returning)
-		self.assertIsNone(SmokeTests.r.r_unlink(key, returning=True))
-
-	def test_unlink_004(self):
-		key: str = 'delete_004'
-		# doesn't set the value
-		# delete (with returning and convert)
-		self.assertIsNone(SmokeTests.r.r_unlink(key, returning=True), None)
-
-	def test_unlink_005(self):
-		self.assertIsNone(SmokeTests.r.r_unlink(''))
-
-	# set/get/unlink ###################################################################################################
-
-	def test_set_get_unlink_str_001(self):
-		""" without returning """
-		key: str = 'set_get_unlink_str_001'
-		value: str = SmokeTests.get_random_string()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res_1, value)
-
-		# delete (without returning - None)
-		self.assertIsNone(SmokeTests.r.r_unlink(key))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_str_002(self):
-		""" with returning """
-		key: str = 'set_get_unlink_str_002'
-		value: str = SmokeTests.get_random_string()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res_1, value)
-
-		# delete (without returning - None)
-		res_2: str = SmokeTests.r.r_unlink(key, returning=True)
-		self.assertEqual(res_1, res_2)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_str_003(self):
-		""" with returning and convert to wrong type """
-		key: str = 'set_get_unlink_str_003'
-		value: str = SmokeTests.get_random_string()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: str = SmokeTests.r.r_get(key, convert_to_type='numeric')
-		self.assertEqual(res_1, value)
-
-		# delete (with returning)
-		res_2: str = SmokeTests.r.r_unlink(key, returning=True)
-		self.assertEqual(res_1, res_2)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_int_001(self):
-		""" without returning """
-		key: str = 'set_get_unlink_int_001'
-		value: int = SmokeTests.get_random_integer()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: str = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, value)
-
-		# delete (without returning - None)
-		self.assertIsNone(SmokeTests.r.r_unlink(key))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_int_002(self):
-		""" with returning """
-		key: str = 'set_get_unlink_int_002'
-		value: int = SmokeTests.get_random_integer()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res_1, str(value))
-
-		# delete (with returning)
-		res_2: int = SmokeTests.r.r_unlink(key, returning=True)
-		self.assertEqual(res_1, res_2)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_int_003(self):
-		""" with returning and convert """
-		key: str = 'set_get_unlink_int_003'
-		value: int = SmokeTests.get_random_integer()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: int = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res_1, value)
-
-		# delete (with returning)
-		res_2: int = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='integer')
-		self.assertEqual(res_1, res_2)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_int_004(self):
-		""" with returning and convert to wrong type """
-		key: str = 'set_get_unlink_int_004'
-		value: int = SmokeTests.get_random_integer()
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res_1, str(value))
-
-		# delete (with returning)
-		res_2: int = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='123')
-		self.assertEqual(res_1, res_2)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_float_001(self):
-		""" without returning """
-		key: str = 'set_get_unlink_float_001'
-		value: float = float(SmokeTests.get_random_integer())
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: float = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res_1, value)
-
-		# delete (without returning - None)
-		self.assertIsNone(SmokeTests.r.r_unlink(key))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_float_002(self):
-		""" with returning """
-		key: str = 'set_get_unlink_float_002'
-		value: float = float(SmokeTests.get_random_integer())
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: float = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res_1, value)
-
-		res_2: str = SmokeTests.r.r_unlink(key, returning=True)
-		self.assertEqual(res_2, str(value))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_float_003(self):
-		""" with returning and convert """
-		key: str = 'set_get_unlink_float_003'
-		value: float = float(SmokeTests.get_random_integer())
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: float = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res_1, value)
-
-		res_2: str = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='double')
-		self.assertEqual(res_2, value)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_float_004(self):
-		""" with returning and convert to wrong type """
-		key: str = 'set_get_unlink_float_004'
-		value: float = float(SmokeTests.get_random_integer())
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: float = SmokeTests.r.r_get(key, convert_to_type='float')
-		self.assertEqual(res_1, value)
-
-		res_2: str = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='wrong type')
-		self.assertEqual(res_2, str(value))
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_bool_001(self):
-		key: str = 'set_get_unlink_bool_001'
-		value: bool = True
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: bool = SmokeTests.r.r_get(key, convert_to_type='bool')
-		self.assertEqual(res_1, value)
-
-		res_2: str = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='boolean')
-		self.assertEqual(res_2, value)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	def test_set_get_unlink_bool_002(self):
-		key: str = 'set_get_unlink_bool_002'
-		value: bool = False
-
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res_1: bool = SmokeTests.r.r_get(key, convert_to_type='bool')
-		self.assertEqual(res_1, value)
-
-		res_2: str = SmokeTests.r.r_unlink(key, returning=True, convert_to_type_for_return='boolean')
-		self.assertEqual(res_2, value)
-		self.assertIsNone(SmokeTests.r.r_get(key))
-
-	# TODO - set_get_unlink for arrays
-
-	# rename ###########################################################################################################
-
-	def test_rename_key_001(self):
-		""" Lua - string """
-		key: str = 'rename_key_001'
-		new_key: str = 'rename_key_001-new'
-		value: str = SmokeTests.get_random_string()
-		self.assertIsNone(self.r.r_set(key, value))
-		self.assertEqual(self.r.r_get(key), value)
-		self.r.rename_key(key, new_key)
-		self.assertIsNone(self.r.r_get(key))
-		self.assertEqual(self.r.r_get(new_key), value)
-
-	def test_rename_key_002(self):
-		""" Lua - boolean """
-		key: str = 'rename_key_002'
-		new_key: str = 'rename_key_002-new'
-		value: bool = True if SmokeTests.get_random_integer() % 2 == 0 else False
-		self.assertIsNone(self.r.r_set(key, value))
-		self.assertEqual(self.r.r_get(key, convert_to_type='bool'), value)
-		self.r.rename_key(key, new_key)
-		self.assertIsNone(self.r.r_get(key))
-		self.assertEqual(self.r.r_get(new_key, convert_to_type='bool'), value)
-
-	def test_rename_key_003(self):
-		""" Lua - integer """
-		key: str = 'rename_key_003'
-		new_key: str = 'rename_key_003-new'
-		value: int = SmokeTests.get_random_integer()
-		self.assertIsNone(self.r.r_set(key, value))
-		self.assertEqual(self.r.r_get(key, convert_to_type='int'), value)
-		self.r.rename_key(key, new_key)
-		self.assertIsNone(self.r.r_get(key))
-		self.assertEqual(self.r.r_get(new_key, convert_to_type='int'), value)
-
-	def test_rename_key_004(self):
-		""" Lua - float """
-		key: str = 'rename_key_004'
-		new_key: str = 'rename_key_004-new'
-		value: float = float(SmokeTests.get_random_integer()) + random()
-		self.assertIsNone(self.r.r_set(key, value))
-		self.assertEqual(self.r.r_get(key, convert_to_type='float'), value)
-		self.r.rename_key(key, new_key)
-		self.assertIsNone(self.r.r_get(key))
-		self.assertEqual(self.r.r_get(new_key, convert_to_type='float'), value)
-
-	def test_rename_key_005(self):
-		""" Lua - list """
-		key: str = 'rename_key_005'
-		new_key: str = 'rename_key_005-new'
-		value: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(10, 20))]
-		self.assertIsNone(self.r.r_set(key, value))
-		self.assertEqual(self.r.r_get(key, convert_to_type='int'), value)
-		self.r.rename_key(key, new_key)
-		self.assertIsNone(self.r.r_get(key))
-		self.assertEqual(self.r.r_get(new_key, convert_to_type='int'), value)
-
-	def test_rename_key_006(self):
-		""" Lua - tuple """
-		key: str = 'rename_key_006'
-		new_key: str = 'rename_key_006-new'
-		value: tuple = tuple(float(SmokeTests.get_random_integer()) + random() for _ in range(randint(10, 20)))
-		self.assertIsNone(self.r.r_set(key, value))
-		self.assertEqual(tuple(self.r.r_get(key, convert_to_type='float')), value)
-		self.r.rename_key(key, new_key)
-		self.assertIsNone(self.r.r_get(key))
-		self.assertEqual(tuple(self.r.r_get(new_key, convert_to_type='float')), value)
-
-	def test_rename_key_007(self):
-		""" Lua - set """
-		key: str = 'rename_key_007'
-		new_key: str = 'rename_key_007-new'
-		value: set = {SmokeTests.get_random_integer() for _ in range(randint(5, 10))}
-		self.assertIsNone(self.r.r_set(key, value))
-		self.assertEqual(set(self.r.r_get(key, convert_to_type='int')), value)
-		self.r.rename_key(key, new_key)
-		self.assertIsNone(self.r.r_get(key))
-		self.assertEqual(set(self.r.r_get(new_key, convert_to_type='int')), value)
-
-	def test_rename_key_008(self):
-		""" Lua - frozenset """
-		key: str = 'rename_key_008'
-		new_key: str = 'rename_key_008-new'
-		value: frozenset = frozenset(SmokeTests.get_random_string() for _ in range(randint(5, 10)))
-		self.assertIsNone(self.r.r_set(key, value))
-		self.assertEqual(frozenset(self.r.r_get(key)), value)
-		self.r.rename_key(key, new_key)
-		self.assertIsNone(self.r.r_get(key))
-		self.assertEqual(frozenset(self.r.r_get(new_key)), value)
-
-	# mass check keys ##################################################################################################
-
-	def test_keys_is_exist_001(self):
-		SmokeTests.original_redis.flushdb()
-
-		keys: set = {SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(25, 50))}
+		sleep(15)
+		res_2: None = TtlTests.r.r_get(key)  # without convert_to_type
+		self.assertIsNone(res_2, f'res = {res_2}')
+		res_3: None = TtlTests.r.r_get(key, convert_to_type='float')
+		self.assertIsNone(res_3, f'res = {res_3}')
+
+	def test_set_get_ttl_set_002(self):
+		key: str = 'set_get_set_001'
+		value: set[str] = {TtlTests.get_random_string() for _ in range(randint(10, 20))}
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1))
+
+		sleep(5)
+		res_1: None = TtlTests.r.r_get(key)  # without convert_to_type
+		self.assertIsNone(res_1, f'res = {res_1}')
+		res_2: None = TtlTests.r.r_get(key, convert_to_type='integer')  # wrong type
+		self.assertIsNone(res_2, f'res = {res_2}')
+
+	# set_key_ttl ##################################################################################################
+
+	def test_set_key_ttl_001(self):
+		key: str = 'set_key_ttl_001'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=5)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		sleep(10)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_key_ttl_002(self):
+		key: str = 'set_key_ttl_002'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_ms=10_000)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		sleep(15)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_set_key_ttl_003(self):
+		key: str = 'set_key_ttl_003'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_ms=50_000, ttl_sec=5)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		sleep(10)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	# set_keys_ttl #####################################################################################################
+
+	def test_set_keys_ttl_001(self):
+		""" List - 001 - 009 """
+		keys: list = [f'set_keys_ttl_00{i}' for i in range(1, 10)]
 		for key in keys:
-			SmokeTests.r.r_set(key, randint(0, 10_000))
-		self.assertEqual(len(keys), SmokeTests.r.keys_is_exist(keys))
+			TtlTests.r.r_set(key, key)
 
-		SmokeTests.original_redis.flushdb()
-
-	def test_keys_is_exist_002(self):
-		SmokeTests.original_redis.flushdb()
-
-		keys: set = {SmokeTests.get_random_integer() for _ in range(randint(250, 500))}
 		for key in keys:
-			SmokeTests.r.r_set(str(key), SmokeTests.get_random_string())
-		self.assertEqual(len(keys), SmokeTests.r.keys_is_exist(keys))
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-		SmokeTests.original_redis.flushdb()
+		TtlTests.r.set_keys_ttl(keys, ttl_sec=1)
 
-	def test_keys_is_exist_003(self):
-		""" keys_is_exist without set keys """
-		SmokeTests.original_redis.flushdb()
+		sleep(3)
 
-		keys: set = {SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(25, 50))}
-		self.assertEqual(SmokeTests.r.keys_is_exist(keys), 0)
-
-		SmokeTests.original_redis.flushdb()
-
-	# remove all keys ##################################################################################################
-
-	def test_r_remove_all_keys_local_001(self):
-		""" Lua """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		key_count: int = randint(5, 10)
-		for key in range(key_count):
-			SmokeTests.r.r_set(str(key), key)
-		res = SmokeTests.r.r_remove_all_keys_local(get_count_keys=True)
-		self.assertEqual(res, key_count)
-
-	def test_r_remove_all_keys_local_002(self):
-		""" Lua """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		key_count: int = randint(5, 10)
-		for key in range(key_count):
-			SmokeTests.r.r_set(str(key), [key])
-		res = SmokeTests.r.r_remove_all_keys_local(get_count_keys=True)
-		self.assertEqual(res, key_count)
-
-	def test_r_remove_all_keys_local_003(self):
-		""" Lua """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		key_count: int = randint(25, 50)
-		for key in range(key_count):
-			SmokeTests.r.r_set(str(key), str(key))
-		res = SmokeTests.r.r_remove_all_keys_local(get_count_keys=True)
-		self.assertEqual(res, key_count)
-
-	def test_r_remove_all_keys_local_004(self):
-		""" Lua  - integer - without get_count_keys param """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		key_count: int = randint(50, 100)
-		for key in range(key_count):
-			SmokeTests.r.r_set(str(key), key)
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-
-	def test_r_remove_all_keys_local_005(self):
-		""" Lua  - str - without get_count_keys param """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		key_count: int = randint(50, 100)
-		for key in range(key_count):
-			SmokeTests.r.r_set(str(key), str(key))
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-
-	# check_keys_and_get_values ########################################################################################
-
-	def test_check_keys_and_get_values_001(self):
-		""" key is integer """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		exists_keys: tuple = tuple([i for i in range(randint(50, 100)) if i % randint(2, 5) == 0])
-		for key in exists_keys:
-			SmokeTests.r.r_set(str(key), key)
-		res: dict = SmokeTests.r.check_keys_and_get_values(exists_keys)
-		self.assertEqual(sorted(res.keys()), sorted(exists_keys))
-
-	def test_check_keys_and_get_values_002(self):
-		""" key is string """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		exists_keys: tuple = tuple([str(i) for i in range(randint(50, 100)) if i % randint(2, 5) == 0])
-		for key in exists_keys:
-			SmokeTests.r.r_set(key, key)
-		res: dict = SmokeTests.r.check_keys_and_get_values(exists_keys)
-		self.assertEqual(sorted(res.keys()), sorted(exists_keys))
-
-	def test_check_keys_and_get_values_003(self):
-		""" check each key - value """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		exists_keys: tuple = tuple([i for i in range(randint(50, 100)) if i % randint(2, 5) == 0])
-		for key in exists_keys:
-			SmokeTests.r.r_set(str(key), key)
-		res: dict = SmokeTests.r.check_keys_and_get_values(exists_keys)
-		self.assertEqual(sorted(res.keys()), sorted(exists_keys))
-		for key in res.keys():
-			self.assertEqual(str(key), res[key])
-
-	# r_mass_delete ####################################################################################################
-
-	def test_r_mass_delete_001(self):
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([i for i in range(randint(50, 100))])
 		for key in keys:
-			SmokeTests.r.r_set(key, int(key))
-		res = SmokeTests.r.r_mass_delete(keys)
-		self.assertEqual(res,  ((), (), {}))
+			self.assertIsNone(TtlTests.r.r_get(key))
 
-	def test_r_mass_delete_002(self):
-		""" Don't write down all the keys """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		for key in keys[:randint(5, 10)]:
-			SmokeTests.r.r_set(key, key)
-		res = SmokeTests.r.r_mass_delete(keys)
-		self.assertEqual(res,  ((), (), {}))
+	def test_set_keys_ttl_002(self):
+		""" List - 011 - 019 """
+		keys: list = [f'set_keys_ttl_01{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
 
-	def test_r_mass_delete_003(self):
-		""" Don't write down all the keys """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		for key in keys[:len(keys)//2]:
-			SmokeTests.r.r_set(key, key)
-		res = SmokeTests.r.r_mass_delete(keys, return_non_exists=True)
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], ())
-		self.assertEqual(sorted(res[1]),  sorted(keys[len(keys)//2:]))
-		self.assertEqual(res[2], {})
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-	def test_r_mass_delete_004(self):
-		""" Don't write down all the keys """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		exists_keys: tuple = keys[:len(keys) // randint(2, 5)]
-		for key in exists_keys:
-			SmokeTests.r.r_set(str(key), key)
-		res = SmokeTests.r.r_mass_delete(keys, return_exists=True)
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(sorted(res[0]), sorted(exists_keys))
-		self.assertEqual(res[1], ())
-		self.assertEqual(res[2], {})
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
 
-	def test_r_mass_delete_005(self):
-		""" Don't write down all the keys """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		_slice: int = randint(2, 5)
-		exists_keys: tuple = keys[:len(keys) // _slice]
-		key_value: dict = {key: SmokeTests.get_random_string() for key in exists_keys}
-		for key, value in key_value.items():
-			SmokeTests.r.r_set(key, value)
+		sleep(10)
 
-		res = SmokeTests.r.r_mass_delete(
-			keys, return_exists=True, return_non_exists=True, get_dict_key_value_exists=True
-		)
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
 
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(sorted(res[0]), sorted(exists_keys))  # return_exists
-		self.assertEqual(sorted(res[1]),  sorted(keys[len(keys)//_slice:]))  # return_non_exists
-		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+	def test_set_keys_ttl_003(self):
+		""" List - 021 - 029 """
+		keys: list = [f'set_keys_ttl_02{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
 
-	def test_r_mass_delete_006(self):
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		key_value: dict = {key: SmokeTests.get_random_string() for key in keys}
-		for key, value in key_value.items():
-			SmokeTests.r.r_set(key, value)
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-		res = SmokeTests.r.r_mass_delete(
-			keys, return_exists=True, return_non_exists=True, get_dict_key_value_exists=True,
-		)
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000, ttl_sec=1_000)
 
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(sorted(res[0]), sorted(keys))  # return_exists
-		self.assertEqual(res[1],  ())  # return_non_exists
-		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+		sleep(10)
 
-	def test_r_mass_delete_007(self):
-		""" get key-value with converting type """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		key_value: dict = {key: SmokeTests.get_random_integer() for key in keys}
-		for key, value in key_value.items():
-			SmokeTests.r.r_set(str(key), value)
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
 
-		res = SmokeTests.r.r_mass_delete(keys, get_dict_key_value_exists=True, convert_to_type_dict_key='int')
+	def test_set_keys_ttl_004(self):
+		""" Tuple - 031 - 039 """
+		keys: tuple = tuple([f'set_keys_ttl_03{i}' for i in range(1, 10)])
+		for key in keys:
+			TtlTests.r.r_set(key, key)
 
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], ())  # return_exists
-		self.assertEqual(res[1], ())  # return_non_exists
-		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-	def test_r_mass_delete_008(self):
-		""" get key-value with converting type """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		key_value: dict = {key: bool(randint(0, 1)) for key in keys}
-		for key, value in key_value.items():
-			SmokeTests.r.r_set(key, value)
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
 
-		res = SmokeTests.r.r_mass_delete(keys, get_dict_key_value_exists=True, convert_to_type_dict_key='boolean')
+		sleep(10)
 
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], ())  # return_exists
-		self.assertEqual(res[1], ())  # return_non_exists
-		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
 
-	def test_r_mass_delete_009(self):
-		""" get key-value with converting type """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		key_value: dict = {key: bool(randint(0, 1)) for key in keys}
-		for key, value in key_value.items():
-			SmokeTests.r.r_set(key, value)
+	def test_set_keys_ttl_005(self):
+		""" Set - 041 - 049 """
+		keys: set = set([f'set_keys_ttl_04{i}' for i in range(1, 10)])
+		for key in keys:
+			TtlTests.r.r_set(key, key)
 
-		res = SmokeTests.r.r_mass_delete(
-			keys, return_exists=True, get_dict_key_value_exists=True, convert_to_type_dict_key='bool'
-		)
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], tuple(sorted(list(keys))))  # return_exists
-		self.assertEqual(res[1], ())  # return_non_exists
-		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
 
-	def test_r_mass_delete_010(self):
-		""" get key-value with converting type """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		key_value: dict = {key: randint(0, 1_000) for key in keys}
-		for key, value in key_value.items():
-			SmokeTests.r.r_set(key, value)
+		sleep(10)
 
-		res = SmokeTests.r.r_mass_delete(
-			keys, return_exists=True, get_dict_key_value_exists=True, convert_to_type_dict_key='integer'
-		)
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
 
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], tuple(sorted(list(keys))))  # return_exists
-		self.assertEqual(res[1], ())  # return_non_exists
-		self.assertEqual(dict(sorted(res[2].items())), dict(sorted(key_value.items())))  # get_dict_key_value_exists
+	def test_set_keys_ttl_006(self):
+		""" Frozenset - 051 - 059 """
+		keys: frozenset = frozenset([f'set_keys_ttl_05{i}' for i in range(1, 10)])
+		for key in keys:
+			TtlTests.r.r_set(key, key)
 
-	def test_r_mass_delete_011(self):
-		""" get key-value with converting type (integer) and without other params """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		key_value: dict = {key: randint(0, 1_000) for key in keys}
-		for key, value in key_value.items():
-			SmokeTests.r.r_set(key, value)
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-		res = SmokeTests.r.r_mass_delete(
-			keys, convert_to_type_dict_key='integer'
-		)
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
 
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], ())  # return_exists
-		self.assertEqual(res[1], ())  # return_non_exists
-		self.assertEqual(res[2], {})  # get_dict_key_value_exists
+		sleep(10)
 
-	def test_r_mass_delete_012(self):
-		""" get key-value with converting type (boolean) and without other params """
-		self.assertIsNone(SmokeTests.r.r_remove_all_keys_local())
-		keys: tuple = tuple([str(i) for i in range(randint(50, 100))])
-		key_value: dict = {key: randint(0, 1_000) for key in keys}
-		for key, value in key_value.items():
-			SmokeTests.r.r_set(key, value)
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
 
-		res = SmokeTests.r.r_mass_delete(
-			keys, convert_to_type_dict_key='boolean'
-		)
+	def test_set_keys_ttl_007(self):
+		""" List - 061 - 069 """
+		keys: list = [f'set_keys_ttl_06{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
 
-		self.assertTrue(isinstance(res, tuple))
-		self.assertEqual(res[0], ())  # return_exists
-		self.assertEqual(res[1], ())  # return_non_exists
-		self.assertEqual(res[2], {})  # get_dict_key_value_exists
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-	def test_r_mass_delete_013(self):
-		self.assertEqual(SmokeTests.r.r_mass_delete([]), ((), (), {}))
+		TtlTests.r.set_keys_ttl(keys)
 
-	def test_r_mass_delete_014(self):
-		self.assertEqual(SmokeTests.r.r_mass_delete(tuple()), ((), (), {}))
+		sleep(15)
 
-	def test_r_mass_delete_015(self):
-		self.assertEqual(SmokeTests.r.r_mass_delete(set()), ((), (), {}))
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-	def test_r_mass_delete_016(self):
-		self.assertEqual(SmokeTests.r.r_mass_delete(frozenset()), ((), (), {}))
+	def test_set_keys_ttl_008(self):
+		""" List - 071 - 079 """
+		keys: list = [f'set_keys_ttl_07{i}' for i in range(1, 10)]
+		for key in keys:
+			if int(key[-1]) % 2 == 0:
+				TtlTests.r.r_set(key, key)
+			else:
+				TtlTests.r.r_set(key, [key])
 
-	# r_mass_unlink ####################################################################################################
+		for key in keys:
+			if int(key[-1]) % 2 == 0:
+				self.assertEqual(TtlTests.r.r_get(key), key)
+			else:
+				self.assertEqual(TtlTests.r.r_get(key), [key])
 
-	def test_r_mass_unlink_001(self):
-		self.assertEqual(SmokeTests.r.r_mass_unlink([]), ((), (), {}))
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=None, ttl_sec=1)
 
-	def test_r_mass_unlink_002(self):
-		self.assertEqual(SmokeTests.r.r_mass_unlink(tuple()), ((), (), {}))
+		sleep(5)
 
-	def test_r_mass_unlink_003(self):
-		self.assertEqual(SmokeTests.r.r_mass_unlink(set()), ((), (), {}))
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
 
-	def test_r_mass_unlink_004(self):
-		self.assertEqual(SmokeTests.r.r_mass_unlink(frozenset()), ((), (), {}))
+	def test_set_keys_ttl_009(self):
+		""" List - 081 - 089 + unknown keys """
+		keys: list = [f'set_keys_ttl_08{i}' for i in range(1, 10)]
+		for key in keys:
+			TtlTests.r.r_set(key, key)
 
-	# r_set function with 'if_exists' parameter ########################################################################
+		for key in keys:
+			self.assertEqual(TtlTests.r.r_get(key), key)
 
-	def test_r_set_if_exists_001(self):
-		key: str = 'r_set_if_exists_001'
-		value_1: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value_1)
+		keys.extend([TtlTests.get_random_string() for _ in range(randint(5, 10))])
+		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000, ttl_sec=None)
 
-		value_2: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value_2, if_exist=True)
+		sleep(10)
 
-		res: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res, value_2)
+		for key in keys:
+			self.assertIsNone(TtlTests.r.r_get(key))
 
-	def test_r_set_if_exists_002(self):
-		key: str = 'r_set_if_exists_002'
-		value_1: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value_1)
+	# get_key_ttl ######################################################################################################
 
-		value_lst: list = [SmokeTests.get_random_integer() for _ in range(randint(10, 15))]
-		SmokeTests.r.r_set(key, value_lst, if_exist=True)
+	# TODO
 
-		res: str = SmokeTests.r.r_get(key, convert_to_type='int')
-		self.assertEqual(res, value_lst)
+	# drop_key_ttl #####################################################################################################
 
-	def test_r_set_if_exists_003(self):
-		key: str = 'r_set_if_exists_003'
-		value_1: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value_1, if_exist=True)
-		res: str = SmokeTests.r.r_get(key)
-		self.assertIsNone(res)
+	def test_drop_key_ttl_001(self):
+		key: str = 'drop_key_ttl_001'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
 
-	# r_set function with 'if_not_exists' parameter ####################################################################
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
 
-	def test_r_set_if_not_exists_001(self):
-		key: str = 'r_set_if_not_exists_001'
-		value_1: int = SmokeTests.get_random_integer()
-		SmokeTests.r.r_set(key, value_1)
+		TtlTests.r.set_key_ttl(key, ttl_ms=15_000)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
 
-		value_2: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value_2, if_not_exist=True)
+		TtlTests.r.drop_key_ttl(key)
+		sleep(20)
+		res_3: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_3)
 
-		res: str = SmokeTests.r.r_get(key, convert_to_type='integer')
-		self.assertEqual(res, value_1)
+	def test_drop_key_ttl_002(self):
+		key: str = 'drop_key_ttl_002'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
 
-	def test_r_set_if_not_exists_002(self):
-		key: str = 'r_set_if_not_exists_002'
-		value_1: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value_1)
-		value_2: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value_2, if_not_exist=True)
-		res: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res, value_1)
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
 
-	def test_r_set_if_not_exists_003(self):
-		key: str = 'r_set_if_not_exists_003'
-		value_1: str = SmokeTests.get_random_string()
-		SmokeTests.r.r_set(key, value_1)
+		TtlTests.r.set_key_ttl(key, ttl_sec=10)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
 
-		value_lst: list = [SmokeTests.get_random_integer() for _ in range(randint(10, 15))]
-		SmokeTests.r.r_set(key, value_lst, if_not_exist=True)
-		res: str = SmokeTests.r.r_get(key)
-		self.assertEqual(res, value_1)
+		TtlTests.r.drop_key_ttl(key)
+		sleep(15)
+		res_3: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_3)
+
+	def test_drop_key_ttl_003(self):
+		key: str = 'drop_key_ttl_003'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=10)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		TtlTests.r.drop_key_ttl('')  # unknown key
+		sleep(20)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_drop_key_ttl_004(self):
+		""" drop ttl without ttl for key """
+		key: str = 'drop_key_ttl_004'
+		value: str = TtlTests.get_random_string()
+		TtlTests.r.r_set(key, value)
+
+		res_1: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_1)
+
+		TtlTests.r.set_key_ttl(key)
+		res_2: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_2)
+
+		TtlTests.r.drop_key_ttl(key)
+		sleep(10)
+		res_3: str = TtlTests.r.r_get(key)
+		self.assertEqual(value, res_3)
+
+	# drop_keys_ttl ####################################################################################################
+
+	# TODO
 
 
 if __name__ == '__main__':
