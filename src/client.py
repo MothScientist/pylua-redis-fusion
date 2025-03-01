@@ -8,8 +8,7 @@ from redis import (
     Redis,
     ConnectionPool as rConnectionPool,
     ConnectionError as rConnectionError,
-    TimeoutError as rTimeoutError,
-    RedisError as rRedisError
+    TimeoutError as rTimeoutError
 )
 
 
@@ -17,11 +16,11 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', 'eval_status', 'static_redis_server_info')
+    __slots__ = ('redis', 'eval_status')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
-            socket_timeout: int | float = 0.1, retry_on_timeout: bool = True
+            socket_timeout: int | float = 0.1, retry_on_timeout: bool = True, socket_keepalive: bool = True
     ):
         self.redis = Redis(
             connection_pool=rConnectionPool(
@@ -33,22 +32,20 @@ class PyRedis:
                 socket_timeout=socket_timeout,
                 encoding='utf-8',
                 decode_responses=True,
-                retry_on_timeout=retry_on_timeout
+                retry_on_timeout=retry_on_timeout,
+                socket_keepalive=socket_keepalive
             )
         )
-
         self.eval_status: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
-        # to save memory, initialize with None (dict() = 64 bytes, None = 16 bytes)
-        self.static_redis_server_info: dict | None = None  # Storing static information about a Redis server
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """
-        Closing connection when exiting context manager 'with'
-        """
-        self.redis.quit()
+        self.redis.close()
+
+    def __del__(self):
+        self.redis.close()
 
     def r_ping(self) -> bool:
         try:
@@ -56,64 +53,19 @@ class PyRedis:
         except (rConnectionError, rTimeoutError):
             return False
 
-    # Redis INFO #######################################################################################################
-
     def get_redis_info(self) -> dict:
         """
-        If you do not have enough built-in library functions to get data about the Redis server,
-        use this function and select the fields you need.
+        Some of the most popular keys in the output dictionary are:
+
+        used_memory_vm_eval (For Redis >= 7.0):
+        Number of bytes used by the script VM engines for EVAL framework (not part of used_memory)
+
+        number_of_cached_scripts (For Redis >= 7.0):
+        The number of EVAL scripts cached by the server
+
+        uptime_in_seconds, uptime_in_days, redis_version, gcc_version, arch_bits, os, etc.
         """
         return self.redis.info()
-
-    def check_redis_static_info(self, data_key: str) -> dict:
-        if not self.static_redis_server_info:
-            data: dict = self.redis.info()
-            data_keys: tuple = ('arch_bits', 'redis_version')
-            self.static_redis_server_info: dict = {key: data.get(key) for key in data_keys}
-        return self.static_redis_server_info.get(data_key)
-
-    # Static data
-
-    def get_redis_server_architecture(self):
-        """
-        arch_bits
-        :return: Architecture (32 or 64 bits)
-        """
-        return self.check_redis_static_info('arch_bits')
-
-    def get_redis_version(self):
-        return self.check_redis_static_info('redis_version')
-
-    # Dynamic data
-
-    def get_redis_used_memory_vm_eval(self):
-        """
-        For Redis >= 7.0
-        Number of bytes used by the script VM engines for EVAL framework (not part of used_memory)
-        """
-        return self.redis.info().get('used_memory_vm_eval')
-
-    def get_redis_number_of_cached_scripts(self):
-        """
-        For Redis >= 7.0
-        The number of EVAL scripts cached by the server
-        """
-        return self.redis.info().get('number_of_cached_scripts')
-
-    def get_redis_uptime(self, in_days: bool = False):
-        data: dict = self.redis.info()
-        return data.get('uptime_in_days') if in_days else data.get('uptime_in_seconds')
-
-    ####################################################################################################################
-
-    def key_is_exist(self, key: str) -> bool | None:
-        return bool(self.redis.exists(key)) if key else None
-
-    def keys_is_exist(self, keys: list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
-        """
-        Mass operation to check for keys
-        """
-        return self.redis.exists(*keys) if keys else 0
 
     def get_key_memory_usage(self, key: str):
         """
@@ -125,6 +77,15 @@ class PyRedis:
         :return: [integer] the memory usage in bytes
         """
         self.redis.memory_usage(key, samples=0)
+
+    def key_is_exist(self, key: str) -> bool | None:
+        return bool(self.redis.exists(key)) if key else None
+
+    def keys_is_exist(self, keys: list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
+        """
+        Mass operation to check for keys
+        """
+        return self.redis.exists(*keys) if keys else 0
 
     def get_count_of_keys(self) -> int:
         """ Returns the number of keys in the current database """
@@ -463,10 +424,10 @@ class PyRedis:
         a single Lua script can only change the data of the current database to which the connection is connected.
         """
         total_keys = 0
-        databases = int(self.redis.config_get('databases')['databases'])  # Get the number of databases
-        for db in range(databases):
-            self.redis.execute_command("SELECT", db)
-            if get_count_keys:
+        if get_count_keys:
+            databases = int(self.redis.config_get('databases')['databases'])  # Get the number of databases
+            for db in range(databases):
+                self.redis.execute_command("SELECT", db)
                 total_keys += self.redis.dbsize()
 
         self.redis.flushall()
