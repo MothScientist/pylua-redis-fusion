@@ -2,9 +2,9 @@ import unittest
 from redis import Redis, ConnectionPool
 from sys import path as sys_path
 
+from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 sys_path.append('../')
 from src.client import PyRedis
-from tests.connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 
 redis_db: int = 4
 
