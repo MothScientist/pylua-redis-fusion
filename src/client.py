@@ -125,8 +125,8 @@ class PyRedis:
         return None if the key does not exist;
         return 0 if the key exists but has no associated expire;
         """
-        res = self.redis.ttl(key) if in_seconds else self.redis.pttl(key)
-        return res if res not in (-1, -2) else (0 if res == -1 else None)
+        ttl = self.redis.ttl(key) if in_seconds else self.redis.pttl(key)
+        return ttl if ttl not in (-1, -2) else (0 if ttl == -1 else None)
 
     def drop_key_ttl(self, key: str):
         """ Removes the key lifetime (ttl) if one is set """

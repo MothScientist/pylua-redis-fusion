@@ -41,26 +41,26 @@ class LuaScriptsSHATests(unittest.TestCase):
 		self.assertTrue(LuaScriptsSHATests.r.r_ping())
 
 	def test_lua_sha_001(self):
-		self.assertEqual(LuaScriptsSHATests.r.eval_status, {})
+		self.assertEqual(LuaScriptsSHATests.r.lua_scripts_sha, {})
 
 	def test_lua_sha_002(self):
 		key: str = 'lua_sha_002'
 		LuaScriptsSHATests.r.r_set(key, key)
-		self.assertTrue('set_not_array_helper' in LuaScriptsSHATests.r.eval_status)
+		self.assertTrue('set_not_array_helper' in LuaScriptsSHATests.r.lua_scripts_sha)
 
 	def test_lua_sha_003(self):
 		key: str = 'lua_sha_002'
 		LuaScriptsSHATests.r.r_set(key, key)
 		LuaScriptsSHATests.r.r_set(key, [key])
 		self.assertTrue(
-			all(key in LuaScriptsSHATests.r.eval_status for key in ('set_not_array_helper', 'arrays_helper'))
+			all(key in LuaScriptsSHATests.r.lua_scripts_sha for key in ('set_not_array_helper', 'arrays_helper'))
 		)
 
 	def test_lua_sha_004(self):
 		key: str = 'lua_sha_004'
 		LuaScriptsSHATests.r.r_set(key, key)
 		self.assertTrue(
-			all(isinstance(value, str) and value for value in LuaScriptsSHATests.r.eval_status.values())
+			all(isinstance(value, str) and value for value in LuaScriptsSHATests.r.lua_scripts_sha.values())
 		)
 
 

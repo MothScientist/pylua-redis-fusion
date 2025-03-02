@@ -592,7 +592,9 @@ class SmokeTests(unittest.TestCase):
 
 		# rewrite
 		value_2: tuple[int, ...] = tuple([SmokeTests.get_random_integer() for _ in range(randint(20, 25))])
-		old_value: tuple[int, ...] = tuple(SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='integer'))
+		old_value: tuple[int, ...] = tuple(
+			SmokeTests.r.r_set(key, value_2, get_old_value=True, convert_to_type_for_get='integer')
+		)
 		self.assertEqual(old_value, value_1)
 		res_2: tuple[int, ...] = tuple(SmokeTests.r.r_get(key, convert_to_type='integer'))
 		self.assertEqual(res_2, value_2)
@@ -1586,6 +1588,34 @@ class SmokeTests(unittest.TestCase):
 		SmokeTests.r.r_set(key, value_lst, if_not_exist=True)
 		res: str = SmokeTests.r.r_get(key)
 		self.assertEqual(res, value_1)
+
+	def test_get_redis_info_001(self):
+		self.assertTrue(len(SmokeTests.r.get_redis_info()) > 0)
+
+	def test_get_redis_info_002(self):
+		self.assertTrue(SmokeTests.r.get_redis_info().get('uptime_in_seconds'))
+
+	def test_get_redis_info_003(self):
+		self.assertTrue(SmokeTests.r.get_redis_info().get('redis_version'))
+
+	def test_get_redis_info_004(self):
+		self.assertTrue(SmokeTests.r.get_redis_info().get('gcc_version'))
+
+	def test_get_redis_info_005(self):
+		self.assertTrue(SmokeTests.r.get_redis_info().get('arch_bits'))
+
+	def test_get_redis_info_006(self):
+		self.assertTrue(SmokeTests.r.get_redis_info().get('os'))
+
+	def test_get_key_memory_usage_001(self):
+		key: str = 'get_key_memory_usage_001'
+		SmokeTests.r.r_set(key, key)
+		self.assertTrue(SmokeTests.r.get_key_memory_usage(key) > 0)
+
+	def test_get_key_memory_usage_002(self):
+		key: str = 'get_key_memory_usage_002'
+		# without set
+		self.assertEqual(SmokeTests.r.get_key_memory_usage(key), 0)
 
 
 if __name__ == '__main__':
