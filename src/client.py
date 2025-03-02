@@ -16,7 +16,7 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', 'lua_scripts_sha')
+    __slots__ = ('redis', 'lua_scripts_sha', 'user_lua_scripts_buffer')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
@@ -37,6 +37,7 @@ class PyRedis:
             )
         )
         self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
+        self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts  # TODO - tests
 
     def __enter__(self):
         return self
@@ -210,7 +211,6 @@ class PyRedis:
 
         return PyRedis.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
 
-    def r_get(self, key: str, default_value=None, convert_to_type: str = None):
     def append_value_to_array(
             self,
             key: str,
@@ -489,17 +489,25 @@ class PyRedis:
         """
         if not (script or sha):
             return
-        if sha:
+        if sha or (sha := script in self.user_lua_scripts_buffer):
             return self.redis.evalsha_ro(sha, *args) if read_only else self.redis.evalsha(sha, *args)
         return self.redis.eval_ro(script, *args) if read_only else self.redis.eval(script, *args)
 
-    def load_lua_script(self, lua_script: str):
+    def load_lua_script(self, lua_script: str, use_buffer: bool = True):
         """
         Load a Lua script into the script cache_data
         :param lua_script:
+        :param use_buffer: You can use the built-in buffer to store the SHA of your scripts,
+        and if it is found when executing the script,
+        its SHA will already be inside the structure and will not be calculated again.
         :return: SHA
         """
-        return self.redis.script_load(lua_script)
+        if lua_script in self.user_lua_scripts_buffer:
+            return self.user_lua_scripts_buffer[lua_script]
+        res = self.redis.script_load(lua_script)
+        if use_buffer:
+            self.user_lua_scripts_buffer[lua_script] = res
+        return res
 
     def __register_lua_scripts(self, script_name: str, *args):
         if script_name not in self.lua_scripts_sha:
