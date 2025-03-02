@@ -211,6 +211,43 @@ class PyRedis:
         return PyRedis.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
 
     def r_get(self, key: str, default_value=None, convert_to_type: str = None):
+    def append_value_to_array(
+            self,
+            key: str,
+            value: bool | int | float | str,
+            top_of_list: bool = False,
+            type_if_not_exists: str | None = None,
+            get_old_value: bool = False,
+            convert_to_type: str | None = None
+    ) -> list | set | None:
+        """
+        Adding a new value to a list or set
+        :param key:
+        :param value: Remember that Redis does not support nested structures,
+        so arrays cannot be values inside other arrays.
+        :param top_of_list: Add value to the beginning of the list, otherwise it is added to the end
+        (for sets this parameter is ignored, since they do not store the order of values).
+        :param type_if_not_exists: If such a key does not exist, then a list or set value will be created,
+        if otherwise specified, then the None parameter is assigned,
+        which says that if such a key does not exist, it will not be created.
+        :param get_old_value: Return the previous value of the key
+        :param convert_to_type: bool/int/float (by default all output data is of type str after decode() function);
+        For float -> int: rounds down to integer part number (drops fractional part)
+        :return: None if such value did not exist before or get_old_value = False
+        """
+        if not key or (not value and value not in (False, 0)) or not isinstance(value, (bool,  int, float, str)):
+            return
+        value: str = str(value)
+        type_if_not_exists: str = 'null' if type_if_not_exists not in ('list', 'set') else type_if_not_exists
+        top_of_list: int = 1 if top_of_list is True else 0
+        get_old_value: int = 1 if get_old_value else 0
+        res = self.__register_lua_scripts(
+            'append_value_to_array', 1, key, type_if_not_exists, top_of_list, get_old_value, value
+        )
+        res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
+        return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
+
+    def r_get(self, key: str, default_value=None, convert_to_type: str | None = None):
         """
         Used both to get a value by key and to check for its existence
         :param key:
