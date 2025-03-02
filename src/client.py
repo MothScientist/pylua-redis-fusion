@@ -150,7 +150,7 @@ class PyRedis:
     def r_set(
             self,
             key: str | dict,
-            value: int | float | str | list | tuple | set | frozenset | None,
+            value: bool | int | float | str | list | tuple | set | frozenset,
             get_old_value: bool = False,
             convert_to_type_for_get: str = None,
             time_ms: int | None = None,
@@ -176,7 +176,8 @@ class PyRedis:
         :param keep_ttl: retain the time to live associated with the key.  # TODO - tests
         :return: None
         """
-        if not key or (not value and value not in (False, 0)):
+        if (not key or (not value and value not in (False, 0))
+                or not isinstance(value, (bool, int, float, str, list, tuple, set, frozenset))):
             # Writing empty objects is not supported
             return
 
@@ -190,23 +191,27 @@ class PyRedis:
             pass
 
         elif isinstance(value, (bool, int, float, str)):
+            get_old_value: int = int(get_old_value)
+            time_ms: int = time_ms or 0
+            if_exist: int = int(if_exist)
+            if_not_exist: int = int(if_not_exist)
+            keep_ttl: int = int(keep_ttl)
+            value: str = str(value)
             res = self.__register_lua_scripts(
-                'set_not_array_helper', 1, key,
-                str(int(get_old_value)),
-                str(time_ms or 0),
-                str(int(if_exist)),
-                str(int(if_not_exist)),
-                str(int(keep_ttl)),
-                str(value)
+                'set_not_array_helper', 1, key, get_old_value, time_ms, if_exist, if_not_exist, keep_ttl, value
             )
 
         elif isinstance(value, (list, tuple, set, frozenset)):
-            value = type(value)(str(element) for element in value)
+            value: list | tuple | set | frozenset = type(value)(str(element) for element in value)
+            time_ms: int = time_ms or 0
+            if_exist: int = int(if_exist)
+            if_not_exist: int = int(if_not_exist)
+            get_old_value: int = int(get_old_value)
+            keep_ttl: int = int(keep_ttl)
             res = self.__register_lua_scripts(
-                'arrays_helper', 1, key,
-                str(int(get_old_value)), str(time_ms or 0), str(int(if_exist)), str(int(if_not_exist)),
-                str(int(keep_ttl)), 'rpush' if isinstance(value, (list, tuple)) else 'sadd',
-                *value
+                'set_arrays_helper', 1, key,
+                get_old_value, time_ms, if_exist, if_not_exist, keep_ttl,
+                'rpush' if isinstance(value, (list, tuple)) else 'sadd', *value
             )
 
         return PyRedis.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
@@ -502,10 +507,8 @@ class PyRedis:
         its SHA will already be inside the structure and will not be calculated again.
         :return: SHA
         """
-        if lua_script in self.user_lua_scripts_buffer:
-            return self.user_lua_scripts_buffer[lua_script]
-        res = self.redis.script_load(lua_script)
-        if use_buffer:
+        res = self.user_lua_scripts_buffer.get(lua_script) or self.redis.script_load(lua_script)
+        if use_buffer and lua_script not in self.user_lua_scripts_buffer:
             self.user_lua_scripts_buffer[lua_script] = res
         return res
 
@@ -546,7 +549,7 @@ class PyRedis:
         return value
 
     @staticmethod
-    def __compare_and_select_sec_ms(time_s: int, time_ms: int) -> int:
+    def __compare_and_select_sec_ms(time_s: int | None, time_ms: int | None) -> int:
         """
         If both seconds and milliseconds are specified,
         the time is converted to milliseconds and the smallest one is selected

@@ -53,7 +53,7 @@ class LuaScriptsSHATests(unittest.TestCase):
 		LuaScriptsSHATests.r.r_set(key, key)
 		LuaScriptsSHATests.r.r_set(key, [key])
 		self.assertTrue(
-			all(key in LuaScriptsSHATests.r.lua_scripts_sha for key in ('set_not_array_helper', 'arrays_helper'))
+			all(key in LuaScriptsSHATests.r.lua_scripts_sha for key in ('set_not_array_helper', 'set_arrays_helper'))
 		)
 
 	def test_lua_sha_004(self):

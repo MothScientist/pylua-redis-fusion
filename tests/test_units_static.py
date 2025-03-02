@@ -388,7 +388,7 @@ class PrivateStaticFuncTests(unittest.TestCase):
 		self.assertTrue(isinstance(res, str))
 
 	def test_load_lua_func_obj_002(self):
-		res = PrivateStaticFuncTests.load_lua_func_obj('arrays_helper')
+		res = PrivateStaticFuncTests.load_lua_func_obj('set_arrays_helper')
 		self.assertNotEqual(res, '')
 		self.assertTrue(isinstance(res, str))
 
