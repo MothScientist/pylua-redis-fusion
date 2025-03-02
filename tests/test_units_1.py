@@ -75,7 +75,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_ms=10_000))
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(res_1, value)
-		sleep(20)
+		sleep(11)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -196,7 +196,7 @@ class TtlTests(unittest.TestCase):
 		res_1: tuple[str, ...] = tuple(TtlTests.r.r_get(key))
 		self.assertEqual(res_1, value)
 
-		sleep(20)
+		sleep(16)
 		res_2: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_2, f'res = {res_2}')
 
@@ -205,7 +205,7 @@ class TtlTests(unittest.TestCase):
 		value: tuple[float, ...] = tuple([random() for _ in range(randint(10, 20))])
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=5))
 
-		sleep(10)
+		sleep(6)
 		res: None = TtlTests.r.r_get(key, convert_to_type='float')
 		self.assertIsNone(res, f'res = {res}')
 
@@ -218,7 +218,7 @@ class TtlTests(unittest.TestCase):
 		res_1: set[float] = set(TtlTests.r.r_get(key, convert_to_type='float'))
 		self.assertEqual(res_1, value)
 
-		sleep(15)
+		sleep(11)
 		res_2: None = TtlTests.r.r_get(key)  # without convert_to_type
 		self.assertIsNone(res_2, f'res = {res_2}')
 		res_3: None = TtlTests.r.r_get(key, convert_to_type='float')
@@ -229,7 +229,7 @@ class TtlTests(unittest.TestCase):
 		value: set[str] = {TtlTests.get_random_string() for _ in range(randint(10, 20))}
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1))
 
-		sleep(5)
+		sleep(2)
 		res_1: None = TtlTests.r.r_get(key)  # without convert_to_type
 		self.assertIsNone(res_1, f'res = {res_1}')
 		res_2: None = TtlTests.r.r_get(key, convert_to_type='integer')  # wrong type
@@ -249,7 +249,7 @@ class TtlTests(unittest.TestCase):
 		res_2: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_2)
 
-		sleep(10)
+		sleep(6)
 		self.assertIsNone(TtlTests.r.r_get(key))
 
 	def test_set_key_ttl_002(self):
@@ -264,7 +264,7 @@ class TtlTests(unittest.TestCase):
 		res_2: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_2)
 
-		sleep(15)
+		sleep(11)
 		self.assertIsNone(TtlTests.r.r_get(key))
 
 	def test_set_key_ttl_003(self):
@@ -279,7 +279,7 @@ class TtlTests(unittest.TestCase):
 		res_2: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_2)
 
-		sleep(10)
+		sleep(6)
 		self.assertIsNone(TtlTests.r.r_get(key))
 
 	# set_keys_ttl #####################################################################################################
@@ -295,7 +295,7 @@ class TtlTests(unittest.TestCase):
 
 		TtlTests.r.set_keys_ttl(keys, ttl_sec=1)
 
-		sleep(3)
+		sleep(2)
 
 		for key in keys:
 			self.assertIsNone(TtlTests.r.r_get(key))
@@ -311,7 +311,7 @@ class TtlTests(unittest.TestCase):
 
 		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
 
-		sleep(10)
+		sleep(6)
 
 		for key in keys:
 			self.assertIsNone(TtlTests.r.r_get(key))
@@ -327,7 +327,7 @@ class TtlTests(unittest.TestCase):
 
 		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000, ttl_sec=1_000)
 
-		sleep(10)
+		sleep(6)
 
 		for key in keys:
 			self.assertIsNone(TtlTests.r.r_get(key))
@@ -343,7 +343,7 @@ class TtlTests(unittest.TestCase):
 
 		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
 
-		sleep(10)
+		sleep(6)
 
 		for key in keys:
 			self.assertIsNone(TtlTests.r.r_get(key))
@@ -359,7 +359,7 @@ class TtlTests(unittest.TestCase):
 
 		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
 
-		sleep(10)
+		sleep(6)
 
 		for key in keys:
 			self.assertIsNone(TtlTests.r.r_get(key))
@@ -375,7 +375,7 @@ class TtlTests(unittest.TestCase):
 
 		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000)
 
-		sleep(10)
+		sleep(6)
 
 		for key in keys:
 			self.assertIsNone(TtlTests.r.r_get(key))
@@ -389,9 +389,9 @@ class TtlTests(unittest.TestCase):
 		for key in keys:
 			self.assertEqual(TtlTests.r.r_get(key), key)
 
-		TtlTests.r.set_keys_ttl(keys)
+		TtlTests.r.set_keys_ttl(keys)  # do not set the lifetime of the key
 
-		sleep(15)
+		sleep(5)
 
 		for key in keys:
 			self.assertEqual(TtlTests.r.r_get(key), key)
@@ -413,7 +413,7 @@ class TtlTests(unittest.TestCase):
 
 		TtlTests.r.set_keys_ttl(keys, ttl_ms=None, ttl_sec=1)
 
-		sleep(5)
+		sleep(2)
 
 		for key in keys:
 			self.assertIsNone(TtlTests.r.r_get(key))
@@ -430,7 +430,7 @@ class TtlTests(unittest.TestCase):
 		keys.extend([TtlTests.get_random_string() for _ in range(randint(5, 10))])
 		TtlTests.r.set_keys_ttl(keys, ttl_ms=5_000, ttl_sec=None)
 
-		sleep(10)
+		sleep(6)
 
 		for key in keys:
 			self.assertIsNone(TtlTests.r.r_get(key))
@@ -454,7 +454,7 @@ class TtlTests(unittest.TestCase):
 		self.assertEqual(value, res_2)
 
 		TtlTests.r.drop_key_ttl(key)
-		sleep(20)
+		sleep(16)
 		res_3: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_3)
 
@@ -471,7 +471,7 @@ class TtlTests(unittest.TestCase):
 		self.assertEqual(value, res_2)
 
 		TtlTests.r.drop_key_ttl(key)
-		sleep(15)
+		sleep(11)
 		res_3: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_3)
 
@@ -488,7 +488,7 @@ class TtlTests(unittest.TestCase):
 		self.assertEqual(value, res_2)
 
 		TtlTests.r.drop_key_ttl('')  # unknown key
-		sleep(20)
+		sleep(11)
 		self.assertIsNone(TtlTests.r.r_get(key))
 
 	def test_drop_key_ttl_004(self):
@@ -500,12 +500,12 @@ class TtlTests(unittest.TestCase):
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_1)
 
-		TtlTests.r.set_key_ttl(key)
+		TtlTests.r.set_key_ttl(key, ttl_sec=5)
 		res_2: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_2)
 
 		TtlTests.r.drop_key_ttl(key)
-		sleep(10)
+		sleep(6)
 		res_3: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_3)
 
