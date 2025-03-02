@@ -438,7 +438,33 @@ class PyRedis:
 
         return int(total_keys) if get_count_keys else None
 
-    def __register_lua_scripts(self, script_name: str, *args, read_only: bool = False):
+    def run_lua_script(self, script: str | None = None, sha: str | None = None, read_only: bool = False, *args):
+        """
+        Execute the Lua script, specifying the numkeys the script
+        will touch and the key names and argument values in keys_and_args.
+
+        :param script: Lua script as a string
+        :param sha: SHA or result load_lua_script() function
+        :param read_only: True if the EVAL command should be executed, read-only
+        :param args: The first arguments in *args you must pass are the number of keys,
+        and then the keys themselves in the required order. Then come the additional arguments.
+        :return: Returns the result of the script
+        """
+        if not (script or sha):
+            return
+        if sha:
+            return self.redis.evalsha_ro(sha, *args) if read_only else self.redis.evalsha(sha, *args)
+        return self.redis.eval_ro(script, *args) if read_only else self.redis.eval(script, *args)
+
+    def load_lua_script(self, lua_script: str):
+        """
+        Load a Lua script into the script cache_data
+        :param lua_script:
+        :return: SHA
+        """
+        return self.redis.script_load(lua_script)
+
+    def __register_lua_scripts(self, script_name: str, *args):
         if script_name not in self.lua_scripts_sha:
             lua_script = PyRedis.__load_lua_script(script_name)
             self.lua_scripts_sha[script_name] = self.redis.script_load(lua_script)
@@ -480,8 +506,8 @@ class PyRedis:
         If both seconds and milliseconds are specified,
         the time is converted to milliseconds and the smallest one is selected
         """
-        res = min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
-        return int(res) if isinstance(res, (int, float)) else None
+        time_ms = min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
+        return int(time_ms) if isinstance(time_ms, (int, float)) else None
 
     @staticmethod
     def __remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
