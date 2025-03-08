@@ -48,6 +48,14 @@ class PyRedis:
     def __del__(self):
         self.redis.close()
 
+    def redis_py(self) -> Redis:
+        """
+        Returns the original library object that the current library is built on if you need to perform an action
+        that is not available within the current library.
+        :return: redis-py library object
+        """
+        return self.redis
+
     def r_ping(self) -> bool:
         try:
             return self.redis.ping()
