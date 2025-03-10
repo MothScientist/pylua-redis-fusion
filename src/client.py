@@ -228,7 +228,7 @@ class PyRedis:
             self,
             key: str,
             value: bool | int | float | str,
-            top_of_list: bool = False,
+            index: int = -1,
             type_if_not_exists: str | None = None,
             get_old_value: bool = False,
             convert_to_type: str | None = None
@@ -238,8 +238,10 @@ class PyRedis:
         :param key:
         :param value: Remember that Redis does not support nested structures,
         so arrays cannot be values inside other arrays.
-        :param top_of_list: Add value to the beginning of the list, otherwise it is added to the end
-        (for sets this parameter is ignored, since they do not store the order of values).
+        :param index: At what position this element should be added. 0 - to the beginning, -1 - to the end,
+        otherwise a specific position within the list (For sets and sorted sets, the parameter is ignored).
+        If the position is greater than the length of the list,
+        the element will be added to the end (equivalent to parameter -1).
         :param type_if_not_exists: If such a key does not exist, then a list or set value will be created,
         if otherwise specified, then the None parameter is assigned,
         which says that if such a key does not exist, it will not be created.
@@ -252,10 +254,9 @@ class PyRedis:
             return
         value: str = str(value)
         type_if_not_exists: str = 'null' if type_if_not_exists not in ('list', 'set') else type_if_not_exists
-        top_of_list: int = 1 if top_of_list is True else 0
-        get_old_value: int = 1 if get_old_value else 0
+        get_old_value: int = int(get_old_value)
         res = self.__register_lua_scripts(
-            'append_value_to_array', 1, key, type_if_not_exists, top_of_list, get_old_value, value
+            'append_value_to_array', 1, key, index, type_if_not_exists, get_old_value, value
         )
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
         return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
@@ -323,7 +324,7 @@ class PyRedis:
             return
 
         res = self.__register_lua_scripts(
-            'delete_or_unlink_with_returning', 1, key, str(int(returning)), 'unlink' if command else 'delete'
+            'delete_or_unlink_with_returning', 1, key, int(returning), 'unlink' if command else 'delete'
         )
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
 
@@ -463,7 +464,7 @@ class PyRedis:
         :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
         :return: count keys or None
         """
-        count_keys = self.__register_lua_scripts('remove_all_keys_local', 0, str(int(get_count_keys)))
+        count_keys = self.__register_lua_scripts('remove_all_keys_local', 0, int(get_count_keys))
         return int(count_keys) if count_keys else None
 
     def r_remove_all_keys(self, get_count_keys: bool = False) -> int | None:

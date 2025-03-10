@@ -1,26 +1,26 @@
 local key = KEYS[1]
-local get_old_value = tonumber(ARGV[1])
+local get_old_value = tonumber(ARGV[1]) == 1
 local time_ms = tonumber(ARGV[2])
-local if_exist = tonumber(ARGV[3])
-local if_not_exist = tonumber(ARGV[4])
-local keep_ttl = tonumber(ARGV[5])
+local if_exist = tonumber(ARGV[3]) == 1
+local if_not_exist = tonumber(ARGV[4]) == 1
+local keep_ttl = tonumber(ARGV[5]) == 1
 local value = ARGV[6]
 
-local key_exist = redis.call("EXISTS", key)
+local key_exist = redis.call("EXISTS", key) == 1
 
 
-if key_exist == 1 and keep_ttl == 1 then
+if key_exist and keep_ttl then
   time_ms = redis.call("PTTL", key)
 end
 
 
-if (key_exist == 0 and if_exist == 1) or (key_exist == 1 and if_not_exist == 1) then
+if (not key_exist and if_exist) or (key_exist and if_not_exist) then
   return
 end
 
 local old_value
 
-if get_old_value == 1 then
+if get_old_value then
   local value_type = redis.call("TYPE", key) -- determine what type the value stored in this key is
 
   if value_type.ok == 'string' then -- if value: bool/int/float/str
@@ -33,7 +33,7 @@ if get_old_value == 1 then
 end
 
 -- before writing, we must clear the current value by key, if it exists
-if key_exist == 1 then
+if key_exist then
   redis.call("DEL", key)
 end
 
