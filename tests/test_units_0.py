@@ -62,7 +62,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertTrue(obj.ping())
 
 	def test_origin_object_002(self):
-		key: str = 'origin_object_002'
+		key: str = self.test_origin_object_002.__name__
 		obj = SmokeTests.r.redis_py()
 		obj.set(key, key)
 		self.assertEqual(obj.get(key), key)
@@ -72,119 +72,295 @@ class SmokeTests(unittest.TestCase):
 	# key_is_exist #####################################################################################################
 
 	def test_key_is_exist_int_001(self):
-		key: str = 'key_is_exist_int_001'
+		key: str = self.test_key_is_exist_int_001.__name__
 		value: int = SmokeTests.get_random_integer()
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_int_002(self):
-		key: str = 'key_is_exist_int_002'
+		key: str = self.test_key_is_exist_int_002.__name__
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
+	def test_key_is_exist_int_003(self):
+		key: str = self.test_key_is_exist_int_003.__name__
+		value: int = 0
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
 	def test_key_is_exist_float_001(self):
-		key: str = 'key_is_exist_float_001'
+		key: str = self.test_key_is_exist_float_001.__name__
 		value: float = random()
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_float_002(self):
-		key: str = 'key_is_exist_float_002'
+		key: str = self.test_key_is_exist_float_002.__name__
 		value: float = float(SmokeTests.get_random_integer())
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_float_003(self):
-		key: str = 'key_is_exist_float_003'
+		key: str = self.test_key_is_exist_float_003.__name__
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
+	def test_key_is_exist_float_004(self):
+		key: str = self.test_key_is_exist_float_004.__name__
+		value: float = 0.0
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
 	def test_key_is_exist_str_001(self):
-		key: str = 'key_is_exist_str_001'
+		key: str = self.test_key_is_exist_str_001.__name__
 		value: str = SmokeTests.get_random_string()
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_str_002(self):
-		key: str = 'key_is_exist_str_002'
+		key: str = self.test_key_is_exist_str_002.__name__
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_bool_001(self):
-		key: str = 'key_is_exist_bool_001'
+		key: str = self.test_key_is_exist_bool_001.__name__
 		SmokeTests.r.r_set(key, True)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_bool_002(self):
-		key: str = 'key_is_exist_bool_002'
+		key: str = self.test_key_is_exist_bool_002.__name__
 		SmokeTests.r.r_set(key, False)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_bool_003(self):
-		key: str = 'key_is_exist_bool_003'
+		key: str = self.test_key_is_exist_bool_003.__name__
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_none_001(self):
-		key: str = 'key_is_exist_none_001'
+		key: str = self.test_key_is_exist_none_001.__name__
 		SmokeTests.r.r_set(key, None)
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_list_001(self):
-		key: str = 'key_is_exist_list_001'
+		key: str = self.test_key_is_exist_list_001.__name__
 		value: list = [SmokeTests.get_random_integer() for _ in range(randint(10, 20))]
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_list_002(self):
-		key: str = 'key_is_exist_list_002'
+		key: str = self.test_key_is_exist_list_002.__name__
 		SmokeTests.r.r_set(key, [])
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_list_003(self):
-		key: str = 'key_is_exist_list_003'
+		key: str = self.test_key_is_exist_list_003.__name__
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
+	def test_key_is_exist_list_004(self):
+		key: str = self.test_key_is_exist_list_004.__name__
+		value: list = [SmokeTests.get_random_string() for _ in range(randint(10, 20))]
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_list_005(self):
+		key: str = self.test_key_is_exist_list_005.__name__
+		value: list = [random() for _ in range(randint(10, 20))]
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_list_006(self):
+		key: str = self.test_key_is_exist_list_006.__name__
+		value: list = [float(SmokeTests.get_random_integer()) for _ in range(randint(10, 20))]
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
 	def test_key_is_exist_tuple_001(self):
-		key: str = 'key_is_exist_tuple_001'
+		key: str = self.test_key_is_exist_tuple_001.__name__
 		value: tuple = tuple([SmokeTests.get_random_string() for _ in range(randint(10, 20))])
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_tuple_002(self):
-		key: str = 'key_is_exist_tuple_002'
+		key: str = self.test_key_is_exist_tuple_002.__name__
 		SmokeTests.r.r_set(key, tuple())
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_tuple_003(self):
-		key: str = 'key_is_exist_tuple_003'
+		key: str = self.test_key_is_exist_tuple_003.__name__
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
+	def test_key_is_exist_tuple_004(self):
+		key: str = self.test_key_is_exist_tuple_004.__name__
+		value: tuple = tuple([bool(randint(0, 1)) for _ in range(randint(10, 20))])
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_tuple_005(self):
+		key: str = self.test_key_is_exist_tuple_005.__name__
+		value: tuple = tuple([SmokeTests.get_random_integer() for _ in range(randint(10, 20))])
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_tuple_006(self):
+		key: str = self.test_key_is_exist_tuple_006.__name__
+		value: tuple = tuple([float(SmokeTests.get_random_integer()) for _ in range(randint(10, 20))])
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
+	def test_key_is_exist_tuple_007(self):
+		key: str = self.test_key_is_exist_tuple_007.__name__
+		value: tuple = tuple([random() for _ in range(randint(10, 20))])
+		SmokeTests.r.r_set(key, value)
+		self.assertTrue(SmokeTests.r.key_is_exist(key))
+
 	def test_key_is_exist_set_001(self):
-		key: str = 'key_is_exist_set_001'
+		key: str = self.test_key_is_exist_set_001.__name__
 		value: set = {SmokeTests.get_random_string() for _ in range(randint(10, 20))}
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_set_002(self):
-		key: str = 'key_is_exist_set_002'
+		key: str = self.test_key_is_exist_set_002.__name__
 		SmokeTests.r.r_set(key, set())
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_set_003(self):
-		key: str = 'key_is_exist_set_003'
+		key: str = self.test_key_is_exist_set_003.__name__
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_frozenset_001(self):
-		key: str = 'key_is_exist_set_001'
+		key: str = self.test_key_is_exist_frozenset_001.__name__
 		value: frozenset = frozenset({SmokeTests.get_random_string() for _ in range(randint(10, 20))})
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_frozenset_002(self):
-		key: str = 'key_is_exist_frozenset_002'
+		key: str = self.test_key_is_exist_frozenset_002.__name__
 		SmokeTests.r.r_set(key, frozenset())
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
 
 	def test_key_is_exist_frozenset_003(self):
-		key: str = 'key_is_exist_frozenset_003'
+		key: str = self.test_key_is_exist_frozenset_003.__name__
 		self.assertFalse(SmokeTests.r.key_is_exist(key))
+
+	# append_value_to_array ############################################################################################
+
+	def test_append_value_to_array_001(self):
+		""" List """
+		key: str = self.test_append_value_to_array_001.__name__
+		value: list = [1, 2, 3, 4, 5]
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, 0, index=0)
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, [0, 1, 2, 3, 4, 5])
+
+	def test_append_value_to_array_002(self):
+		""" List """
+		key: str = self.test_append_value_to_array_002.__name__
+		value: list = [0, 1, 2, 3, 4]
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, 5, index=-1)
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, [0, 1, 2, 3, 4, 5])
+
+	def test_append_value_to_array_003(self):
+		""" List """
+		key: str = self.test_append_value_to_array_003.__name__
+		value: list = [0, 1, 2]
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, 3)
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, [0, 1, 2, 3])
+
+	def test_append_value_to_array_004(self):
+		""" List """
+		key: str = self.test_append_value_to_array_004.__name__
+		value: list = [0, 1, 2, 4, 5]
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, 3, index=3)
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, [0, 1, 2, 3, 4, 5])
+
+	def test_append_value_to_array_005(self):
+		""" List """
+		key: str = self.test_append_value_to_array_005.__name__
+		value: list = list(range(0, 10))
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, randint(0, 100), index=randint(1, 9))
+		res: list = SmokeTests.r.r_get(key)
+		self.assertTrue(len(res) == 11)
+
+	def test_append_value_to_array_006(self):
+		""" Set """
+		key: str = self.test_append_value_to_array_006.__name__
+		value: set = set(range(0, 10))
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, randint(0, 100))
+		res: set = SmokeTests.r.r_get(key)
+		self.assertTrue(len(res) == 11)
+
+	def test_append_value_to_array_007(self):
+		""" Set """
+		key: str = self.test_append_value_to_array_007.__name__
+		value: set = set(randint(0, 10_000) for _ in range(0, 25))
+		SmokeTests.r.r_set(key, value)
+		new_value: int = randint(100_000, 1_000_000)
+		SmokeTests.r.append_value_to_array(key, new_value)
+		res: set = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(value.union({new_value}), res)
+
+	# r_len ############################################################################################################
+
+	def test_r_len_001(self):
+		""" List"""
+		key: str = self.test_r_len_001.__name__
+		lst_len: int = SmokeTests.get_random_integer()
+		SmokeTests.r.r_set(key, [key] * lst_len)
+		res: int = SmokeTests.r.r_len(key)
+		self.assertEqual(res, lst_len)
+
+	def test_r_len_002(self):
+		""" Tuple """
+		key: str = self.test_r_len_002.__name__
+		lst_len: int = SmokeTests.get_random_integer()
+		SmokeTests.r.r_set(key, tuple([key] * lst_len))
+		res: int = SmokeTests.r.r_len(key)
+		self.assertEqual(res, lst_len)
+
+	def test_r_len_003(self):
+		""" Set """
+		key: str = self.test_r_len_003.__name__
+		lst_len: int = SmokeTests.get_random_integer()
+		SmokeTests.r.r_set(key, set([i for i in range(lst_len)]))
+		res: int = SmokeTests.r.r_len(key)
+		self.assertEqual(res, lst_len)
+
+	def test_r_len_004(self):
+		""" Frozenset """
+		key: str = self.test_r_len_004.__name__
+		lst_len: int = SmokeTests.get_random_integer()
+		SmokeTests.r.r_set(key, frozenset([i for i in range(lst_len)]))
+		res: int = SmokeTests.r.r_len(key)
+		self.assertEqual(res, lst_len)
+
+	def test_r_len_005(self):
+		key: str = self.test_r_len_005.__name__
+		# not a list
+		SmokeTests.r.r_set(key, key)
+		res: int = SmokeTests.r.r_len(key)
+		self.assertEqual(res, 0)
+
+	def test_r_len_006(self):
+		key: str = self.test_r_len_006.__name__
+		# without set
+		res: int = SmokeTests.r.r_len(key)
+		self.assertIsNone(res)
+
+	def test_r_len_007(self):
+		key: str = self.test_r_len_007.__name__
+		SmokeTests.r.r_set(key, {key})
+
+	def test_r_len_008(self):
+		key: str = self.test_r_len_008.__name__
+		# на место ключа в set передать None
+		pass
 
 	# get_count_of_keys ################################################################################################
 
