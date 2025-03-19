@@ -384,48 +384,48 @@ class SmokeTests(unittest.TestCase):
 	# get_type_value_of_key ############################################################################################
 
 	def test_get_type_value_of_key_str_001(self):
-		key: str = 'get_type_value_of_key_str_001'
+		key: str = self.test_get_type_value_of_key_str_001.__name__
 		value: str = SmokeTests.get_random_string()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
 
 	def test_get_type_value_of_key_int_001(self):
-		key: str = 'get_type_value_of_key_int_001'
+		key: str = self.test_get_type_value_of_key_int_001.__name__
 		value: int = SmokeTests.get_random_integer()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
 
 	def test_get_type_value_of_key_float_001(self):
 		""" 0.x """
-		key: str = 'get_type_value_of_key_float_001'
+		key: str = self.test_get_type_value_of_key_float_001.__name__
 		value: float = random()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
 
 	def test_get_type_value_of_key_float_002(self):
 		""" x.0 """
-		key: str = 'get_type_value_of_key_float_002'
+		key: str = self.test_get_type_value_of_key_float_002.__name__
 		value: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
 
 	def test_get_type_value_of_key_float_003(self):
 		""" x.x """
-		key: str = 'get_type_value_of_key_float_003'
+		key: str = self.test_get_type_value_of_key_float_003.__name__
 		value: float = float(SmokeTests.get_random_integer()) + random()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
 
 	def test_get_type_value_of_key_bool_001(self):
 		""" True """
-		key: str = 'get_type_value_of_key_bool_001'
+		key: str = self.test_get_type_value_of_key_bool_001.__name__
 		value: bool = True
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
 
 	def test_get_type_value_of_key_bool_002(self):
 		""" False """
-		key: str = 'get_type_value_of_key_bool_002'
+		key: str = self.test_get_type_value_of_key_bool_002.__name__
 		value: bool = False
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		self.assertEqual('string', SmokeTests.r.get_type_value_of_key(key))
@@ -439,13 +439,11 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_002(self):
 		key: str = SmokeTests.get_random_string()
-		value: None = None
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertIsNone(SmokeTests.r.r_set(key, None))
 
 	def test_set_003(self):
 		key: str = ''
-		value: None = None
-		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		self.assertIsNone(SmokeTests.r.r_set(key, None))
 
 	# get ##############################################################################################################
 
@@ -459,7 +457,7 @@ class SmokeTests(unittest.TestCase):
 	# set/get ##########################################################################################################
 
 	def test_set_get_int_001(self):
-		key: str = 'set_get_int_001'
+		key: str = self.test_set_get_int_001.__name__
 		value: int = SmokeTests.get_random_integer()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key)
@@ -467,7 +465,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_int_002(self):
 		""" get_old_value """
-		key: str = 'set_get_int_002'
+		key: str = self.test_set_get_int_002.__name__
 		value_1: int = SmokeTests.get_random_integer()
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
 		res_1 = SmokeTests.r.r_get(key)
@@ -480,28 +478,28 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(int(res_2), value_2)
 
 	def test_set_get_int_003(self):  # convert_to_type
-		key: str = 'set_get_int_003'
+		key: str = self.test_set_get_int_003.__name__
 		value: int = SmokeTests.get_random_integer()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, value)
 
 	def test_set_get_int_004(self):  # convert_to_type
-		key: str = 'set_get_int_004'
+		key: str = self.test_set_get_int_004.__name__
 		value: int = SmokeTests.get_random_integer()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='integer')
 		self.assertEqual(res, value)
 
 	def test_set_get_float_001(self):
-		key: str = 'set_get_float_001'
+		key: str = self.test_set_get_float_001.__name__
 		value: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key)
 		self.assertEqual(float(res), value)
 
 	def test_set_get_float_002(self):
-		key: str = 'set_get_float_002'
+		key: str = self.test_set_get_float_002.__name__
 		value_1: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
 		res_1 = SmokeTests.r.r_get(key)
@@ -514,7 +512,7 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(float(res_2), value_2)
 
 	def test_set_get_float_003(self):  # convert_to_type
-		key: str = 'set_get_float_003'
+		key: str = self.test_set_get_float_003.__name__
 		value: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='float')
