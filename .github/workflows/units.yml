@@ -56,14 +56,19 @@ jobs:
       - name: Run UnitTests (Smoke tests)
         run: |
           cd tests || exit 1
-          python -m unittest test_units_1.py
+          python -m unittest test_units_0.py test_units_3.py test_units_4.py
 
-      - name: Run multiple CPUs UnitTests (Ttl)
+      - name: Run Ttl UnitTests
         run: |
           cd tests || exit 1
-          pytest test_units_2.py -n 4 # no more than 4 cores to avoid problems with process concurrency
+          python -m unittest test_units_1.py
+
+      - name: Multiple databases tests
+        run: |
+          cd tests || exit 1
+          python -m unittest test_units_2.py
 
       - name: Unit tests for helper functions
         run: |
           cd tests || exit 1
-          python -m unittest test_units_3.py
+          python -m unittest test_units_static.py

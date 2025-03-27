@@ -18,15 +18,17 @@ if (key_exist == 0 and if_exist == 1) or (key_exist == 1 and if_not_exist == 1) 
   return
 end
 
-local res
+local old_value
 
 if get_old_value == 1 then
   local value_type = redis.call("TYPE", key) -- determine what type the value stored in this key is
 
   if value_type.ok == 'string' then -- if value: bool/int/float/str
-      res = redis.call("GET", key)
+    old_value = redis.call("GET", key)
   elseif value_type.ok == 'list' then -- to get lists we use another function
-      res = redis.call("LRANGE", key, 1, -1) -- special attention is required for the range
+    old_value = redis.call("LRANGE", key, 0, -1) -- special attention is required for the range
+  elseif value_type.ok == 'set' then
+    old_value = redis.call("SMEMBERS", key)
   end
 end
 
@@ -42,4 +44,4 @@ if time_ms > 0 then
    redis.call("PEXPIRE", key, time_ms)
 end
 
-return res
+return old_value

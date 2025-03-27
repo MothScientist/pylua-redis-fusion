@@ -1,13 +1,15 @@
 -- function to get values by key
 local key = KEYS[1]
-local res
+local value
 
 local value_type = redis.call("TYPE", key) -- determine what type the value stored in this key is
 
 if value_type.ok == 'string' then -- if value: bool/int/float/str
-    res = redis.call("GET", key)
+  value = redis.call("GET", key)
 elseif value_type.ok == 'list' then -- to get lists we use another function
-    res = redis.call("LRANGE", key, 1, -1) -- special attention is required for the range
+  value = redis.call("LRANGE", key, 0, -1) -- special attention is required for the range
+elseif value_type.ok == 'set' then
+  value = redis.call("SMEMBERS", key)
 end
 
-return res
+return {value, value_type.ok}

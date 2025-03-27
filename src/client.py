@@ -251,7 +251,7 @@ class PyRedis:
             return_non_exists: bool = False,
             get_dict_key_value_exists: bool = False,
             convert_to_type_dict_key: str = None
-    ) -> tuple[tuple, tuple, dict]:
+    ) -> tuple[tuple, tuple, dict]:  # todo - lua
         """
         Mass delete keys from a given iterable.
         Uses the same function as regular r_delete,
@@ -333,7 +333,7 @@ class PyRedis:
         :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
         :return: count keys or None
         """
-        count_keys = self.__register_lua_scripts('remove_all_keys', 0, str(int(get_count_keys)))
+        count_keys: int | None = self.__register_lua_scripts('remove_all_keys', 0, str(int(get_count_keys)))
         return int(count_keys) if count_keys else None
 
     def __register_lua_scripts(self, script_name: str, *args):
@@ -392,3 +392,30 @@ class PyRedis:
         curr_dir = os_path.dirname(__file__)
         with open(os_path.join(curr_dir, f'lua_scripts/{filename}.lua'), 'r') as lua_file:
             return lua_file.read()
+
+if __name__ == '__main__':
+    from os import getenv
+    from dotenv import load_dotenv
+
+    load_dotenv('redis.env')  # Load environment variables from redis.env file
+    redis_psw: str = getenv('REDIS_PSW')
+    redis_db: int = int(getenv('REDIS_DB'))
+    redis_host: str = getenv('REDIS_HOST')
+    redis_port: int = int(getenv('REDIS_PORT'))
+    r = PyRedis(
+            host=redis_host,
+            port=redis_port,
+            db=0,
+            password=redis_psw,
+            socket_timeout=.1
+        )
+    r.r_set('test', 25.234)
+    print(r.r_get('test'))
+    r.rename_key('test', '123')
+    print(r.r_get('test'))
+    print(r.r_get('123'))
+    res = r.r_remove_all_keys(get_count_keys=True)
+    print(res)
+    print(type(res))
+
+# TODO - прибавление и убавление значений добавить
