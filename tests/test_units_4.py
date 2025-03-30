@@ -44,12 +44,12 @@ class LuaScriptsSHATests(unittest.TestCase):
 		self.assertEqual(LuaScriptsSHATests.r.lua_scripts_sha, {})
 
 	def test_lua_sha_002(self):
-		key: str = 'lua_sha_002'
+		key: str = self.test_lua_sha_002.__name__
 		LuaScriptsSHATests.r.r_set(key, key)
 		self.assertTrue('set_not_array_helper' in LuaScriptsSHATests.r.lua_scripts_sha)
 
 	def test_lua_sha_003(self):
-		key: str = 'lua_sha_002'
+		key: str = self.test_lua_sha_003.__name__
 		LuaScriptsSHATests.r.r_set(key, key)
 		LuaScriptsSHATests.r.r_set(key, [key])
 		self.assertTrue(
@@ -57,7 +57,7 @@ class LuaScriptsSHATests(unittest.TestCase):
 		)
 
 	def test_lua_sha_004(self):
-		key: str = 'lua_sha_004'
+		key: str = self.test_lua_sha_004.__name__
 		LuaScriptsSHATests.r.r_set(key, key)
 		self.assertTrue(
 			all(isinstance(value, str) and value for value in LuaScriptsSHATests.r.lua_scripts_sha.values())
