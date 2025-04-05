@@ -281,20 +281,20 @@ class SmokeTests(unittest.TestCase):
 	def test_append_value_to_array_005(self):
 		""" List """
 		key: str = self.test_append_value_to_array_005.__name__
-		value: list = list(range(0, 10))
+		value: list = list(range(10))
 		SmokeTests.r.r_set(key, value)
 		SmokeTests.r.append_value_to_array(key, randint(0, 100), index=randint(1, 9))
 		res: list = SmokeTests.r.r_get(key)
-		self.assertTrue(len(res) == 11)
+		self.assertTrue(len(res) == len(value) + 1)
 
 	def test_append_value_to_array_006(self):
 		""" Set """
 		key: str = self.test_append_value_to_array_006.__name__
 		value: set = set(range(10))
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, randint(0, 100))
+		SmokeTests.r.append_value_to_array(key, randint(50, 100))  # the new value must not overlap with existing ones
 		res: set = SmokeTests.r.r_get(key)
-		self.assertTrue(len(res) == 11)
+		self.assertTrue(len(res) == len(value) + 1)
 
 	def test_append_value_to_array_007(self):
 		""" Set """
