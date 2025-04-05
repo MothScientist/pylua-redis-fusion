@@ -290,7 +290,7 @@ class SmokeTests(unittest.TestCase):
 	def test_append_value_to_array_006(self):
 		""" Set """
 		key: str = self.test_append_value_to_array_006.__name__
-		value: set = set(range(0, 10))
+		value: set = set(range(10))
 		SmokeTests.r.r_set(key, value)
 		SmokeTests.r.append_value_to_array(key, randint(0, 100))
 		res: set = SmokeTests.r.r_get(key)
@@ -311,7 +311,7 @@ class SmokeTests(unittest.TestCase):
 	def test_r_len_001(self):
 		""" List"""
 		key: str = self.test_r_len_001.__name__
-		lst_len: int = SmokeTests.get_random_integer()
+		lst_len: int = randint(5, 25)
 		SmokeTests.r.r_set(key, [key] * lst_len)
 		res: int = SmokeTests.r.r_len(key)
 		self.assertEqual(res, lst_len)
@@ -319,7 +319,7 @@ class SmokeTests(unittest.TestCase):
 	def test_r_len_002(self):
 		""" Tuple """
 		key: str = self.test_r_len_002.__name__
-		lst_len: int = SmokeTests.get_random_integer()
+		lst_len: int = randint(5, 25)
 		SmokeTests.r.r_set(key, tuple([key] * lst_len))
 		res: int = SmokeTests.r.r_len(key)
 		self.assertEqual(res, lst_len)
@@ -327,7 +327,7 @@ class SmokeTests(unittest.TestCase):
 	def test_r_len_003(self):
 		""" Set """
 		key: str = self.test_r_len_003.__name__
-		lst_len: int = SmokeTests.get_random_integer()
+		lst_len: int = randint(5, 25)
 		SmokeTests.r.r_set(key, set([i for i in range(lst_len)]))
 		res: int = SmokeTests.r.r_len(key)
 		self.assertEqual(res, lst_len)
@@ -335,7 +335,7 @@ class SmokeTests(unittest.TestCase):
 	def test_r_len_004(self):
 		""" Frozenset """
 		key: str = self.test_r_len_004.__name__
-		lst_len: int = SmokeTests.get_random_integer()
+		lst_len: int = randint(5, 25)
 		SmokeTests.r.r_set(key, frozenset([i for i in range(lst_len)]))
 		res: int = SmokeTests.r.r_len(key)
 		self.assertEqual(res, lst_len)
@@ -356,11 +356,14 @@ class SmokeTests(unittest.TestCase):
 	def test_r_len_007(self):
 		key: str = self.test_r_len_007.__name__
 		SmokeTests.r.r_set(key, {key})
+		res: int = SmokeTests.r.r_len(key)
+		self.assertEqual(res, 1)
 
 	def test_r_len_008(self):
 		key: str = self.test_r_len_008.__name__
-		# на место ключа в set передать None
-		pass
+		SmokeTests.r.r_set(key, None)
+		res: int = SmokeTests.r.r_len(key)
+		self.assertEqual(res, None)
 
 	# get_count_of_keys ################################################################################################
 

@@ -278,6 +278,15 @@ class PyRedis:
 
         return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
+    def r_len(self, key: str) -> int | None:
+        """
+        Получить длину списка/множества в Redis
+        :param key:
+        :return: None - такого ключа нет; 0 - такой ключ есть, но в нем записан не массив;
+        """
+        res = self.__register_lua_scripts('r_len', 1, key)
+        return int(res) if res is not None else None
+
     def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
         Delete a key
