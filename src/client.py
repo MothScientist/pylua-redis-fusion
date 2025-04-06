@@ -252,7 +252,7 @@ class PyRedis:
         :return: None if such value did not exist before or get_old_value = False
         """
         if not key or (not value and value not in (False, 0)) or not isinstance(value, (bool,  int, float, str)):
-            return
+            return None
         value: str = str(value)
         type_if_not_exists: str = 'null' if type_if_not_exists not in ('list', 'set') else type_if_not_exists
         get_old_value: int = int(get_old_value)
