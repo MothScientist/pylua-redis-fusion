@@ -78,10 +78,10 @@ jobs:
           cd tests || exit 1
           python -m unittest test_units_4.py
 
-#      - name: User Scripts Interface
-#        run: |
-#          cd tests || exit 1
-#          python -m unittest test_units_5.py
+      - name: User Scripts Interface
+        run: |
+          cd tests || exit 1
+          python -m unittest test_units_5.py
 
       - name: Unit tests for helper functions
         run: |

@@ -498,25 +498,25 @@ class PyRedis:
 
         return int(total_keys) if get_count_keys else None
 
-    def run_lua_script(self, script: str | None = None, sha: str | None = None, read_only: bool = False, *args):
+    def run_lua_script(self, *args, lua_script: str | None = None, sha: str | None = None, read_only: bool = False):
         """
         Execute the Lua script, specifying the numkeys the script
         will touch and the key names and argument values in keys_and_args.
 
-        :param script: Lua script as a string
+        :param lua_script: Lua script as a string
         :param sha: SHA or result load_lua_script() function
         :param read_only: True if the EVAL command should be executed, read-only
         :param args: The first arguments in *args you must pass are the number of keys,
         and then the keys themselves in the required order. Then come the additional arguments.
         :return: Returns the result of the script
         """
-        if not (script or sha):
+        if not (lua_script or sha):
             return
-        if sha or (sha := script in self.user_lua_scripts_buffer):
+        if sha or (sha := self.user_lua_scripts_buffer.get(lua_script)):
             return self.redis.evalsha_ro(sha, *args) if read_only else self.redis.evalsha(sha, *args)
-        return self.redis.eval_ro(script, *args) if read_only else self.redis.eval(script, *args)
+        return self.redis.eval_ro(lua_script, *args) if read_only else self.redis.eval(lua_script, *args)
 
-    def load_lua_script(self, lua_script: str, use_buffer: bool = True):
+    def load_lua_script(self, lua_script: str, use_buffer: bool = True) -> str:
         """
         Load a Lua script into the script cache_data
         :param lua_script:

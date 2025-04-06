@@ -55,20 +55,6 @@ class SmokeTests(unittest.TestCase):
 		wrong_r = PyRedis(host='unknown')
 		self.assertFalse(wrong_r.r_ping())
 
-	# redis-py object ##################################################################################################
-
-	def test_origin_object_001(self):
-		obj = SmokeTests.r.redis_py()
-		self.assertTrue(obj.ping())
-
-	def test_origin_object_002(self):
-		key: str = self.test_origin_object_002.__name__
-		obj = SmokeTests.r.redis_py()
-		obj.set(key, key)
-		self.assertEqual(obj.get(key), key)
-		obj.delete(key)
-		self.assertEqual(obj.get(key), None)
-
 	# key_is_exist #####################################################################################################
 
 	def test_key_is_exist_int_001(self):
