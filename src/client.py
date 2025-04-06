@@ -16,7 +16,7 @@ class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', 'lua_scripts_sha', 'user_lua_scripts_buffer')
+    __slots__ = ('redis', 'curr_dir', 'lua_scripts_sha', 'user_lua_scripts_buffer')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
@@ -36,6 +36,7 @@ class PyRedis:
                 socket_keepalive=socket_keepalive
             )
         )
+        self.curr_dir = os_path.dirname(__file__)
         self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
         self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts  # TODO - tests
 
@@ -187,7 +188,7 @@ class PyRedis:
         if (not key or (not value and value not in (False, 0))
                 or not isinstance(value, (bool, int, float, str, list, tuple, set, frozenset))):
             # Writing empty objects is not supported
-            return
+            return None
 
         if time_s or time_ms:
             time_s, time_ms = None, PyRedis.__compare_and_select_sec_ms(time_s, time_ms)
@@ -431,9 +432,9 @@ class PyRedis:
 
         keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
 
-        # all parameters = None (None is None is None -> True)
+        # all parameters = None | False
         if return_exists is return_non_exists is get_dict_key_value_exists is False:
-            self.redis.unlink(*keys) if command else self.redis.delete(*keys)
+            self.redis.unlink(*keys) if command else self.redis.delete(*keys)  # pylint: disable=expression-not-assigned
             return (), (), {}
 
         # if one of the parameters is specified, then we collect a dictionary of existing key-values
@@ -532,7 +533,7 @@ class PyRedis:
 
     def __register_lua_scripts(self, script_name: str, *args):
         if script_name not in self.lua_scripts_sha:
-            lua_script = PyRedis.__load_lua_script(script_name)
+            lua_script = self.__load_lua_script(script_name)
             self.lua_scripts_sha[script_name] = self.redis.script_load(lua_script)
         return self.redis.evalsha(self.lua_scripts_sha[script_name], *args)
 
@@ -581,9 +582,7 @@ class PyRedis:
             return tuple(iterable_var)
         return tuple(set(iterable_var))
 
-    @staticmethod
-    def __load_lua_script(filename: str) -> str:
+    def __load_lua_script(self, filename: str) -> str:
         """ Load Lua script from a file """
-        curr_dir = os_path.dirname(__file__)
-        with open(os_path.join(curr_dir, f'lua_scripts/{filename}.lua'), 'r') as lua_file:
+        with open(os_path.join(self.curr_dir, f'lua_scripts/{filename}.lua'), 'r', encoding='utf-8') as lua_file:
             return lua_file.read()
