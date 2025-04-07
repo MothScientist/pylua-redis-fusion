@@ -95,10 +95,10 @@ class UserScriptsInterface(unittest.TestCase):
 
 	# load_lua_script / run_lua_script #################################################################################
 
-	def test_load_and_run_lua_script_1(self):
+	def test_load_and_run_lua_users_script_1(self):
 		""" User script with buffer """
 		UserScriptsInterface.clear_dictionaries()
-		key: str = self.test_load_and_run_lua_script_1.__name__
+		key: str = self.test_load_and_run_lua_users_script_1.__name__
 		value: str = UserScriptsInterface.get_random_string()
 		lua_script: str = \
 			(
@@ -117,10 +117,10 @@ class UserScriptsInterface(unittest.TestCase):
 		self.assertTrue(lua_script in UserScriptsInterface.r.user_lua_scripts_buffer)
 		self.assertTrue(sha == UserScriptsInterface.r.user_lua_scripts_buffer.get(lua_script))
 
-	def test_load_and_run_lua_script_2(self):
+	def test_load_and_run_lua_users_script_2(self):
 		""" User script without buffer """
 		UserScriptsInterface.clear_dictionaries()
-		key: str = self.test_load_and_run_lua_script_2.__name__
+		key: str = self.test_load_and_run_lua_users_script_2.__name__
 		value: str = UserScriptsInterface.get_random_string()
 		lua_script: str = \
 			(
@@ -137,5 +137,19 @@ class UserScriptsInterface(unittest.TestCase):
 		# check buffer
 		self.assertEqual(UserScriptsInterface.r.lua_scripts_sha, dict())
 		self.assertEqual(UserScriptsInterface.r.user_lua_scripts_buffer, dict())
+
+	def test_load_library_lua_func_obj_001(self):
+		script: str = UserScriptsInterface.r._PyRedis__load_lua_script_from_file('get_helper')
+		self.assertNotEqual(script, '')
+		self.assertTrue(isinstance(script, str))
+
+	def test_load_library_lua_func_obj_002(self):
+		res = UserScriptsInterface.r._PyRedis__load_lua_script_from_file('set_arrays_helper')
+		self.assertNotEqual(res, '')
+		self.assertTrue(isinstance(res, str))
+
+	def test_load_library_lua_func_obj_003(self):
+		with self.assertRaises(FileNotFoundError):
+			UserScriptsInterface.r._PyRedis__load_lua_script_from_file('unknown_script')
 
 	# flush_lua_scripts ################################################################################################

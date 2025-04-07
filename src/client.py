@@ -533,9 +533,14 @@ class PyRedis:
 
     def __register_lua_scripts(self, script_name: str, *args):
         if script_name not in self.lua_scripts_sha:
-            lua_script = self.__load_lua_script(script_name)
+            lua_script = self.__load_lua_script_from_file(script_name)
             self.lua_scripts_sha[script_name] = self.redis.script_load(lua_script)
         return self.redis.evalsha(self.lua_scripts_sha[script_name], *args)
+
+    def __load_lua_script_from_file(self, filename: str) -> str:
+        """ Load Lua script from a file """
+        with open(os_path.join(self.curr_dir, f'lua_scripts/{filename}.lua'), 'r', encoding='utf-8') as lua_file:
+            return lua_file.read()
 
     @staticmethod
     def __convert_to_type(value: str | list[str] | set[str], _type: str) -> str | bool | int | float | list | set:
