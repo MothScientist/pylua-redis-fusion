@@ -39,11 +39,7 @@ else -- key exists
       if index >= length then
         redis.call('RPUSH', key, value)
       else
-        -- get elements from list
-        local elements = redis.call('LRANGE', key, 0, - 1)
-        table.insert(elements, index + 1, value)
-        redis.call('DEL', key)
-        redis.call('RPUSH', key, unpack(elements))
+        redis.call('LINSERT', key, 'AFTER', index-1, value)
       end
     end
   end
