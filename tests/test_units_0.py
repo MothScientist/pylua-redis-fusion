@@ -508,28 +508,28 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(res, value)
 
 	def test_set_get_float_004(self):  # convert_to_type
-		key: str = 'set_get_float_004'
+		key: str = self.test_set_get_float_004.__name__
 		value: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='double')
 		self.assertEqual(res, value)
 
 	def test_set_get_float_005(self):  # convert_to_type
-		key: str = 'set_get_float_005'
+		key: str = self.test_set_get_float_005.__name__
 		value: float = float(SmokeTests.get_random_integer())
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='numeric')
 		self.assertEqual(res, value)
 
 	def test_set_get_str_001(self):
-		key: str = 'set_get_str_001'
+		key: str = self.test_set_get_str_001.__name__
 		value: str = SmokeTests.get_random_string()
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key)
 		self.assertEqual(res, value)
 
 	def test_set_get_str_002(self):
-		key: str = 'set_get_str_002'
+		key: str = self.test_set_get_str_002.__name__
 		value_1: str = SmokeTests.get_random_string()
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
 		res_1: str = SmokeTests.r.r_get(key)
@@ -542,42 +542,42 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(res_2, value_2)
 
 	def test_set_get_bool_001(self):  # convert_to_type
-		key: str = 'set_get_bool_001'
+		key: str = self.test_set_get_bool_001.__name__
 		value: bool = True
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='bool')
 		self.assertEqual(res, value)
 
 	def test_set_get_bool_002(self):  # convert_to_type
-		key: str = 'set_get_bool_002'
+		key: str = self.test_set_get_bool_002.__name__
 		value: bool = False
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='bool')
 		self.assertEqual(res, value)
 
 	def test_set_get_bool_003(self):  # convert_to_type
-		key: str = 'set_get_bool_003'
+		key: str = self.test_set_get_bool_003.__name__
 		value: int = 1
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='bool')
 		self.assertEqual(res, bool(value))
 
 	def test_set_get_bool_004(self):  # convert_to_type
-		key: str = 'set_get_bool_004'
+		key: str = self.test_set_get_bool_004.__name__
 		value: int = 0
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key, convert_to_type='bool')
 		self.assertEqual(res, bool(value))
 
 	def test_set_get_bool_005(self):
-		key: str = 'set_get_bool_005'
+		key: str = self.test_set_get_bool_005.__name__
 		value: bool = True
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key)
 		self.assertEqual(res, str(value))
 
 	def test_set_get_bool_006(self):
-		key: str = 'set_get_bool_006'
+		key: str = self.test_set_get_bool_006.__name__
 		value: bool = False
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key)
@@ -585,7 +585,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_001(self):
 		""" integer """
-		key: str = 'set_get_list_001'
+		key: str = self.test_set_get_list_001.__name__
 		value: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(10, 15))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: list = list(map(int, SmokeTests.r.r_get(key)))
@@ -593,7 +593,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_002(self):
 		""" integer """
-		key: str = 'set_get_list_002'
+		key: str = self.test_set_get_list_002.__name__
 		value_1: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(10, 25))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
 		res_1: list = list(map(int, SmokeTests.r.r_get(key)))
@@ -607,7 +607,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_003(self):
 		""" string """
-		key: str = 'set_get_list_003'
+		key: str = self.test_set_get_list_003.__name__
 		value: list[str] = [SmokeTests.get_random_string() for _ in range(randint(10, 50))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: list[str] = list(map(str, SmokeTests.r.r_get(key)))
@@ -615,7 +615,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_004(self):  # convert_to_type
 		""" boolean """
-		key: str = 'set_get_list_004'
+		key: str = self.test_set_get_list_004.__name__
 		value: list[bool] = [bool(randint(0, 1)) for _ in range(randint(10, 50))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: list[bool] = list(SmokeTests.r.r_get(key, convert_to_type='boolean'))
@@ -623,7 +623,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_005(self):
 		""" float """
-		key: str = 'set_get_list_005'
+		key: str = self.test_set_get_list_005.__name__
 		value: list[float] = [random() for _ in range(randint(10, 15))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: list[float] = list(map(float, SmokeTests.r.r_get(key)))
@@ -631,7 +631,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_006(self):
 		""" float """
-		key: str = 'set_get_list_006'
+		key: str = self.test_set_get_list_006.__name__
 		value: list[float] = [float(SmokeTests.get_random_integer()) for _ in range(randint(10, 15))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: list[float] = list(map(float, SmokeTests.r.r_get(key)))
@@ -639,7 +639,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_007(self):  # convert_to_type
 		""" float """
-		key: str = 'set_get_list_007'
+		key: str = self.test_set_get_list_007.__name__
 		value: list[float] = [random() for _ in range(randint(10, 15))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: list[float] = SmokeTests.r.r_get(key, convert_to_type='float')
@@ -647,7 +647,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_008(self):  # convert_to_type
 		""" float """
-		key: str = 'set_get_list_008'
+		key: str = self.test_set_get_list_008.__name__
 		value: list[float] = [float(SmokeTests.get_random_integer()) for _ in range(randint(10, 15))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: list[float] = SmokeTests.r.r_get(key, convert_to_type='float')
@@ -655,7 +655,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_009(self):
 		""" boolean """
-		key: str = 'set_get_list_009'
+		key: str = self.test_set_get_list_009.__name__
 		value: list[bool] = [bool(randint(0, 1)) for _ in range(randint(10, 50))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: list[bool] = [True if item in ('1', 'true', 'True') else False for item in SmokeTests.r.r_get(key)]
@@ -663,7 +663,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_010(self):
 		""" integer + get_old_value + convert_to_type_for_get """
-		key: str = 'set_get_list_010'
+		key: str = self.test_set_get_list_010.__name__
 		value_1: list[int] = [SmokeTests.get_random_integer() for _ in range(randint(5, 10))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
 		res_1: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
@@ -678,7 +678,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_list_011(self):
 		""" string + get_old_value """
-		key: str = 'set_get_list_010'
+		key: str = self.test_set_get_list_011.__name__
 		value_1: list[str] = [SmokeTests.get_random_string() for _ in range(randint(5, 10))]
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
 		res_1: list[str] = SmokeTests.r.r_get(key)
@@ -693,7 +693,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_tuple_001(self):
 		""" integer """
-		key: str = 'set_get_tuple_001'
+		key: str = self.test_set_get_tuple_001.__name__
 		value: tuple[int, ...] = tuple(SmokeTests.get_random_integer() for _ in range(randint(10, 25)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res: tuple[int, ...] = tuple(map(int, SmokeTests.r.r_get(key)))
@@ -701,7 +701,7 @@ class SmokeTests(unittest.TestCase):
 
 	def test_set_get_tuple_002(self):
 		""" integer """
-		key: str = 'set_get_tuple_002'
+		key: str = self.test_set_get_tuple_002.__name__
 		value_1: tuple[int, ...] = tuple(SmokeTests.get_random_integer() for _ in range(randint(10, 25)))
 		self.assertIsNone(SmokeTests.r.r_set(key, value_1))
 		res_1: tuple[int, ...] = tuple(map(int, SmokeTests.r.r_get(key)))

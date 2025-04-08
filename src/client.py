@@ -240,7 +240,7 @@ class PyRedis:
         :param value: Remember that Redis does not support nested structures,
         so arrays cannot be values inside other arrays.
         :param index: At what position this element should be added. 0 - to the beginning, -1 - to the end,
-        otherwise a specific position within the list (For sets and sorted sets, the parameter is ignored).
+        otherwise a specific position within the list (For sets index is ignored).
         If the position is greater than the length of the list,
         the element will be added to the end (equivalent to parameter -1).
         :param type_if_not_exists: If such a key does not exist, then a list or set value will be created,
