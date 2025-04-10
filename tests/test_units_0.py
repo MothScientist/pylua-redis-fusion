@@ -145,8 +145,6 @@ class SmokeTests(unittest.TestCase):
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.keys_is_exists(key))
 
-	def test_key_is_exist_list_005(self):
-		key: str = self.test_key_is_exist_list_005.__name__
 	def test_keys_is_exists_list_005(self):
 		key: str = self.test_keys_is_exists_list_005.__name__
 		value: list = [random() for _ in range(randint(10, 20))]
