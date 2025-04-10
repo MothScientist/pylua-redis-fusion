@@ -87,3 +87,8 @@ jobs:
         run: |
           cd tests || exit 1
           python -m unittest test_units_static.py
+
+      - name: Loaded tests
+        run: |
+          cd tests || exit 1
+          python -m unittest test_loaded_check.py
