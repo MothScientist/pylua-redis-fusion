@@ -1,7 +1,12 @@
 -- function to get values by key
 local key = KEYS[1]
-local value
+local key_exist = redis.call("EXISTS", key) == 1
 
+if not key_exist then
+  return {nil, nil}
+end
+
+local value
 local value_type = redis.call("TYPE", key) -- determine what type the value stored in this key is
 
 if value_type.ok == 'string' then -- if value: bool/int/float/str

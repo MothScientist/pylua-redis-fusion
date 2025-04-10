@@ -39,11 +39,11 @@ class TtlTests(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		TtlTests.original_redis.flushdb()  # clear the database after tests
+		TtlTests.original_redis.flushdb()  # clear the database before tests
 
 	@classmethod
 	def tearDownClass(cls):
-		TtlTests.original_redis.flushdb()  # clear the database before tests
+		TtlTests.original_redis.flushdb()  # clear the database after tests
 
 	@staticmethod
 	def get_random_integer(_min: int = 0, _max: int = 100):

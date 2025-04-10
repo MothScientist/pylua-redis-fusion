@@ -30,11 +30,11 @@ class LuaScriptsSHATests(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		LuaScriptsSHATests.original_redis.flushdb()  # clear the database after tests
+		LuaScriptsSHATests.original_redis.flushdb()  # clear the database before tests
 
 	@classmethod
 	def tearDownClass(cls):
-		LuaScriptsSHATests.original_redis.flushdb()  # clear the database before tests
+		LuaScriptsSHATests.original_redis.flushdb()  # clear the database after tests
 
 	def test_ping(self):
 		""" Service is available """

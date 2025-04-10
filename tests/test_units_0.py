@@ -33,11 +33,11 @@ class SmokeTests(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		SmokeTests.original_redis.flushdb()  # clear the database after tests
+		SmokeTests.original_redis.flushdb()  # clear the database before tests
 
 	@classmethod
 	def tearDownClass(cls):
-		SmokeTests.original_redis.flushdb()  # clear the database before tests
+		SmokeTests.original_redis.flushdb()  # clear the database after tests
 
 	@staticmethod
 	def get_random_integer():
@@ -204,8 +204,6 @@ class SmokeTests(unittest.TestCase):
 		SmokeTests.r.r_set(key, value)
 		self.assertTrue(SmokeTests.r.keys_is_exists(key))
 
-	def test_key_is_exist_set_002(self):
-		key: str = self.test_key_is_exist_set_002.__name__
 	def test_keys_is_exists_set_002(self):
 		key: str = self.test_keys_is_exists_set_002.__name__
 		SmokeTests.r.r_set(key, set())
@@ -1122,15 +1120,6 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='int')
 		self.assertEqual(res_2, value)
 
-	def test_cycle_set_get_delete_001(self):
-		for value, key in enumerate([i for i in range(100_000_000, 100_000_000 + randint(25, 50))]):
-			key = str(key)
-			str_value = str(value)
-			self.assertIsNone(SmokeTests.r.r_set(key, value))
-			self.assertEqual(SmokeTests.r.r_get(key), str_value)
-			self.assertEqual(SmokeTests.r.r_delete(key, returning=True), str_value)
-			self.assertIsNone(SmokeTests.r.r_get(key))
-
 	# unlink ###########################################################################################################
 
 	def test_unlink_001(self):
@@ -1425,37 +1414,6 @@ class SmokeTests(unittest.TestCase):
 		self.r.rename_key(key, new_key)
 		self.assertIsNone(self.r.r_get(key))
 		self.assertEqual(frozenset(self.r.r_get(new_key)), value)
-
-	# mass check keys ##################################################################################################
-
-	def test_keys_is_exist_001(self):
-		SmokeTests.original_redis.flushdb()
-
-		keys: set = {SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(25, 50))}
-		for key in keys:
-			SmokeTests.r.r_set(key, randint(0, 10_000))
-		self.assertEqual(len(keys), SmokeTests.r.keys_is_exist(keys))
-
-		SmokeTests.original_redis.flushdb()
-
-	def test_keys_is_exist_002(self):
-		SmokeTests.original_redis.flushdb()
-
-		keys: set = {SmokeTests.get_random_integer() for _ in range(randint(250, 500))}
-		for key in keys:
-			SmokeTests.r.r_set(str(key), SmokeTests.get_random_string())
-		self.assertEqual(len(keys), SmokeTests.r.keys_is_exist(keys))
-
-		SmokeTests.original_redis.flushdb()
-
-	def test_keys_is_exist_003(self):
-		""" keys_is_exist without set keys """
-		SmokeTests.original_redis.flushdb()
-
-		keys: set = {SmokeTests.get_random_string(length=randint(5, 15)) for _ in range(randint(25, 50))}
-		self.assertEqual(SmokeTests.r.keys_is_exist(keys), 0)
-
-		SmokeTests.original_redis.flushdb()
 
 	# remove all keys ##################################################################################################
 

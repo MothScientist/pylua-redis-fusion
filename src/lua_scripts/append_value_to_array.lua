@@ -8,7 +8,7 @@ local key_exist = redis.call("EXISTS", key)
 
 if (key_exist == 0) then
   if (type_if_not_exists == 'null') then
-    return
+    return {nil, nil}
   elseif (type_if_not_exists == 'list') then
     redis.call("RPUSH", key, value)
   else

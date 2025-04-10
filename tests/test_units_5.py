@@ -43,12 +43,12 @@ class UserScriptsInterface(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.clear_dictionaries()
-		UserScriptsInterface.original_redis.flushdb()  # clear the database after tests
+		UserScriptsInterface.original_redis.flushdb()  # clear the database before tests
 
 	@classmethod
 	def tearDownClass(cls):
 		cls.clear_dictionaries()
-		UserScriptsInterface.original_redis.flushdb()  # clear the database before tests
+		UserScriptsInterface.original_redis.flushdb()  # clear the database after tests
 
 	@staticmethod
 	def get_random_string(length: int = randint(5, 10)):
