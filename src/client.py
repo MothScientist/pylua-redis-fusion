@@ -220,7 +220,7 @@ class PyRedis:
             res = self.__register_lua_scripts(
                 'set_arrays_helper', 1, key,
                 get_old_value, time_ms, if_exist, if_not_exist, keep_ttl,
-                'rpush' if isinstance(value, (list, tuple)) else 'sadd', *value
+                'rpush' if isinstance(value, (list, tuple)) else 'sadd', int(len(value) < 5000), *value
             )
 
         return PyRedis.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
