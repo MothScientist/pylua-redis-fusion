@@ -95,11 +95,10 @@ class PyRedis:
     def key_is_exist(self, key: str) -> bool | None:
         return bool(self.redis.exists(key)) if key else None
 
-    def keys_is_exist(self, keys: list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
-        """
-        Mass operation to check for keys
-        """
-        return self.redis.exists(*keys) if keys else 0
+    def keys_is_exists(self, keys: str | list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
+        if isinstance(keys, str) and keys:
+            keys = [keys]
+        return self.redis.exists(*keys) if keys else None
 
     def get_count_of_keys(self) -> int:
         """ Returns the number of keys in the current database """
