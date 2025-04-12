@@ -827,7 +827,8 @@ class SmokeTests(unittest.TestCase):
 			set(SmokeTests.get_random_integer() for _ in range(randint(1, 10)))
 		)
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
-		res: set[int] = SmokeTests.r.r_get(key, convert_to_type='int')  # str -> int = str
+		# Changes convert_to_type option
+		res: set[int] = SmokeTests.r.r_get(key, convert_to_type='int_any')  # str -> int = str
 		self.assertEqual(res, value)
 
 	def test_set_get_set_004(self):  # convert_to_type

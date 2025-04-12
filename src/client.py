@@ -11,12 +11,14 @@ from redis import (
     TimeoutError as rTimeoutError
 )
 
+from .data_type_converter import TypeConverter
+
 
 class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', 'curr_dir', 'lua_scripts_sha', 'user_lua_scripts_buffer')
+    __slots__ = ('redis', 'curr_dir', 'lua_scripts_sha', 'user_lua_scripts_buffer', 'data_type_converter')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
@@ -39,6 +41,7 @@ class PyRedis:
         self.curr_dir = os_path.dirname(__file__)
         self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
         self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts  # TODO - tests
+        self.data_type_converter = TypeConverter().converter
 
     def __enter__(self):
         return self
@@ -222,7 +225,7 @@ class PyRedis:
                 'rpush' if isinstance(value, (list, tuple)) else 'sadd', int(len(value) < 5000), *value
             )
 
-        return PyRedis.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
+        return self.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
 
     def append_value_to_array(
             self,
@@ -260,6 +263,7 @@ class PyRedis:
         )
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
         return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
+        return self.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
     def r_get(self, key: str, default_value=None, convert_to_type: str | None = None):
         """
@@ -275,8 +279,7 @@ class PyRedis:
 
         res = self.__register_lua_scripts('get_helper', 1, key)
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else default_value
-
-        return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
+        return self.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
     def r_len(self, key: str) -> int | None:
         """
@@ -338,7 +341,7 @@ class PyRedis:
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
 
         if returning and res:
-            return PyRedis.__convert_to_type(res, convert_to_type_for_return) if convert_to_type_for_return else res
+            return self.__convert_to_type(res, convert_to_type_for_return) if convert_to_type_for_return else res
         return
 
     def rename_key(self, key: str, new_key: str, get_rename_status: bool = None):
@@ -445,7 +448,7 @@ class PyRedis:
 
         # convert_to_type_dict_key
         exists_key_value = {
-            key: PyRedis.__helper_convert_to_type(value, convert_to_type_dict_key)
+            key: self.__convert_to_type(value, convert_to_type_dict_key)
             for key, value in exists_key_value.items()
         } if convert_to_type_dict_key else exists_key_value
 
@@ -464,7 +467,7 @@ class PyRedis:
         """
         keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
         values = self.redis.mget(keys)  # later in the library the variable is converted to list
-        return {keys[i]: PyRedis.__helper_convert_to_type(value, convert_to_type_dict_key)
+        return {keys[i]: self.__convert_to_type(value, convert_to_type_dict_key)
                 if convert_to_type_dict_key else value for i, value in enumerate(values) if value is not None}
 
     def r_remove_all_keys_local(self, get_count_keys: bool = False) -> int | None:
@@ -541,35 +544,12 @@ class PyRedis:
         with open(os_path.join(self.curr_dir, f'lua_scripts/{filename}.lua'), 'r', encoding='utf-8') as lua_file:
             return lua_file.read()
 
-    @staticmethod
-    def __convert_to_type(value: str | list[str] | set[str], _type: str) -> str | bool | int | float | list | set:
-        if isinstance(value, (list, set)):
-            return [PyRedis.__helper_convert_to_type(i, _type) for i in value] if isinstance(value, list) \
-                else {PyRedis.__helper_convert_to_type(i, _type) for i in value}
-        return PyRedis.__helper_convert_to_type(value, _type)
-
-    @staticmethod
-    def __helper_convert_to_type(value: str, _type: str) -> str | int | float:
-        try:
-            if _type in ('int', 'integer'):
-
-                if '.' in value:
-                    # if it`s float, then before converting it`s necessary to slice the fractional part from the string
-                    idx: int = value.find('.')
-                    value: str = value[:idx]
-
-                value: int = int(value)
-
-            elif _type in ('float', 'double', 'numeric'):
-                value: float = float(value)
-
-            elif _type in ('bool', 'boolean'):
-                _true: tuple[str, str, str] = ('1', 'True', 'true')
-                value: bool | str = (value in _true) if value in ('0', 'False', 'false', *_true) else value
-
-        except (ValueError, TypeError):
-            pass
-        return value
+    def __convert_to_type(
+            self,
+            value: str | list[str] | set[str],
+            _type: str
+    ) -> str | bool | int | float | list | set:
+        return self.data_type_converter(value, _type)
 
     @staticmethod
     def __compare_and_select_sec_ms(time_s: int | None, time_ms: int | None) -> int:
