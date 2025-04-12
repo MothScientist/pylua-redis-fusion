@@ -262,7 +262,6 @@ class PyRedis:
             'append_value_to_array', 1, key, index, type_if_not_exists, get_old_value, value
         )
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
-        return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
         return self.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
     def r_get(self, key: str, default_value=None, convert_to_type: str | None = None):
