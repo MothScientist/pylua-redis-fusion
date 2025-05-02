@@ -13,8 +13,6 @@ Python version: <span style="color: aqua;">__3.13__</span> (Support includes Pyt
 
 `pip install git+https://github.com/MothScientist/pylua-redis-fusion.git`</br></br>
 
-#### Future updates are described in detail in the [roadmap.md](https://github.com/MothScientist/pylua-redis-fusion/blob/master/roadmap.md) file
-
 ### <span style="color: white;">How does this library differ from [redis-py](https://github.com/redis/redis-py), on which it is built?</span>
 
 __For quick connection to your Python projects and easy usage.__ <span style="color: violet;">__«Plug and Play»__ :)</span></br>

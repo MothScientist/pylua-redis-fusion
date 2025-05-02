@@ -30,11 +30,11 @@ class ContextManagerTests(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		ContextManagerTests.original_redis.flushdb()  # clear the database after tests
+		ContextManagerTests.original_redis.flushdb()  # clear the database before tests
 
 	@classmethod
 	def tearDownClass(cls):
-		ContextManagerTests.original_redis.flushdb()  # clear the database before tests
+		ContextManagerTests.original_redis.flushdb()  # clear the database after tests
 
 	def test_ping(self):
 		""" Service is available """

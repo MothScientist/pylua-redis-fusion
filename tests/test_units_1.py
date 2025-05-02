@@ -39,11 +39,11 @@ class TtlTests(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		TtlTests.original_redis.flushdb()  # clear the database after tests
+		TtlTests.original_redis.flushdb()  # clear the database before tests
 
 	@classmethod
 	def tearDownClass(cls):
-		TtlTests.original_redis.flushdb()  # clear the database before tests
+		TtlTests.original_redis.flushdb()  # clear the database after tests
 
 	@staticmethod
 	def get_random_integer(_min: int = 0, _max: int = 100):
@@ -60,7 +60,7 @@ class TtlTests(unittest.TestCase):
 	# set_get_ttl  #####################################################################################################
 
 	def test_set_get_ttl_str_001(self):
-		key: str = 'set_get_str_001'
+		key: str = self.test_set_get_ttl_str_001.__name__
 		value: str = TtlTests.get_random_string()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=5))
 		res_1: str = TtlTests.r.r_get(key)
@@ -70,7 +70,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res_2, f'res = {res_2}')
 
 	def test_set_get_ttl_str_002(self):
-		key: str = 'set_get_str_002'
+		key: str = self.test_set_get_ttl_str_002.__name__
 		value: str = TtlTests.get_random_string()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_ms=10_000))
 		res_1: str = TtlTests.r.r_get(key)
@@ -80,7 +80,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res_2, f'res = {res_2}')
 
 	def test_set_get_ttl_str_003(self):
-		key: str = 'set_get_str_003'
+		key: str = self.test_set_get_ttl_str_003.__name__
 		value: str = TtlTests.get_random_string()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=3, time_ms=100_000))
 		res_1: str = TtlTests.r.r_get(key)
@@ -90,7 +90,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res_2, f'res = {res_2}')
 
 	def test_set_get_ttl_str_004(self):
-		key: str = 'set_get_str_004'
+		key: str = self.test_set_get_ttl_str_004.__name__
 		value: str = TtlTests.get_random_string()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=10000, time_ms=5_000))
 		res_1: str = TtlTests.r.r_get(key)
@@ -100,7 +100,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res_2, f'res = {res_2}')
 
 	def test_set_get_ttl_str_005(self):
-		key: str = 'set_get_str_005'
+		key: str = self.test_set_get_ttl_str_005.__name__
 		value: str = TtlTests.get_random_string()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=1, time_ms=1_000_000))
 		sleep(3)
@@ -108,7 +108,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res, f'res = {res}')
 
 	def test_set_get_ttl_int_001(self):
-		key: str = 'set_get_int_001'
+		key: str = self.test_set_get_ttl_int_001.__name__
 		value: int = TtlTests.get_random_integer()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=10, time_ms=100))
 		sleep(1)
@@ -116,7 +116,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res, f'res = {res}')
 
 	def test_set_get_ttl_int_002(self):
-		key: str = 'set_get_int_002'
+		key: str = self.test_set_get_ttl_int_002.__name__
 		value: int = TtlTests.get_random_integer()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=15))
 		res_1: str = TtlTests.r.r_get(key, convert_to_type='int')
@@ -129,7 +129,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res_3, f'res = {res_2}')
 
 	def test_set_get_ttl_float_001(self):
-		key: str = 'set_get_float_001'
+		key: str = self.test_set_get_ttl_float_001.__name__
 		value: float = random()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=5))
 		res_1: str = TtlTests.r.r_get(key)
@@ -139,7 +139,7 @@ class TtlTests(unittest.TestCase):
 		self.assertIsNone(res_2, f'res = {res_2}')
 
 	def test_set_get_ttl_float_002(self):
-		key: str = 'set_get_float_002'
+		key: str = self.test_set_get_ttl_float_002.__name__
 		value: float = random()
 		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=20))
 		res_1: str = TtlTests.r.r_get(key, convert_to_type='numeric')

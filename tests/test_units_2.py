@@ -44,13 +44,13 @@ class MultipleDatabasesTests(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		# clear the database after tests
+		# clear the database before tests
 		MultipleDatabasesTests.original_redis_db2.flushdb()
 		MultipleDatabasesTests.original_redis_db3.flushdb()
 
 	@classmethod
 	def tearDownClass(cls):
-		# clear the database before tests
+		# clear the database after tests
 		MultipleDatabasesTests.original_redis_db2.flushdb()
 		MultipleDatabasesTests.original_redis_db3.flushdb()
 

@@ -10,7 +10,6 @@ from src.client import PyRedis
 class PrivateStaticFuncTests(unittest.TestCase):
 	""" Checking private functions of PyRedis class """
 
-	load_lua_func_obj = PyRedis._PyRedis__load_lua_script  # noqa
 	time_func_obj = PyRedis._PyRedis__compare_and_select_sec_ms  # noqa
 	remove_duplicates_func_obj = PyRedis._PyRedis__remove_duplicates  # noqa
 	convert_func_obj = PyRedis._PyRedis__convert_to_type  # noqa
@@ -379,22 +378,6 @@ class PrivateStaticFuncTests(unittest.TestCase):
 		value: float = random()
 		res: str = PrivateStaticFuncTests.helper_convert_func_obj(str(value), 'double')
 		self.assertEqual(value, res)
-
-	# load_lua_func_obj ################################################################################################
-
-	def test_load_lua_func_obj_001(self):
-		res = PrivateStaticFuncTests.load_lua_func_obj('get_helper')
-		self.assertNotEqual(res, '')
-		self.assertTrue(isinstance(res, str))
-
-	def test_load_lua_func_obj_002(self):
-		res = PrivateStaticFuncTests.load_lua_func_obj('arrays_helper')
-		self.assertNotEqual(res, '')
-		self.assertTrue(isinstance(res, str))
-
-	def test_load_lua_func_obj_003(self):
-		with self.assertRaises(FileNotFoundError):
-			PrivateStaticFuncTests.load_lua_func_obj('unknown_script')
 
 
 if __name__ == '__main__':

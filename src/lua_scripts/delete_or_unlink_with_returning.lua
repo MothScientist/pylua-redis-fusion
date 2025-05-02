@@ -1,5 +1,5 @@
 local key = KEYS[1]
-local returning = ARGV[1] == "1"
+local returning = tonumber(ARGV[1]) == 1
 local delete_or_unlink = ARGV[2]
 local value
 local value_type

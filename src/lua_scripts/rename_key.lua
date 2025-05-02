@@ -1,5 +1,6 @@
-if redis.call('EXISTS', KEYS[1]) == 1 then
-    redis.call('RENAME', KEYS[1], KEYS[2])
+local key = KEYS[1]
+if redis.call('EXISTS', key) == 1 then
+    redis.call('RENAME', key, KEYS[2])
     return true
 else
     return false
