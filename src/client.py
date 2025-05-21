@@ -286,6 +286,26 @@ class PyRedis:
         res = self.__register_lua_scripts('r_len', 1, key)
         return int(res) if res is not None else None
 
+    def r_pop(
+            self,
+            key: str,
+            count: int = 1,
+            reverse: bool = False,
+            convert_to_type: str = None
+    ) -> tuple:
+        """
+        Removes and returns an element of the list stored by key.
+        It`s important to remember that a "random" element is taken from the set,
+        since the set does not preserve the order in which the elements are stored.
+        :param key:
+        :param count: By default, it returns 1 item, you can specify the number to extract and return
+        :param reverse: By default, items in lists are taken from the beginning. Specify True to get items from the end.
+        :param convert_to_type:
+        :return: tuple
+        """
+        res = self.__register_lua_scripts('r_pop', 1, key, count, int(reverse))  # return list
+        return tuple(self.__convert_to_type(res, convert_to_type) if convert_to_type else res) if res else ()
+
     def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
         Delete a key
