@@ -91,21 +91,18 @@ class PyRedis:
         """
         return self.redis.memory_usage(key, samples=0) or 0
 
+    def get_count_of_keys(self) -> int:
+        """ Returns the number of keys in the current database """
+        return self.redis.dbsize()
+
     def flush_lua_scripts(self):
         self.lua_scripts_sha: dict = {}
         self.redis.script_flush()
-
-    def key_is_exist(self, key: str) -> bool | None:
-        return bool(self.redis.exists(key)) if key else None
 
     def keys_is_exists(self, keys: str | list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
         if isinstance(keys, str) and keys:
             keys = [keys]
         return self.redis.exists(*keys) if keys else None
-
-    def get_count_of_keys(self) -> int:
-        """ Returns the number of keys in the current database """
-        return self.redis.dbsize()
 
     def set_key_ttl(
             self,
