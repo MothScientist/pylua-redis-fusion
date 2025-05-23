@@ -1784,6 +1784,67 @@ class SmokeTests(unittest.TestCase):
 		# without set
 		self.assertEqual(SmokeTests.r.get_key_memory_usage(key), 0)
 
+	# r_pop ############################################################################################################
+
+	def test_r_pop_001(self):
+		key: str = self.test_r_pop_001.__name__
+		_len: list = [i for i in range(5)]
+		SmokeTests.r.r_set(key, _len)
+
+		res_1: tuple = SmokeTests.r.r_pop(key)
+		self.assertTrue(len(res_1) == 1, f'len = {len(res_1)}')
+		self.assertTrue(int(res_1[0]) == _len[-1], f'res[0] = {res_1[0]} | _len[-1] = {_len[-1]}')
+		self.assertEqual(
+			list(map(int, SmokeTests.r.r_get(key))), _len[:-1], f'r_get(key) = {SmokeTests.r.r_get(key)}'
+		)
+
+	def test_r_pop_002(self):
+		# test_r_pop_001 with convert to type
+		key: str = self.test_r_pop_002.__name__
+		_len: list = [i for i in range(5)]
+		SmokeTests.r.r_set(key, _len)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, convert_to_type='int')
+		self.assertTrue(len(res_1) == 1, f'len = {len(res_1)}')
+		self.assertTrue(res_1[0] == _len[-1], f'res[0] = {res_1[0]} | _len[-1] = {_len[-1]}')
+		self.assertEqual(
+			SmokeTests.r.r_get(key, convert_to_type='integer'), _len[:-1], f'r_get(key) = {SmokeTests.r.r_get(key)}'
+		)
+
+	def test_r_pop_003(self):
+		"""
+		List
+		Count == Len
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_003.__name__
+
+	def test_r_pop_004(self):
+		"""
+		List
+		Count != Len
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_004.__name__
+
+	def test_r_pop_005(self):
+		"""
+		Set
+		Count == Len
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_005.__name__
+
+	def test_r_pop_006(self):
+		"""
+		Set
+		Count != Len
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_006.__name__
+
+	# TODO - r_pop: count, reverse
+
 
 if __name__ == '__main__':
 	unittest.main()
