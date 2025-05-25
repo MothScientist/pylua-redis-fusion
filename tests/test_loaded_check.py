@@ -71,9 +71,9 @@ class LoadedTests(unittest.TestCase):
 
 	# Loaded test ######################################################################################################
 
-	def test_loaded_001(self):
+	def test_append_value_to_array_loaded_001(self):
 		""" List | 5_500 <= len <= 10_000 : r_set -> append_value_to_array -> r_get - with chunks """
-		key: str = self.test_loaded_001.__name__
+		key: str = self.test_append_value_to_array_loaded_001.__name__
 		value: list = [randint(0, 100_000) for _ in range(randint(5_500, 10_000))]
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
@@ -110,9 +110,9 @@ class LoadedTests(unittest.TestCase):
 			f'r_get = {(get_time_1 + get_time_2) / 2:.3f} sec.'
 		)
 
-	def test_loaded_002(self):
+	def test_append_value_to_array_loaded_002(self):
 		""" List | 250_000 <= len <= 500_000 : r_set -> append_value_to_array in 20-30% len -> r_get - with chunks """
-		key: str = self.test_loaded_002.__name__
+		key: str = self.test_append_value_to_array_loaded_002.__name__
 		value: list = [randint(0, 100_000) for _ in range(randint(250_000, 500_000))]
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
@@ -146,9 +146,9 @@ class LoadedTests(unittest.TestCase):
 			f'r_get = {get_time:.3f} sec.'
 		)
 
-	def test_loaded_003(self):
+	def test_append_value_to_array_loaded_003(self):
 		""" List | 250_000 <= len <= 500_000 : r_set -> append_value_to_array in 45-55% len -> r_get - with chunks """
-		key: str = self.test_loaded_003.__name__
+		key: str = self.test_append_value_to_array_loaded_003.__name__
 		value: list = [randint(0, 100_000) for _ in range(randint(250_000, 500_000))]
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
@@ -182,9 +182,9 @@ class LoadedTests(unittest.TestCase):
 			f'r_get = {get_time:.3f} sec.'
 		)
 
-	def test_loaded_004(self):
+	def test_append_value_to_array_loaded_004(self):
 		""" List | 250_000 <= len <= 500_000 : r_set -> append_value_to_array in 75-90% len -> r_get - with chunks"""
-		key: str = self.test_loaded_004.__name__
+		key: str = self.test_append_value_to_array_loaded_004.__name__
 		value: list = [randint(0, 100_000) for _ in range(randint(250_000, 500_000))]
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
@@ -221,9 +221,9 @@ class LoadedTests(unittest.TestCase):
 			f'r_get = {get_time:.3f} sec.'
 		)
 
-	def test_loaded_005(self):
+	def test_append_value_to_array_loaded_005(self):
 		""" List | 3_000 <= len <= 4_500 : set | append_value_to_array in 30-70% len | get  - without chunks"""
-		key: str = self.test_loaded_005.__name__
+		key: str = self.test_append_value_to_array_loaded_005.__name__
 		value: list = [randint(0, 100_000) for _ in range(randint(3_000, 4_500))]
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
@@ -257,9 +257,9 @@ class LoadedTests(unittest.TestCase):
 			f'r_get = {get_time:.3f} sec.'
 		)
 
-	def test_loaded_006(self):
+	def test_append_value_to_array_loaded_006(self):
 		""" Set | 20_000 <= len <= 25_000 : r_set -> append_value_to_array -> r_get  - with chunks"""
-		key: str = self.test_loaded_006.__name__
+		key: str = self.test_append_value_to_array_loaded_006.__name__
 		value: set = {str(i) for i in range(randint(20_000, 25_000))}
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
@@ -275,9 +275,9 @@ class LoadedTests(unittest.TestCase):
 
 		self.assertTrue(len(res) == len(value) + 1)
 
-	def test_loaded_007(self):
+	def test_append_value_to_array_loaded_007(self):
 		""" Tuple | 20_000 <= len <= 25_000 : r_set -> append_value_to_array -> r_get  - with chunks"""
-		key: str = self.test_loaded_007.__name__
+		key: str = self.test_append_value_to_array_loaded_007.__name__
 		value: tuple = tuple(str(i) for i in range(randint(20_000, 25_000)))
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
@@ -295,9 +295,9 @@ class LoadedTests(unittest.TestCase):
 		self.assertTrue(len(res) == len(value) + 1)
 		self.assertEqual(res[_index], new_value)
 
-	def test_loaded_008(self):
+	def test_append_value_to_array_loaded_008(self):
 		""" Frozenset | 20_000 <= len <= 25_000 : r_set -> append_value_to_array -> r_get  - with chunks"""
-		key: str = self.test_loaded_006.__name__
+		key: str = self.test_append_value_to_array_loaded_008.__name__
 		value: frozenset = frozenset(str(i) for i in range(randint(20_000, 25_000)))
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
@@ -312,3 +312,11 @@ class LoadedTests(unittest.TestCase):
 		res: list = LoadedTests.r.r_get(key)
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+	def test_r_pop_loaded_001(self):
+		key: str = self.test_r_pop_loaded_001.__name__
+		pass
+
+
+if __name__ == '__main__':
+	unittest.main()
