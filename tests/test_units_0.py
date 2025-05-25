@@ -1,4 +1,5 @@
 import unittest
+from collections import Counter  # to compare arrays with elements in different orders
 from redis import Redis, ConnectionPool
 from random import randint, choice, random
 from string import ascii_letters, digits
@@ -1788,27 +1789,29 @@ class SmokeTests(unittest.TestCase):
 
 	def test_r_pop_001(self):
 		key: str = self.test_r_pop_001.__name__
-		_len: list = [i for i in range(5)]
-		SmokeTests.r.r_set(key, _len)
+		_len: int = randint(5, 10)
+		_list: list = [i for i in range(_len)]
+		SmokeTests.r.r_set(key, _list)
 
 		res_1: tuple = SmokeTests.r.r_pop(key)
 		self.assertTrue(len(res_1) == 1, f'len = {len(res_1)}')
-		self.assertTrue(int(res_1[0]) == _len[-1], f'res[0] = {res_1[0]} | _len[-1] = {_len[-1]}')
+		self.assertTrue(int(res_1[0]) == _list[-1], f'res[0] = {res_1[0]} | _len[-1] = {_list[-1]}')
 		self.assertEqual(
-			list(map(int, SmokeTests.r.r_get(key))), _len[:-1], f'r_get(key) = {SmokeTests.r.r_get(key)}'
+			list(map(int, SmokeTests.r.r_get(key))), _list[:-1], f'r_get(key) = {SmokeTests.r.r_get(key)}'
 		)
 
 	def test_r_pop_002(self):
 		# test_r_pop_001 with convert to type
 		key: str = self.test_r_pop_002.__name__
-		_len: list = [i for i in range(5)]
-		SmokeTests.r.r_set(key, _len)
+		_len: int = randint(5, 10)
+		_list: list = [i for i in range(_len)]
+		SmokeTests.r.r_set(key, _list)
 
 		res_1: tuple = SmokeTests.r.r_pop(key, convert_to_type='int')
 		self.assertTrue(len(res_1) == 1, f'len = {len(res_1)}')
-		self.assertTrue(res_1[0] == _len[-1], f'res[0] = {res_1[0]} | _len[-1] = {_len[-1]}')
+		self.assertEqual(res_1[0], _list[-1])
 		self.assertEqual(
-			SmokeTests.r.r_get(key, convert_to_type='integer'), _len[:-1], f'r_get(key) = {SmokeTests.r.r_get(key)}'
+			SmokeTests.r.r_get(key, convert_to_type='integer'), _list[:-1], f'r_get(key) = {SmokeTests.r.r_get(key)}'
 		)
 
 	def test_r_pop_003(self):
@@ -1818,6 +1821,14 @@ class SmokeTests(unittest.TestCase):
 		Checking if a key is deleted if there are no elements left
 		"""
 		key: str = self.test_r_pop_003.__name__
+		_len: int = randint(10, 20)
+		_list: list = [str(SmokeTests.get_random_integer()) for _ in range(_len)]
+		SmokeTests.r.r_set(key, _list)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_len)
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(len(res_1), _len)
+		self.assertEqual(Counter(list(res_1)), Counter(_list))
 
 	def test_r_pop_004(self):
 		"""
@@ -1826,22 +1837,150 @@ class SmokeTests(unittest.TestCase):
 		Checking if a key is deleted if there are no elements left
 		"""
 		key: str = self.test_r_pop_004.__name__
+		_len: int = randint(10, 20)
+		_len_pop: int = randint(3, 5)
+		_list: list = [str(SmokeTests.get_random_integer()) for _ in range(_len)]
+		SmokeTests.r.r_set(key, _list)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_len_pop)
+		self.assertIsNotNone(SmokeTests.r.r_get(key))  # not deleted after r_pop
+		self.assertEqual(len(res_1), _len_pop)
+		self.assertEqual(Counter(list(res_1)), Counter(_list[-_len_pop:]))
+		_new_list: list = list(SmokeTests.r.r_get(key))
+		self.assertEqual(Counter(_new_list), Counter(_list[:-_len_pop]))
 
 	def test_r_pop_005(self):
+		"""
+		Tuple
+		Count == Len
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_005.__name__
+		_len: int = randint(10, 20)
+		_tuple: tuple = tuple(str(SmokeTests.get_random_integer()) for _ in range(_len))
+		SmokeTests.r.r_set(key, _tuple)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_len)
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(len(res_1), _len)
+		self.assertEqual(Counter(res_1), Counter(_tuple))
+
+	def test_r_pop_006(self):
+		"""
+		Tuple
+		Count != Len
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_006.__name__
+		_len: int = randint(10, 20)
+		_tuple_pop: int = randint(3, 5)
+		_tuple: tuple = tuple(str(SmokeTests.get_random_integer()) for _ in range(_len))
+		SmokeTests.r.r_set(key, _tuple)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_tuple_pop)
+		self.assertIsNotNone(SmokeTests.r.r_get(key))  # not deleted after r_pop
+		self.assertEqual(len(res_1), _tuple_pop)
+		self.assertEqual(Counter(res_1), Counter(_tuple[-_tuple_pop:]))
+		_new_tuple: tuple = tuple(SmokeTests.r.r_get(key))
+		self.assertEqual(Counter(_new_tuple), Counter(_tuple[:-_tuple_pop]))
+
+	def test_r_pop_007(self):
 		"""
 		Set
 		Count == Len
 		Checking if a key is deleted if there are no elements left
 		"""
-		key: str = self.test_r_pop_005.__name__
+		key: str = self.test_r_pop_007.__name__
+		_len: int = randint(10, 20)
+		_set: set = set(str(SmokeTests.get_random_integer()) for _ in range(_len))
+		SmokeTests.r.r_set(key, _set)
 
-	def test_r_pop_006(self):
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_len)
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(len(res_1), _len)
+		self.assertEqual(Counter(res_1), Counter(_set))
+
+	def test_r_pop_008(self):
 		"""
 		Set
 		Count != Len
 		Checking if a key is deleted if there are no elements left
 		"""
-		key: str = self.test_r_pop_006.__name__
+		key: str = self.test_r_pop_008.__name__
+		_len: int = randint(10, 20)
+		_set_pop: int = randint(3, 5)
+		_set: set = set(str(SmokeTests.get_random_integer()) for _ in range(_len))
+		SmokeTests.r.r_set(key, _set)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_set_pop)
+		self.assertIsNotNone(SmokeTests.r.r_get(key))  # not deleted after r_pop
+		self.assertEqual(len(res_1), _set_pop)
+		_new_set: set = set(SmokeTests.r.r_get(key))
+		self.assertEqual(len(_new_set), _len - _set_pop)
+		# There is no point in comparing the remaining values here - sets do not store the order of values
+		# This means that we will get false results
+
+	def test_r_pop_009(self):
+		"""
+		Frozenset
+		Count == Len
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_009.__name__
+		_len: int = randint(10, 20)
+		_frozenset: frozenset = frozenset(str(SmokeTests.get_random_integer()) for _ in range(_len))
+		SmokeTests.r.r_set(key, _frozenset)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_len)
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(len(res_1), _len)
+		self.assertEqual(Counter(res_1), Counter(_frozenset))
+
+	def test_r_pop_010(self):
+		"""
+		Frozenset
+		Count != Len
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_010.__name__
+		_len: int = randint(10, 20)
+		_set_pop: int = randint(3, 5)
+		_frozenset: frozenset = frozenset(str(SmokeTests.get_random_integer()) for _ in range(_len))
+		SmokeTests.r.r_set(key, _frozenset)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_set_pop)
+		self.assertIsNotNone(SmokeTests.r.r_get(key))  # not deleted after r_pop
+		self.assertEqual(len(res_1), _set_pop)
+		_new_frozenset: frozenset = frozenset(SmokeTests.r.r_get(key))
+		self.assertEqual(len(_new_frozenset), _len - _set_pop)
+		# There is no point in comparing the remaining values here - frozensets do not store the order of values
+		# This means that we will get false results
+
+	def test_r_pop_011(self):
+		"""
+		List
+		Len == 1
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_011.__name__
+		_list: list = [randint(1, 100)]
+		SmokeTests.r.r_set(key, _list)
+		_pop: tuple = SmokeTests.r.r_pop(key, convert_to_type='int')
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(_pop, tuple(_list))
+
+	def test_r_pop_012(self):
+		"""
+		Tuple
+		Len == 1
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_012.__name__
+		_tuple: tuple = (randint(1, 100),)
+		SmokeTests.r.r_set(key, _tuple)
+		_pop: tuple = SmokeTests.r.r_pop(key, convert_to_type='int')
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(_pop, _tuple)
 
 	# TODO - r_pop: count, reverse
 
