@@ -35,6 +35,8 @@ __For quick connection to your Python projects and easy usage.__ <span style="co
 * set
 * frozenset
 
+#### Support for writing arrays longer than 1 million (implemented in Lua) in 1 Python operation without losing write speed!
+
 The number of supported methods and data types increases as the project develops, <span style="color: aqua;">**but it has all the basic methods for working with Redis**</span> (see the list and description of current commands with examples in the `example.py` file in the root of the repository).
 
 <span style="color: white;"><u>Backward compatibility of functions is also preserved, which allows you to avoid problems when 
