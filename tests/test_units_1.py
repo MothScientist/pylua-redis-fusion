@@ -511,6 +511,35 @@ class TtlTests(unittest.TestCase):
 
 	# drop_keys_ttl ####################################################################################################
 
+	# keep_ttl #########################################################################################################
+
+	def test_keep_ttl_001(self):
+		key: str = self.test_keep_ttl_001.__name__
+		value_1, value_2 = TtlTests.get_random_string(), TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=3)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.r_set(key, value_2, keep_ttl=True)
+		self.assertEqual(value_2, TtlTests.r.r_get(key))
+
+		sleep(4)
+
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_keep_ttl_002(self):
+		key: str = self.test_keep_ttl_002.__name__
+
+	def test_keep_ttl_003(self):
+		key: str = self.test_keep_ttl_003.__name__
+
+	def test_keep_ttl_004(self):
+		key: str = self.test_keep_ttl_004.__name__
+
+	def test_keep_ttl_005(self):
+		key: str = self.test_keep_ttl_005.__name__
+
+
 	# TODO
 
 
