@@ -278,22 +278,22 @@ class LoadedTests(unittest.TestCase):
 	def test_append_value_to_array_loaded_007(self):
 		""" Tuple | 20_000 <= len <= 25_000 : r_set -> append_value_to_array -> r_get  - with chunks"""
 		key: str = self.test_append_value_to_array_loaded_007.__name__
-		value: tuple = tuple(str(i) for i in range(randint(20_000, 25_000)))
+		value: tuple = tuple(i for i in range(randint(20_000, 25_000)))
 		_len = len(value)
 		new_value: int = randint(500_000, 1_000_000)
-		_index: int = _len * (randint(25, 75) // 100)
 
 		LoadedTests.r.r_set(key, value)
 
-		res: list = LoadedTests.r.r_get(key)
+		res: list = LoadedTests.r.r_get(key, convert_to_type='integer')
 		self.assertTrue(len(res) == len(value))
+		self.assertEqual(res[-1], value[-1])
 
 		LoadedTests.r.append_value_to_array(key, new_value)
 
-		res: list = LoadedTests.r.r_get(key)
+		res: list = LoadedTests.r.r_get(key, convert_to_type='integer')
 
 		self.assertTrue(len(res) == len(value) + 1)
-		self.assertEqual(res[_index], new_value)
+		self.assertEqual(res[-1], new_value)
 
 	def test_append_value_to_array_loaded_008(self):
 		""" Frozenset | 20_000 <= len <= 25_000 : r_set -> append_value_to_array -> r_get  - with chunks"""
