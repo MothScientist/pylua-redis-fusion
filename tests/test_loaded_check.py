@@ -12,7 +12,7 @@ from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 sys_path.append('../')
 from src.client import PyRedis
 
-redis_db: int = 6
+redis_db: int = 8
 
 
 class LoadedTests(unittest.TestCase):

@@ -128,6 +128,54 @@ class TtlTests(unittest.TestCase):
 		res_3: None = TtlTests.r.r_get(key)
 		self.assertIsNone(res_3, f'res = {res_2}')
 
+	def test_set_get_ttl_int_003(self):
+		key: str = self.test_set_get_ttl_int_003.__name__
+		value: int = TtlTests.get_random_integer()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=0))
+		sleep(1)
+		res: int = TtlTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, value)
+
+	def test_set_get_ttl_int_004(self):
+		key: str = self.test_set_get_ttl_int_004.__name__
+		value: int = TtlTests.get_random_integer()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=0, time_ms=0))
+		sleep(1)
+		res: int = TtlTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, value)
+
+	def test_set_get_ttl_int_005(self):
+		key: str = self.test_set_get_ttl_int_005.__name__
+		value: int = TtlTests.get_random_integer()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=None, time_ms=0))
+		sleep(1)
+		res: int = TtlTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, value)
+
+	def test_set_get_ttl_int_006(self):
+		key: str = self.test_set_get_ttl_int_006.__name__
+		value: int = TtlTests.get_random_integer()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=0, time_ms=None))
+		sleep(1)
+		res: int = TtlTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, value)
+
+	def test_set_get_ttl_int_007(self):
+		key: str = self.test_set_get_ttl_int_007.__name__
+		value: int = TtlTests.get_random_integer()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_s=None, time_ms=None))
+		sleep(1)
+		res: int = TtlTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, value)
+
+	def test_set_get_ttl_int_008(self):
+		key: str = self.test_set_get_ttl_int_008.__name__
+		value: int = TtlTests.get_random_integer()
+		self.assertIsNone(TtlTests.r.r_set(key, value, time_ms=0))
+		sleep(1)
+		res: int = TtlTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, value)
+
 	def test_set_get_ttl_float_001(self):
 		key: str = self.test_set_get_ttl_float_001.__name__
 		value: float = random()
@@ -493,7 +541,7 @@ class TtlTests(unittest.TestCase):
 
 	def test_drop_key_ttl_004(self):
 		""" drop ttl without ttl for key """
-		key: str = 'drop_key_ttl_004'
+		key: str = self.test_drop_key_ttl_004.__name__
 		value: str = TtlTests.get_random_string()
 		TtlTests.r.r_set(key, value)
 
@@ -524,17 +572,49 @@ class TtlTests(unittest.TestCase):
 		self.assertEqual(value_2, TtlTests.r.r_get(key))
 
 		sleep(4)
-
 		self.assertIsNone(TtlTests.r.r_get(key))
 
 	def test_keep_ttl_002(self):
 		key: str = self.test_keep_ttl_002.__name__
+		value_1, value_2 = TtlTests.get_random_string(), TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=5)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.r_set(key, value_2, keep_ttl=True)
+		self.assertEqual(value_2, TtlTests.r.r_get(key))
+
+		sleep(1)
+		self.assertEqual(value_2, TtlTests.r.r_get(key))
+
+		sleep(5)
+		self.assertIsNone(TtlTests.r.r_get(key))
 
 	def test_keep_ttl_003(self):
 		key: str = self.test_keep_ttl_003.__name__
+		value_1, value_2 = TtlTests.get_random_string(), TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.r_set(key, value_2, keep_ttl=False)
+		self.assertEqual(value_2, TtlTests.r.r_get(key))
+
+		sleep(3)
+		self.assertEqual(value_2, TtlTests.r.r_get(key))
 
 	def test_keep_ttl_004(self):
 		key: str = self.test_keep_ttl_004.__name__
+		value_1, value_2 = TtlTests.get_random_string(), TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.r_set(key, value_2, keep_ttl=False)
+		self.assertEqual(value_2, TtlTests.r.r_get(key))
+
+		sleep(3)
+		self.assertEqual(value_2, TtlTests.r.r_get(key))
 
 	def test_keep_ttl_005(self):
 		key: str = self.test_keep_ttl_005.__name__

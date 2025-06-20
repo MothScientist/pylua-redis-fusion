@@ -45,7 +45,7 @@ class PrivateStaticFuncTests(unittest.TestCase):
 
 	def test_compare_and_select_sec_ms_006(self):
 		res = PrivateStaticFuncTests.time_func_obj(0, 0)
-		self.assertEqual(res, 0)
+		self.assertEqual(res, None)
 
 	def test_compare_and_select_sec_ms_007(self):
 		res = PrivateStaticFuncTests.time_func_obj(15, 1_550)
@@ -81,6 +81,14 @@ class PrivateStaticFuncTests(unittest.TestCase):
 
 	def test_compare_and_select_sec_ms_015(self):
 		res = PrivateStaticFuncTests.time_func_obj(None, None)
+		self.assertEqual(res, None)
+
+	def test_compare_and_select_sec_ms_016(self):
+		res = PrivateStaticFuncTests.time_func_obj(0, None)
+		self.assertEqual(res, None)
+
+	def test_compare_and_select_sec_ms_017(self):
+		res = PrivateStaticFuncTests.time_func_obj(None, 0)
 		self.assertEqual(res, None)
 
 	# __remove_duplicates ##############################################################################################

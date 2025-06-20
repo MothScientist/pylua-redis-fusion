@@ -177,8 +177,8 @@ class PyRedis:
         :param value: IMPORTANT: not considered if a dict type object was passed in key.
         :param get_old_value: return the old value stored at key, or None if the key did not exist.
         :param convert_to_type_for_get: parameter for 'get_old_value', similar to the action in the 'get' function
-        :param time_ms: key lifetime in milliseconds.
-        :param time_s: key lifetime in seconds.
+        :param time_ms: key lifetime in milliseconds (0 equal None).
+        :param time_s: key lifetime in seconds (0 equal None).
         :param if_exist: set value only if such key already exists.
         :param if_not_exist: set value only if such key does not exist yet.
         :param keep_ttl: retain the time to live associated with the key.  # TODO - tests
@@ -234,20 +234,22 @@ class PyRedis:
             convert_to_type: str | None = None
     ) -> list | set | None:
         """
-        Adding a new value to a list or set
+        Adding a new value to a list or set.
+
+        Writing to the middle of a list of length ~500_000 about 0.045s.
         :param key:
         :param value: Remember that Redis does not support nested structures,
-        so arrays cannot be values inside other arrays.
+            so arrays cannot be values inside other arrays.
         :param index: At what position this element should be added. 0 - to the beginning, -1 - to the end,
-        otherwise a specific position within the list (For sets index is ignored).
-        If the position is greater than the length of the list,
-        the element will be added to the end (equivalent to parameter -1).
+            otherwise a specific position within the list (For sets index is ignored).
+            If the position is greater than the length of the list,
+            the element will be added to the end (equivalent to parameter -1).
         :param type_if_not_exists: If such a key does not exist, then a list or set value will be created,
-        if otherwise specified, then the None parameter is assigned,
-        which says that if such a key does not exist, it will not be created.
+            if otherwise specified, then the None parameter is assigned,
+            which says that if such a key does not exist, it will not be created.
         :param get_old_value: Return the previous value of the key
         :param convert_to_type: bool/int/float (by default all output data is of type str after decode() function);
-        For float -> int: rounds down to integer part number (drops fractional part)
+            For float -> int: rounds down to integer part number (drops fractional part)
         :return: None if such value did not exist before or get_old_value = False
         """
         if not key or (not value and value not in (False, 0)) or not isinstance(value, (bool,  int, float, str)):
@@ -267,7 +269,7 @@ class PyRedis:
         :param key:
         :param default_value: value that will be returned if there is no such key.
         :param convert_to_type: bool/int/float (by default all output data is of type str after decode() function);
-        For float -> int: rounds down to integer part number (drops fractional part)
+            For float -> int: rounds down to integer part number (drops fractional part)
         :return: value, none or default_value
         """
         if not key:
@@ -526,7 +528,7 @@ class PyRedis:
         :param sha: SHA or result load_lua_script() function
         :param read_only: True if the EVAL command should be executed, read-only
         :param args: The first arguments in *args you must pass are the number of keys,
-        and then the keys themselves in the required order. Then come the additional arguments.
+            and then the keys themselves in the required order. Then come the additional arguments.
         :return: Returns the result of the script
         """
         if not (lua_script or sha):
@@ -540,8 +542,8 @@ class PyRedis:
         Load a Lua script into the script cache_data
         :param lua_script:
         :param use_buffer: You can use the built-in buffer to store the SHA of your scripts,
-        and if it is found when executing the script,
-        its SHA will already be inside the structure and will not be calculated again.
+            and if it is found when executing the script,
+            its SHA will already be inside the structure and will not be calculated again.
         :return: SHA
         """
         res = self.user_lua_scripts_buffer.get(lua_script) or self.redis.script_load(lua_script)
@@ -568,13 +570,18 @@ class PyRedis:
         return self.data_type_converter(value, _type)
 
     @staticmethod
-    def __compare_and_select_sec_ms(time_s: int | None, time_ms: int | None) -> int:
+    def __compare_and_select_sec_ms(time_s: int | None, time_ms: int | None) -> int | None:
         """
         If both seconds and milliseconds are specified,
         the time is converted to milliseconds and the smallest one is selected
         """
-        time_ms = min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
-        return int(time_ms) if isinstance(time_ms, (int, float)) else None
+        if not (time_s or time_ms):
+            return None
+
+        if not time_s or not time_ms:
+            return time_s * 1_000 if time_s else time_ms
+
+        return min(time_s * 1_000, time_ms)
 
     @staticmethod
     def __remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:

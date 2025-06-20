@@ -10,7 +10,7 @@ sys_path.append('../')
 from src.data_type_converter import TypeConverter
 from src.client import PyRedis
 
-redis_db: int = 0
+redis_db: int = 7
 
 
 class TypeConverterTest(unittest.TestCase):
