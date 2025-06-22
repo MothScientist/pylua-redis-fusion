@@ -85,6 +85,7 @@ class MultipleDatabasesTests(unittest.TestCase):
 
 	def test_r_remove_all_keys_001(self):
 		MultipleDatabasesTests.original_redis_db2.flushall()
+		MultipleDatabasesTests.original_redis_db3.flushall()
 
 		# for first database
 		key_0: str = MultipleDatabasesTests.get_random_string(length=3)
@@ -106,6 +107,7 @@ class MultipleDatabasesTests(unittest.TestCase):
 		self.assertEqual(count_keys, 2)
 
 	def test_r_remove_all_keys_002(self):
+		MultipleDatabasesTests.original_redis_db2.flushall()
 		MultipleDatabasesTests.original_redis_db3.flushall()
 
 		# for first database
