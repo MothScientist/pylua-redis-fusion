@@ -39,7 +39,21 @@ else -- key exists
       if index >= length then
         redis.call('RPUSH', key, value)
       else
-        redis.call('LINSERT', key, 'AFTER', index-1, value)
+        -- Insert element by index -----------------------------
+        local temp = {}
+        -- Remove elements from the tail until we reach the desired position
+        for i = length - 1, index, -1 do
+            temp[#temp + 1] = redis.call('RPOP', key)
+        end
+
+        -- Insert the new element
+        redis.call('RPUSH', key, value)
+
+        -- Put back the removed elements in reverse order
+        for i = #temp, 1, -1 do
+            redis.call('RPUSH', key, temp[i])
+        end
+        --------------------------------------------------------
       end
     end
   end
