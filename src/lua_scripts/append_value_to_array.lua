@@ -1,6 +1,6 @@
 local key = KEYS[1]
 local index = tonumber(ARGV[1])
-local type_if_not_exists = ARGV[2]
+local type_if_not_exists = ARGV[2] -- 'null', 'list' or 'set'
 local get_old_value = tonumber(ARGV[3]) == 1
 local value = ARGV[4]
 
