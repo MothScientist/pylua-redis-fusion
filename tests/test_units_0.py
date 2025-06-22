@@ -2072,7 +2072,158 @@ class SmokeTests(unittest.TestCase):
 		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
 		self.assertEqual(_pop, _tuple)
 
-	# TODO - r_pop: count, reverse
+	def test_r_pop_013(self):
+		"""
+		Set
+		Len == 1
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_013.__name__
+		_set: set = {randint(1, 100)}
+		SmokeTests.r.r_set(key, _set)
+		_pop: tuple = SmokeTests.r.r_pop(key, convert_to_type='int')
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(_pop, tuple(_set))
+
+	def test_r_pop_014(self):
+		"""
+		Frozenset
+		Len == 1
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_014.__name__
+		_frozenset: frozenset = frozenset([randint(1, 100)])
+		SmokeTests.r.r_set(key, _frozenset)
+		_pop: tuple = SmokeTests.r.r_pop(key, convert_to_type='int')
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(_pop, tuple(_frozenset))
+
+	def test_r_pop_015(self):
+		"""
+		List
+		Len == 1 (reverse)
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_015.__name__
+		_list: list = [randint(1, 100)]
+		SmokeTests.r.r_set(key, _list)
+		_pop: tuple = SmokeTests.r.r_pop(key, reverse=True, convert_to_type='int')
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(_pop, tuple(_list))
+
+	def test_r_pop_016(self):
+		"""
+		Tuple
+		Len == 1 (reverse)
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_016.__name__
+		_tuple: tuple = (randint(1, 100),)
+		SmokeTests.r.r_set(key, _tuple)
+		_pop: tuple = SmokeTests.r.r_pop(key, reverse=True, convert_to_type='int')
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(_pop, _tuple)
+
+	def test_r_pop_017(self):
+		"""
+		Set
+		Len == 1 (reverse)
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_017.__name__
+		_set: set = {randint(1, 100)}
+		SmokeTests.r.r_set(key, _set)
+		_pop: tuple = SmokeTests.r.r_pop(key, reverse=True, convert_to_type='int')
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(_pop, tuple(_set))
+
+	def test_r_pop_018(self):
+		"""
+		Frozenset
+		Len == 1 (reverse)
+		Checking if a key is deleted if there are no elements left
+		"""
+		key: str = self.test_r_pop_018.__name__
+		_frozenset: frozenset = frozenset([randint(1, 100)])
+		SmokeTests.r.r_set(key, _frozenset)
+		_pop: tuple = SmokeTests.r.r_pop(key, reverse=True, convert_to_type='int')
+		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
+		self.assertEqual(_pop, tuple(_frozenset))
+
+	def test_r_pop_019(self):
+		"""
+		Get all elements except the last one
+		List
+		"""
+		key: str = self.test_r_pop_019.__name__
+		_len: int = randint(10, 20)
+		_len_pop: int = _len - 1
+		_list: list = [str(SmokeTests.get_random_integer()) for _ in range(_len)]
+		SmokeTests.r.r_set(key, _list)
+
+		res_1: tuple = SmokeTests.r.r_pop(key, count=_len_pop)
+		self.assertIsNotNone(SmokeTests.r.r_get(key))  # not deleted after r_pop
+		self.assertEqual(len(res_1), _len_pop)
+		self.assertEqual(Counter(list(res_1)), Counter(_list[1:]))
+		_new_list: list = list(SmokeTests.r.r_get(key))
+		self.assertEqual(Counter(_new_list), Counter([_list[0]]))
+
+	def test_r_pop_020(self):
+		"""
+		Get all elements except the last one
+		Tuple
+		"""
+		key: str = self.test_r_pop_020.__name__
+
+	def test_r_pop_021(self):
+		"""
+		Get all elements except the last one
+		Set
+		"""
+		key: str = self.test_r_pop_021.__name__
+
+	def test_r_pop_022(self):
+		"""
+		Get all elements except the last one
+		Frozenset
+		"""
+		key: str = self.test_r_pop_022.__name__
+
+	def test_r_pop_023(self):
+		"""
+		Get all elements except the last one (reverse)
+		"""
+		key: str = self.test_r_pop_023.__name__
+
+	def test_r_pop_024(self):
+		"""
+		Get all elements except the last one (reverse)
+		List
+		"""
+		key: str = self.test_r_pop_024.__name__
+
+	def test_r_pop_025(self):
+		"""
+		Get all elements except the last one (reverse)
+		Tuple
+		"""
+		key: str = self.test_r_pop_025.__name__
+
+	def test_r_pop_026(self):
+		"""
+		Get all elements except the last one (reverse)
+		Set
+		"""
+		key: str = self.test_r_pop_026.__name__
+
+	def test_r_pop_027(self):
+		"""
+		Get all elements except the last one (reverse)
+		Frozenset
+		"""
+		key: str = self.test_r_pop_027.__name__
+
+	# TODO - r_pop: count, reverse, все кроме последнего элемента
 
 
 if __name__ == '__main__':
