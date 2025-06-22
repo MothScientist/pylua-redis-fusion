@@ -322,6 +322,96 @@ class SmokeTests(unittest.TestCase):
 		res: set = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(value.union({new_value}), res)
 
+	def test_append_value_to_array_008(self):
+		""" test_append_value_to_array: get_old_value - #1 """
+		key: str = self.test_append_value_to_array_008.__name__
+		value: list[int] = [0, 1, 2]
+		new_value: int = 3
+		SmokeTests.r.r_set(key, value)
+
+		old_value: list[int] = SmokeTests.r.append_value_to_array(key, 3, get_old_value=True, convert_to_type='int')
+		self.assertEqual(old_value, value)
+
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
+		self.assertEqual(res, (value + [new_value]))
+
+	def test_append_value_to_array_009(self):
+		""" test_append_value_to_array: get_old_value - #2 """
+		key: str = self.test_append_value_to_array_009.__name__
+		value: list[int] = [9, 8, 6, 5, 4, 3, 2, 1, 0]
+		SmokeTests.r.r_set(key, value)
+
+		old_value: list[int] = SmokeTests.r.append_value_to_array(
+			key, 7, index=2, get_old_value=True, convert_to_type='int'
+		)
+		self.assertEqual(old_value, value)
+
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
+		self.assertEqual(res, [9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+
+	def test_append_value_to_array_010(self):
+		""" test_append_value_to_array: get_old_value - #3 """
+		key: str = self.test_append_value_to_array_010.__name__
+		value: list[int] = [9, 8, 7, 6, 5, 4, 3, 2, 0]
+		SmokeTests.r.r_set(key, value)
+
+		old_value: list[int] = SmokeTests.r.append_value_to_array(
+			key, 1, index=len(value)-1, get_old_value=True, convert_to_type='int'
+		)
+		self.assertEqual(old_value, value)
+
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
+		self.assertEqual(res, [9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+
+	def test_append_value_to_array_011(self):
+		key: str = self.test_append_value_to_array_011.__name__
+		value: list[str] = ['q', 'qw', 'qwer', 'qwert', 'qwerty']
+		SmokeTests.r.r_set(key, value)
+		old_value: None = SmokeTests.r.append_value_to_array(key, 'qwe', index=2, get_old_value=False)
+		self.assertIsNone(old_value)
+		res: list[str] = SmokeTests.r.r_get(key)
+		self.assertEqual(res, ['q', 'qw', 'qwe', 'qwer', 'qwert', 'qwerty'])
+
+	def test_append_value_to_array_012(self):
+		key: str = self.test_append_value_to_array_012.__name__
+		SmokeTests.r.append_value_to_array(key, 0, type_if_not_exists='null')
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_append_value_to_array_013(self):
+		key: str = self.test_append_value_to_array_013.__name__
+		SmokeTests.r.append_value_to_array(key, 0, type_if_not_exists='list')
+		res = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, [0])
+
+	def test_append_value_to_array_014(self):
+		key: str = self.test_append_value_to_array_014.__name__
+		SmokeTests.r.append_value_to_array(key, 'res', type_if_not_exists='set')
+		self.assertEqual(SmokeTests.r.r_get(key), {'res'})
+
+	def test_append_value_to_array_015(self):
+		key: str = self.test_append_value_to_array_015.__name__
+		SmokeTests.r.append_value_to_array(key, '123', type_if_not_exists='qwerty')
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_append_value_to_array_016(self):
+		key: str = self.test_append_value_to_array_016.__name__
+		SmokeTests.r.append_value_to_array(key, 987, type_if_not_exists='')
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_append_value_to_array_017(self):
+		key: str = self.test_append_value_to_array_017.__name__
+		SmokeTests.r.append_value_to_array(key, 98765, type_if_not_exists='   ')
+		self.assertIsNone(SmokeTests.r.r_get(key))
+
+	def test_append_value_to_array_018(self):
+		""" index > len """
+		key: str = self.test_append_value_to_array_018.__name__
+		SmokeTests.r.append_value_to_array(key, 123, index=15, type_if_not_exists='list')
+		res = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, [123])
+
+	# TODO - test_append_value_to_array: type_if_not_exists
+
 	# r_len ############################################################################################################
 
 	def test_r_len_001(self):
