@@ -101,6 +101,10 @@ class LoadedTests(unittest.TestCase):
 		get_time_2 = end_time - start_time
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+		value.append(new_value)
+		self.assertEqual(sorted(list(value)), sorted(res))
+
 		self.assertEqual(res[_index], new_value)
 
 		print(
@@ -137,6 +141,10 @@ class LoadedTests(unittest.TestCase):
 		get_time = end_time - start_time
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+		value.append(new_value)
+		self.assertEqual(sorted(list(value)), sorted(res))
+
 		self.assertEqual(res[_index], new_value)
 
 		print(
@@ -173,6 +181,10 @@ class LoadedTests(unittest.TestCase):
 		get_time = end_time - start_time
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+		value.append(new_value)
+		self.assertEqual(sorted(list(value)), sorted(res))
+
 		self.assertEqual(res[_index], new_value)
 
 		print(
@@ -212,6 +224,10 @@ class LoadedTests(unittest.TestCase):
 		get_time = end_time - start_time
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+		value.append(new_value)
+		self.assertEqual(sorted(list(value)), sorted(res))
+
 		self.assertEqual(res[_index], new_value)
 
 		print(
@@ -248,6 +264,10 @@ class LoadedTests(unittest.TestCase):
 		get_time = end_time - start_time
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+		value.append(new_value)
+		self.assertEqual(sorted(list(value)), sorted(res))
+
 		self.assertEqual(res[_index], new_value)
 
 		print(
@@ -262,7 +282,7 @@ class LoadedTests(unittest.TestCase):
 		key: str = self.test_append_value_to_array_loaded_006.__name__
 		value: set = {str(i) for i in range(randint(20_000, 25_000))}
 		_len = len(value)
-		new_value: int = randint(500_000, 1_000_000)
+		new_value: str = str(randint(500_000, 1_000_000))
 
 		LoadedTests.r.r_set(key, value)
 
@@ -274,6 +294,9 @@ class LoadedTests(unittest.TestCase):
 		res: list = LoadedTests.r.r_get(key)
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+		value.add(new_value)
+		self.assertEqual(sorted(list(value)), sorted(list(res)))
 
 	def test_append_value_to_array_loaded_007(self):
 		""" Tuple | 20_000 <= len <= 25_000 : r_set -> append_value_to_array -> r_get  - with chunks"""
@@ -293,6 +316,11 @@ class LoadedTests(unittest.TestCase):
 		res: list = LoadedTests.r.r_get(key, convert_to_type='integer')
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+		value: list = list(value)
+		value.append(new_value)
+		self.assertEqual(sorted(value), sorted(res))
+
 		self.assertEqual(res[-1], new_value)
 
 	def test_append_value_to_array_loaded_008(self):
@@ -300,11 +328,11 @@ class LoadedTests(unittest.TestCase):
 		key: str = self.test_append_value_to_array_loaded_008.__name__
 		value: frozenset = frozenset(str(i) for i in range(randint(20_000, 25_000)))
 		_len = len(value)
-		new_value: int = randint(500_000, 1_000_000)
+		new_value: str = str(randint(500_000, 1_000_000))
 
 		LoadedTests.r.r_set(key, value)
 
-		res: list = LoadedTests.r.r_get(key)
+		res = LoadedTests.r.r_get(key)
 		self.assertTrue(len(res) == len(value))
 
 		LoadedTests.r.append_value_to_array(key, new_value)
@@ -312,6 +340,10 @@ class LoadedTests(unittest.TestCase):
 		res: list = LoadedTests.r.r_get(key)
 
 		self.assertTrue(len(res) == len(value) + 1)
+
+		value: set = set(value)
+		value.add(new_value)
+		self.assertEqual(value, res)
 
 	def test_r_pop_loaded_001(self):
 		key: str = self.test_r_pop_loaded_001.__name__
