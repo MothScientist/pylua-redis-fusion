@@ -1,5 +1,4 @@
 import unittest
-from collections import Counter  # to compare arrays with elements in different orders
 from redis import Redis, ConnectionPool
 from random import randint, choice, random
 from string import ascii_letters, digits
@@ -1918,7 +1917,7 @@ class SmokeTests(unittest.TestCase):
 		res_1: tuple = SmokeTests.r.r_pop(key, count=_len)
 		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
 		self.assertEqual(len(res_1), _len)
-		self.assertEqual(Counter(list(res_1)), Counter(_list))
+		self.assertEqual(sorted(list(res_1)), sorted(_list))
 
 	def test_r_pop_004(self):
 		"""
@@ -1935,9 +1934,9 @@ class SmokeTests(unittest.TestCase):
 		res_1: tuple = SmokeTests.r.r_pop(key, count=_len_pop)
 		self.assertIsNotNone(SmokeTests.r.r_get(key))  # not deleted after r_pop
 		self.assertEqual(len(res_1), _len_pop)
-		self.assertEqual(Counter(list(res_1)), Counter(_list[-_len_pop:]))
+		self.assertEqual(sorted(list(res_1)), sorted(_list[-_len_pop:]))
 		_new_list: list = list(SmokeTests.r.r_get(key))
-		self.assertEqual(Counter(_new_list), Counter(_list[:-_len_pop]))
+		self.assertEqual(sorted(_new_list), sorted(_list[:-_len_pop]))
 
 	def test_r_pop_005(self):
 		"""
@@ -1953,7 +1952,7 @@ class SmokeTests(unittest.TestCase):
 		res_1: tuple = SmokeTests.r.r_pop(key, count=_len)
 		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
 		self.assertEqual(len(res_1), _len)
-		self.assertEqual(Counter(res_1), Counter(_tuple))
+		self.assertEqual(sorted(list(res_1)), sorted(list(_tuple)))
 
 	def test_r_pop_006(self):
 		"""
@@ -1970,9 +1969,9 @@ class SmokeTests(unittest.TestCase):
 		res_1: tuple = SmokeTests.r.r_pop(key, count=_tuple_pop)
 		self.assertIsNotNone(SmokeTests.r.r_get(key))  # not deleted after r_pop
 		self.assertEqual(len(res_1), _tuple_pop)
-		self.assertEqual(Counter(res_1), Counter(_tuple[-_tuple_pop:]))
+		self.assertEqual(sorted(list(res_1)), sorted(list(_tuple[-_tuple_pop:])))
 		_new_tuple: tuple = tuple(SmokeTests.r.r_get(key))
-		self.assertEqual(Counter(_new_tuple), Counter(_tuple[:-_tuple_pop]))
+		self.assertEqual(sorted(list(_new_tuple)), sorted(list(_tuple[:-_tuple_pop])))
 
 	def test_r_pop_007(self):
 		"""
@@ -1988,7 +1987,7 @@ class SmokeTests(unittest.TestCase):
 		res_1: tuple = SmokeTests.r.r_pop(key, count=_len)
 		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
 		self.assertEqual(len(res_1), _len)
-		self.assertEqual(Counter(res_1), Counter(_set))
+		self.assertEqual(sorted(list(res_1)), sorted(list(_set)))
 
 	def test_r_pop_008(self):
 		"""
@@ -2022,9 +2021,10 @@ class SmokeTests(unittest.TestCase):
 		SmokeTests.r.r_set(key, _frozenset)
 
 		res_1: tuple = SmokeTests.r.r_pop(key, count=_len)
+
 		self.assertIsNone(SmokeTests.r.r_get(key))  # deleted after r_pop
 		self.assertEqual(len(res_1), _len)
-		self.assertEqual(Counter(res_1), Counter(_frozenset))
+		self.assertEqual(sorted(list(res_1)), sorted(list(_frozenset)))
 
 	def test_r_pop_010(self):
 		"""
@@ -2164,9 +2164,9 @@ class SmokeTests(unittest.TestCase):
 		res_1: tuple = SmokeTests.r.r_pop(key, count=_len_pop)
 		self.assertIsNotNone(SmokeTests.r.r_get(key))  # not deleted after r_pop
 		self.assertEqual(len(res_1), _len_pop)
-		self.assertEqual(Counter(list(res_1)), Counter(_list[1:]))
+		self.assertEqual(sorted(list(res_1)), sorted(_list[1:]))
 		_new_list: list = list(SmokeTests.r.r_get(key))
-		self.assertEqual(Counter(_new_list), Counter([_list[0]]))
+		self.assertEqual(sorted(_new_list), sorted([_list[0]]))
 
 	def test_r_pop_020(self):
 		"""
