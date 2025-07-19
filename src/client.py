@@ -47,7 +47,9 @@ class PyRedis:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """ Unbinds the context from the connection reference """
         self.redis.close()
+        self.redis.connection_pool = None
 
     def __del__(self):
         self.redis.close()

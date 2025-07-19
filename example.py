@@ -81,6 +81,17 @@ def memory():
     print(f'\t\tget_key_memory_usage(key) = {res}')
 
 
+def context_manager():
+    with redis_connection() as redis_conn:
+        conn = redis_conn
+        print(redis_conn.r_ping())
+
+    try:
+        conn.r_ping()
+    except AttributeError:
+        print('It is impossible to connect using the old variable!')
+
+
 ########################################################################################################################
 # Works with the help of a decorator
 # P.S. the decorator is not included in the library, as I want each user to customize it for themselves
@@ -119,3 +130,5 @@ if __name__ == '__main__':
     main()
     print('\nMemory:')
     memory()
+    print('\nContextManager:')
+    context_manager()
