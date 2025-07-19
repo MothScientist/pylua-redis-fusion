@@ -1,3 +1,6 @@
+"""
+Run this file to check the correctness of your .env file data and to see the minimal library functions
+"""
 from dotenv import load_dotenv
 from os import getenv
 from functools import wraps
