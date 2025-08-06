@@ -11,12 +11,14 @@ from redis import (
     TimeoutError as rTimeoutError
 )
 
+from .data_type_converter import TypeConverter
+
 
 class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', 'curr_dir', 'lua_scripts_sha', 'user_lua_scripts_buffer')
+    __slots__ = ('redis', 'curr_dir', 'lua_scripts_sha', 'user_lua_scripts_buffer', 'data_type_converter')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
@@ -39,12 +41,15 @@ class PyRedis:
         self.curr_dir = os_path.dirname(__file__)
         self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
         self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts  # TODO - tests
+        self.data_type_converter = TypeConverter().converter
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """ Unbinds the context from the connection reference """
         self.redis.close()
+        self.redis.connection_pool = None
 
     def __del__(self):
         self.redis.close()
@@ -88,21 +93,18 @@ class PyRedis:
         """
         return self.redis.memory_usage(key, samples=0) or 0
 
+    def get_count_of_keys(self) -> int:
+        """ Returns the number of keys in the current database """
+        return self.redis.dbsize()
+
     def flush_lua_scripts(self):
         self.lua_scripts_sha: dict = {}
         self.redis.script_flush()
-
-    def key_is_exist(self, key: str) -> bool | None:
-        return bool(self.redis.exists(key)) if key else None
 
     def keys_is_exists(self, keys: str | list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
         if isinstance(keys, str) and keys:
             keys = [keys]
         return self.redis.exists(*keys) if keys else None
-
-    def get_count_of_keys(self) -> int:
-        """ Returns the number of keys in the current database """
-        return self.redis.dbsize()
 
     def set_key_ttl(
             self,
@@ -177,8 +179,8 @@ class PyRedis:
         :param value: IMPORTANT: not considered if a dict type object was passed in key.
         :param get_old_value: return the old value stored at key, or None if the key did not exist.
         :param convert_to_type_for_get: parameter for 'get_old_value', similar to the action in the 'get' function
-        :param time_ms: key lifetime in milliseconds.
-        :param time_s: key lifetime in seconds.
+        :param time_ms: key lifetime in milliseconds (0 equal None).
+        :param time_s: key lifetime in seconds (0 equal None).
         :param if_exist: set value only if such key already exists.
         :param if_not_exist: set value only if such key does not exist yet.
         :param keep_ttl: retain the time to live associated with the key.  # TODO - tests
@@ -222,7 +224,7 @@ class PyRedis:
                 'rpush' if isinstance(value, (list, tuple)) else 'sadd', int(len(value) < 5000), *value
             )
 
-        return PyRedis.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
+        return self.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
 
     def append_value_to_array(
             self,
@@ -234,20 +236,22 @@ class PyRedis:
             convert_to_type: str | None = None
     ) -> list | set | None:
         """
-        Adding a new value to a list or set
+        Adding a new value to a list or set.
+
+        Writing to the middle of a list of length ~500_000 about 0.045s.
         :param key:
         :param value: Remember that Redis does not support nested structures,
-        so arrays cannot be values inside other arrays.
-        :param index: At what position this element should be added. 0 - to the beginning, -1 - to the end,
-        otherwise a specific position within the list (For sets index is ignored).
-        If the position is greater than the length of the list,
-        the element will be added to the end (equivalent to parameter -1).
+            so arrays cannot be values inside other arrays.
+        :param index: (>= -1) At what position this element should be added. 0 - to the beginning, -1 - to the end,
+            otherwise a specific position within the list (For sets index is ignored).
+            If the position is greater than the length of the list,
+            the element will be added to the end (equivalent to parameter -1).
         :param type_if_not_exists: If such a key does not exist, then a list or set value will be created,
-        if otherwise specified, then the None parameter is assigned,
-        which says that if such a key does not exist, it will not be created.
+            if otherwise specified, then the None parameter is assigned,
+            which says that if such a key does not exist, it will not be created.
         :param get_old_value: Return the previous value of the key
         :param convert_to_type: bool/int/float (by default all output data is of type str after decode() function);
-        For float -> int: rounds down to integer part number (drops fractional part)
+            For float -> int: rounds down to integer part number (drops fractional part)
         :return: None if such value did not exist before or get_old_value = False
         """
         if not key or (not value and value not in (False, 0)) or not isinstance(value, (bool,  int, float, str)):
@@ -259,7 +263,7 @@ class PyRedis:
             'append_value_to_array', 1, key, index, type_if_not_exists, get_old_value, value
         )
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
-        return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
+        return self.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
     def r_get(self, key: str, default_value=None, convert_to_type: str | None = None):
         """
@@ -267,7 +271,7 @@ class PyRedis:
         :param key:
         :param default_value: value that will be returned if there is no such key.
         :param convert_to_type: bool/int/float (by default all output data is of type str after decode() function);
-        For float -> int: rounds down to integer part number (drops fractional part)
+            For float -> int: rounds down to integer part number (drops fractional part)
         :return: value, none or default_value
         """
         if not key:
@@ -275,8 +279,7 @@ class PyRedis:
 
         res = self.__register_lua_scripts('get_helper', 1, key)
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else default_value
-
-        return PyRedis.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
+        return self.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
     def r_len(self, key: str) -> int | None:
         """
@@ -286,6 +289,26 @@ class PyRedis:
         """
         res = self.__register_lua_scripts('r_len', 1, key)
         return int(res) if res is not None else None
+
+    def r_pop(
+            self,
+            key: str,
+            count: int = 1,
+            reverse: bool = False,
+            convert_to_type: str = None
+    ) -> tuple:
+        """
+        Removes and returns an element of the list stored by key.
+        It`s important to remember that a "random" element is taken from the set,
+        since the set does not preserve the order in which the elements are stored.
+        :param key:
+        :param count: By default, it returns 1 item, you can specify the number to extract and return
+        :param reverse: By default, items in lists are taken from the beginning. Specify True to get items from the end.
+        :param convert_to_type:
+        :return: tuple
+        """
+        res = self.__register_lua_scripts('r_pop', 1, key, count, int(reverse))  # return list
+        return tuple(self.__convert_to_type(res, convert_to_type) if convert_to_type else res) if res else ()
 
     def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
@@ -338,7 +361,7 @@ class PyRedis:
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
 
         if returning and res:
-            return PyRedis.__convert_to_type(res, convert_to_type_for_return) if convert_to_type_for_return else res
+            return self.__convert_to_type(res, convert_to_type_for_return) if convert_to_type_for_return else res
         return
 
     def rename_key(self, key: str, new_key: str, get_rename_status: bool = None):
@@ -445,7 +468,7 @@ class PyRedis:
 
         # convert_to_type_dict_key
         exists_key_value = {
-            key: PyRedis.__helper_convert_to_type(value, convert_to_type_dict_key)
+            key: self.__convert_to_type(value, convert_to_type_dict_key)
             for key, value in exists_key_value.items()
         } if convert_to_type_dict_key else exists_key_value
 
@@ -464,7 +487,7 @@ class PyRedis:
         """
         keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
         values = self.redis.mget(keys)  # later in the library the variable is converted to list
-        return {keys[i]: PyRedis.__helper_convert_to_type(value, convert_to_type_dict_key)
+        return {keys[i]: self.__convert_to_type(value, convert_to_type_dict_key)
                 if convert_to_type_dict_key else value for i, value in enumerate(values) if value is not None}
 
     def r_remove_all_keys_local(self, get_count_keys: bool = False) -> int | None:
@@ -507,7 +530,7 @@ class PyRedis:
         :param sha: SHA or result load_lua_script() function
         :param read_only: True if the EVAL command should be executed, read-only
         :param args: The first arguments in *args you must pass are the number of keys,
-        and then the keys themselves in the required order. Then come the additional arguments.
+            and then the keys themselves in the required order. Then come the additional arguments.
         :return: Returns the result of the script
         """
         if not (lua_script or sha):
@@ -521,8 +544,8 @@ class PyRedis:
         Load a Lua script into the script cache_data
         :param lua_script:
         :param use_buffer: You can use the built-in buffer to store the SHA of your scripts,
-        and if it is found when executing the script,
-        its SHA will already be inside the structure and will not be calculated again.
+            and if it is found when executing the script,
+            its SHA will already be inside the structure and will not be calculated again.
         :return: SHA
         """
         res = self.user_lua_scripts_buffer.get(lua_script) or self.redis.script_load(lua_script)
@@ -541,44 +564,26 @@ class PyRedis:
         with open(os_path.join(self.curr_dir, f'lua_scripts/{filename}.lua'), 'r', encoding='utf-8') as lua_file:
             return lua_file.read()
 
-    @staticmethod
-    def __convert_to_type(value: str | list[str] | set[str], _type: str) -> str | bool | int | float | list | set:
-        if isinstance(value, (list, set)):
-            return [PyRedis.__helper_convert_to_type(i, _type) for i in value] if isinstance(value, list) \
-                else {PyRedis.__helper_convert_to_type(i, _type) for i in value}
-        return PyRedis.__helper_convert_to_type(value, _type)
+    def __convert_to_type(
+            self,
+            value: str | list[str] | set[str],
+            _type: str
+    ) -> str | bool | int | float | list | set:
+        return self.data_type_converter(value, _type)
 
     @staticmethod
-    def __helper_convert_to_type(value: str, _type: str) -> str | int | float:
-        try:
-            if _type in ('int', 'integer'):
-
-                if '.' in value:
-                    # if it`s float, then before converting it`s necessary to slice the fractional part from the string
-                    idx: int = value.find('.')
-                    value: str = value[:idx]
-
-                value: int = int(value)
-
-            elif _type in ('float', 'double', 'numeric'):
-                value: float = float(value)
-
-            elif _type in ('bool', 'boolean'):
-                _true: tuple[str, str, str] = ('1', 'True', 'true')
-                value: bool | str = (value in _true) if value in ('0', 'False', 'false', *_true) else value
-
-        except (ValueError, TypeError):
-            pass
-        return value
-
-    @staticmethod
-    def __compare_and_select_sec_ms(time_s: int | None, time_ms: int | None) -> int:
+    def __compare_and_select_sec_ms(time_s: int | None, time_ms: int | None) -> int | None:
         """
         If both seconds and milliseconds are specified,
         the time is converted to milliseconds and the smallest one is selected
         """
-        time_ms = min(time_s * 1_000, time_ms) if (time_s and time_ms) else (time_s * 1_000 if time_s else time_ms)
-        return int(time_ms) if isinstance(time_ms, (int, float)) else None
+        if not (time_s or time_ms):
+            return None
+
+        if not time_s or not time_ms:
+            return time_s * 1_000 if time_s else time_ms
+
+        return min(time_s * 1_000, time_ms)
 
     @staticmethod
     def __remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:

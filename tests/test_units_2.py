@@ -11,6 +11,9 @@ from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 sys_path.append('../')
 from src.client import PyRedis
 
+redis_db_2: int = 2  # redis_db: int = 2 - for quick search in IDE
+redis_db_3: int = 3  # redis_db: int = 3
+
 
 class MultipleDatabasesTests(unittest.TestCase):
 	# def setUp(self):
@@ -21,7 +24,7 @@ class MultipleDatabasesTests(unittest.TestCase):
 		port=REDIS_PORT,
 		password=REDIS_PWS,
 		username=REDIS_USERNAME,
-		db=2,
+		db=redis_db_2,
 		socket_timeout=.1
 	)
 
@@ -30,7 +33,7 @@ class MultipleDatabasesTests(unittest.TestCase):
 		port=REDIS_PORT,
 		password=REDIS_PWS,
 		username=REDIS_USERNAME,
-		db=3,
+		db=redis_db_3,
 		socket_timeout=.1
 	)
 
@@ -82,6 +85,7 @@ class MultipleDatabasesTests(unittest.TestCase):
 
 	def test_r_remove_all_keys_001(self):
 		MultipleDatabasesTests.original_redis_db2.flushall()
+		MultipleDatabasesTests.original_redis_db3.flushall()
 
 		# for first database
 		key_0: str = MultipleDatabasesTests.get_random_string(length=3)
@@ -103,6 +107,7 @@ class MultipleDatabasesTests(unittest.TestCase):
 		self.assertEqual(count_keys, 2)
 
 	def test_r_remove_all_keys_002(self):
+		MultipleDatabasesTests.original_redis_db2.flushall()
 		MultipleDatabasesTests.original_redis_db3.flushall()
 
 		# for first database

@@ -1,3 +1,6 @@
+"""
+Run this file to check the correctness of your .env file data and to see the minimal library functions
+"""
 from dotenv import load_dotenv
 from os import getenv
 from functools import wraps
@@ -81,6 +84,21 @@ def memory():
     print(f'\t\tget_key_memory_usage(key) = {res}')
 
 
+def context_manager():
+    with redis_connection() as redis_conn:
+        conn = redis_conn
+        print(redis_conn.r_ping())
+
+    try:
+        conn.r_ping()
+    except AttributeError:
+        print('It is impossible to connect using the old variable!')
+
+
+def type_converter():
+    pass
+
+
 ########################################################################################################################
 # Works with the help of a decorator
 # P.S. the decorator is not included in the library, as I want each user to customize it for themselves
@@ -119,3 +137,7 @@ if __name__ == '__main__':
     main()
     print('\nMemory:')
     memory()
+    print('\nContextManager:')
+    context_manager()
+    print('\nTypeConverter:')
+    type_converter()

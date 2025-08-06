@@ -12,7 +12,7 @@ from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 sys_path.append('../')
 from src.client import PyRedis
 
-redis_db: int = 5
+redis_db: int = 6
 
 
 class UserScriptsInterface(unittest.TestCase):
@@ -28,7 +28,7 @@ class UserScriptsInterface(unittest.TestCase):
 		password=REDIS_PWS,
 		username=REDIS_USERNAME,
 		db=redis_db,
-		socket_timeout=5
+		socket_timeout=.1
 	)
 
 	original_redis = Redis(connection_pool=ConnectionPool(
