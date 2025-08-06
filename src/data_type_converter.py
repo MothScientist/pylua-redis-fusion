@@ -63,7 +63,7 @@ class TypeConverter:
 
 		return self.__helper_convert_to_type(value, _type, encoding)
 
-	def __helper_convert_to_type(self, value: str, _type, encoding: str):
+	def __helper_convert_to_type(self, value: str, _type, encoding: str = 'utf-8'):
 		try:
 			if _type is int:
 				if '.' in value:
