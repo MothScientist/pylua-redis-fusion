@@ -95,6 +95,10 @@ def context_manager():
         print('It is impossible to connect using the old variable!')
 
 
+def type_converter():
+    pass
+
+
 ########################################################################################################################
 # Works with the help of a decorator
 # P.S. the decorator is not included in the library, as I want each user to customize it for themselves
@@ -135,3 +139,5 @@ if __name__ == '__main__':
     memory()
     print('\nContextManager:')
     context_manager()
+    print('\nTypeConverter:')
+    type_converter()
