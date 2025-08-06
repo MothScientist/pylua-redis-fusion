@@ -1209,6 +1209,28 @@ class SmokeTests(unittest.TestCase):
 		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='int')
 		self.assertEqual(res_2, value)
 
+	def test_set_get_delete_convert_006(self):
+		key: str = 'test_set_get_delete_convert_006'
+		value: list[bytes] = [b'1', b'2', b'3', b'4', b'5']
+
+		self.assertIsNone(SmokeTests.r.r_set(key, [i.decode('utf-8') for i in value]))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='bytes_utf-8')
+		self.assertEqual(res_1, value)
+
+		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='bytes_utf-8')
+		self.assertEqual(res_2, value)
+
+	def test_set_get_delete_convert_007(self):
+		key: str = 'test_set_get_delete_convert_007'
+		value: set[bytes] = {b'1', b'2', b'3', b'4', b'5'}
+
+		self.assertIsNone(SmokeTests.r.r_set(key, {i.decode('ascii') for i in value}))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='bytes_ascii')
+		self.assertEqual(res_1, value)
+
+		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='bytes_ascii')
+		self.assertEqual(res_2, value)
+
 	# unlink ###########################################################################################################
 
 	def test_unlink_001(self):

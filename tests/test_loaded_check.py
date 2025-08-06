@@ -4,15 +4,16 @@ Checking the execution and saving of user scripts
 import unittest
 from time import perf_counter
 from redis import Redis, ConnectionPool
-from random import randint
+from random import randint, random
 from sys import path as sys_path
 
 from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 
 sys_path.append('../')
 from src.client import PyRedis
+from src.data_type_converter import TypeConverter
 
-redis_db: int = 8
+redis_db: int = 7
 
 
 class LoadedTests(unittest.TestCase):
@@ -34,6 +35,8 @@ class LoadedTests(unittest.TestCase):
 	original_redis = Redis(connection_pool=ConnectionPool(
 		host=REDIS_HOST, port=REDIS_PORT, db=redis_db, password=REDIS_PWS, username=REDIS_USERNAME
 	))
+
+	t = TypeConverter()
 
 	@staticmethod
 	def clear_dictionaries():
@@ -348,6 +351,96 @@ class LoadedTests(unittest.TestCase):
 	def test_r_pop_loaded_001(self):
 		key: str = self.test_r_pop_loaded_001.__name__
 		pass
+
+	def test_convert_to_type_loaded_001(self):
+		""" boolean """
+		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(5_000_000)]
+		value: list[str] = [str(val) for val in expected_res]
+		start_time = perf_counter()
+		res: list[bool] = LoadedTests.t.converter(value, 'bool')
+		end_time = perf_counter()
+		convert_time = end_time - start_time
+		self.assertEqual(res, expected_res)
+
+		print(
+			f'{self.test_convert_to_type_loaded_001.__name__}: convert_time = {convert_time:.3f} sec.;'
+		)
+		# 1.423 sec.; 1.405 sec.; 1.346 sec.;
+
+	def test_convert_to_type_loaded_002(self):
+		""" integer """
+		expected_res: list[int] = [randint(0, 10_000_000) for _ in range(5_000_000)]
+		value: list[str] = [str(val) for val in expected_res]
+		start_time = perf_counter()
+		res: list[int] = LoadedTests.t.converter(value, 'int')
+		end_time = perf_counter()
+		convert_time = end_time - start_time
+		self.assertEqual(res, expected_res)
+
+		print(
+			f'{self.test_convert_to_type_loaded_002.__name__}: convert_time = {convert_time:.3f} sec.;'
+		)
+		# 0.550 sec.; 0.665 sec.; 0.545 sec.;
+
+	def test_convert_to_type_loaded_003(self):
+		""" float """
+		expected_res: list[float] = [randint(0, 10_000) + random() for _ in range(5_000_000)]
+		value: list[str] = [str(val) for val in expected_res]
+		start_time = perf_counter()
+		res: list[float] = LoadedTests.t.converter(value, 'float')
+		end_time = perf_counter()
+		convert_time = end_time - start_time
+		self.assertEqual(res, expected_res)
+
+		print(
+			f'{self.test_convert_to_type_loaded_003.__name__}: convert_time = {convert_time:.3f} sec.;'
+		)
+		# 1.868 sec.; 1.797 sec.; 2.003 sec.;
+
+	def test_convert_to_type_loaded_004(self):
+		""" boolean any """
+		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(5_000_000)]
+		value: list[str] = [str(val) for val in expected_res]
+		start_time = perf_counter()
+		res: list[bool] = LoadedTests.t.converter(value, 'bool_any')
+		end_time = perf_counter()
+		convert_time = end_time - start_time
+		self.assertEqual(res, expected_res)
+
+		print(
+			f'{self.test_convert_to_type_loaded_004.__name__}: convert_time = {convert_time:.3f} sec.;'
+		)
+		# 1.389 sec.; 1.365 sec.; 1.394 sec.;
+
+	def test_convert_to_type_loaded_005(self):
+		""" integer any """
+		expected_res: list[int] = [randint(0, 10_000_000) for _ in range(5_000_000)]
+		value: list[str] = [str(val) for val in expected_res]
+		start_time = perf_counter()
+		res: list[int] = LoadedTests.t.converter(value, 'int_any')
+		end_time = perf_counter()
+		convert_time = end_time - start_time
+		self.assertEqual(res, expected_res)
+
+		print(
+			f'{self.test_convert_to_type_loaded_005.__name__}: convert_time = {convert_time:.3f} sec.;'
+		)
+		# 1.078 sec.; 1.071 sec.; 1.713 sec.;
+
+	def test_convert_to_type_loaded_006(self):
+		""" float """
+		expected_res: list[float] = [randint(0, 10_000) + random() for _ in range(5_000_000)]
+		value: list[str] = [str(val) for val in expected_res]
+		start_time = perf_counter()
+		res: list[float] = LoadedTests.t.converter(value, 'float_any')
+		end_time = perf_counter()
+		convert_time = end_time - start_time
+		self.assertEqual(res, expected_res)
+
+		print(
+			f'{self.test_convert_to_type_loaded_006.__name__}: convert_time = {convert_time:.3f} sec.;'
+		)
+		# 2.548 sec.; 2.475 sec.; 3.088 sec.;
 
 
 if __name__ == '__main__':

@@ -1,16 +1,10 @@
 import unittest
-from redis import Redis, ConnectionPool
 from random import randint, choice, random, shuffle
 from string import ascii_letters, digits
 from sys import path as sys_path
 
-from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
-
 sys_path.append('../')
 from src.data_type_converter import TypeConverter
-from src.client import PyRedis
-
-redis_db: int = 7
 
 
 class TypeConverterTest(unittest.TestCase):
@@ -19,47 +13,11 @@ class TypeConverterTest(unittest.TestCase):
 	# def setUp(self):
 	# 	self.maxDiff = None
 
-	r = PyRedis(
-		host=REDIS_HOST,
-		port=REDIS_PORT,
-		password=REDIS_PWS,
-		username=REDIS_USERNAME,
-		db=redis_db,
-		socket_timeout=5
-	)
-
 	t = TypeConverter()
-
-	original_redis = Redis(connection_pool=ConnectionPool(
-		host=REDIS_HOST, port=REDIS_PORT, db=redis_db, password=REDIS_PWS, username=REDIS_USERNAME
-	))
-
-	@staticmethod
-	def clear_dictionaries():
-		TypeConverterTest.r.lua_scripts_sha.clear()
-		TypeConverterTest.r.user_lua_scripts_buffer.clear()
-
-	@classmethod
-	def setUpClass(cls):
-		cls.clear_dictionaries()
-		TypeConverterTest.original_redis.flushdb()  # clear the database before tests
-
-	@classmethod
-	def tearDownClass(cls):
-		cls.clear_dictionaries()
-		TypeConverterTest.original_redis.flushdb()  # clear the database after tests
-
-	@staticmethod
-	def get_random_integer():
-		return randint(0, 1_000_000)
 
 	@staticmethod
 	def get_random_string(length: int = randint(10, 20)):
 		return ''.join(choice(ascii_letters + digits) for _ in range(length))
-
-	def test_ping(self):
-		""" Service is available """
-		self.assertTrue(TypeConverterTest.r.r_ping())
 
 	# converter ################################################################################################
 
@@ -167,7 +125,7 @@ class TypeConverterTest(unittest.TestCase):
 
 	def test_convert_to_type_019(self):
 		""" integer values with str """
-		int_lst: list[int] = [TypeConverterTest.get_random_integer() for _ in range(50)]
+		int_lst: list[int] = [randint(0, 1_000) for _ in range(50)]
 		str_lst: list[str] = [TypeConverterTest.get_random_string() for _ in range(50)]
 		merge_lists: list = int_lst + str_lst
 		shuffle(merge_lists)  # shuffle the values in the list
@@ -177,7 +135,7 @@ class TypeConverterTest(unittest.TestCase):
 
 	def test_convert_to_type_020(self):
 		""" integer values with bool """
-		int_lst: list[int] = [TypeConverterTest.get_random_integer() for _ in range(50)]
+		int_lst: list[int] = [randint(0, 1_000) for _ in range(50)]
 		bool_lst: list[bool] = [bool(randint(0, 1)) for _ in range(50)]
 		merge_lists: list = int_lst + bool_lst
 		shuffle(merge_lists)
@@ -283,7 +241,7 @@ class TypeConverterTest(unittest.TestCase):
 		self.assertEqual(str(value), res)
 
 	def test_helper_convert_to_type_012(self):
-		value: int = randint(100_000, 1_000_000)
+		value: int = randint(10_000, 100_000)
 		res: str = TypeConverterTest.t.converter(str(value), 'integer')
 		self.assertEqual(value, res)
 
@@ -325,6 +283,30 @@ class TypeConverterTest(unittest.TestCase):
 	def test_helper_convert_to_type_020(self):
 		value: float = random()
 		res: str = TypeConverterTest.t.converter(str(value), 'double')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_021(self):
+		""" bytes """
+		value: bytes = b'qwerty'
+		res: str = TypeConverterTest.t.converter(value.decode(), 'bytes')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_022(self):
+		""" bytes """
+		value: list[bytes] = [b'1', b'2', b'3']
+		res: str = TypeConverterTest.t.converter([i.decode('utf-8') for i in value], 'bytes_utf-8')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_023(self):
+		""" bytes """
+		value: list[bytes] = ['1'.encode('utf-16'), '2'.encode('utf-16'), '3'.encode('utf-16')]
+		res: str = TypeConverterTest.t.converter([i.decode('utf-16') for i in value], 'bytes_utf-16')
+		self.assertEqual(value, res)
+
+	def test_helper_convert_to_type_024(self):
+		""" bytes """
+		value: list[bytes] = [b'1', b'2', b'3']
+		res: str = TypeConverterTest.t.converter([i.decode('ascii') for i in value], 'bytes_ascii')
 		self.assertEqual(value, res)
 
 

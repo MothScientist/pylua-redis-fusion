@@ -13,6 +13,7 @@ class TypeConverter:
 			'numeric': float,
 			'bool': bool,
 			'boolean': bool,
+			'bytes': bytes
 		}
 
 		self.true_equals = ('1', 'True', 'true')
@@ -22,8 +23,10 @@ class TypeConverter:
 	def converter(self, value: str | list[str] | set[str], _type: str):
 		type_check: tuple = tuple(_type.split('_', 1))
 
-		extended = True if len(type_check) == 2 and type_check[1] == 'any' else False
-		_type = self.data_type_names.get(type_check[0]) if len(type_check) in (1, 2) else None
+		type_len = len(type_check)
+		extended = True if type_len == 2 and type_check[1] == 'any' and type_check[0] != 'bytes' else False
+		encoding = type_check[1] if type_len == 2 and type_check[0] == 'bytes' and type_check[1] != 'any' else 'utf-8'
+		_type = self.data_type_names.get(type_check[0]) if type_len in (1, 2) else None
 		if _type is None:
 			return value
 
@@ -34,10 +37,10 @@ class TypeConverter:
 			if set(value).intersection(set(self.boolean_equals)):
 				extended = True
 
-		return self.convert_to_type(value, _type) if not extended \
-			else self.convert_to_type_extended(value, _type)
+		return self.convert_to_type(value, _type) if not extended and _type is not bytes \
+			else self.convert_to_type_extended(value, _type, encoding)
 
-	def convert_to_type(self, value: str | list[str] | set[str], _type):
+	def convert_to_type(self, value: str | list[str] | set[str], _type: type):
 		"""
 		Conversion on the principle of "all or nothing"
 		"""
@@ -49,18 +52,18 @@ class TypeConverter:
 
 		return self.__helper_convert_to_type(value, _type)
 
-	def convert_to_type_extended(self, value: str | list[str] | set[str], _type):
+	def convert_to_type_extended(self, value: str | list[str] | set[str], _type: type, encoding: str):
 		"""
 		Array conversion is performed for each element separately
 		"""
 		if isinstance(value, (list, set)):
-			return [self.__helper_convert_to_type(i, _type) for i in value] \
+			return [self.__helper_convert_to_type(i, _type, encoding) for i in value] \
 				if isinstance(value, list) \
-				else {self.__helper_convert_to_type(i, _type) for i in value}
+				else {self.__helper_convert_to_type(i, _type, encoding) for i in value}
 
 		return self.__helper_convert_to_type(value, _type)
 
-	def __helper_convert_to_type(self, value: str | list[str] | set[str], _type):
+	def __helper_convert_to_type(self, value: str, _type, encoding: str):
 		try:
 			if _type is int:
 				if '.' in value:
@@ -72,6 +75,8 @@ class TypeConverter:
 				value: float = float(value)
 			elif _type is bool:
 				value: bool | str = (value in self.true_equals) if value in self.boolean_equals else value
+			elif _type is bytes:
+				value: bytes = value.encode(encoding)
 		except (ValueError, TypeError):
 			pass
 		return value
