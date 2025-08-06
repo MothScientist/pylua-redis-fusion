@@ -292,25 +292,37 @@ class TypeConverterTest(unittest.TestCase):
         self.assertEqual(value, res)
 
     def test_helper_convert_to_type_022(self):
-        """ bytes """
+        """ bytes utf-8 """
         value: bytes = b'qwerty'
         res: str = TypeConverterTest.t.converter(value.decode(), 'bytes_utf-8')
         self.assertEqual(value, res)
 
     def test_helper_convert_to_type_023(self):
-        """ bytes """
+        """ bytes utf-16 """
+        value: bytes = 'qwerty'.encode('utf-16')
+        res: str = TypeConverterTest.t.converter(value.decode('utf-16'), 'bytes_utf-16')
+        self.assertEqual(value, res)
+
+    def test_helper_convert_to_type_024(self):
+        """ bytes ascii """
+        value: bytes = 'qwerty'.encode('ascii')
+        res: str = TypeConverterTest.t.converter(value.decode('ascii'), 'bytes_ascii')
+        self.assertEqual(value, res)
+
+    def test_helper_convert_to_type_025(self):
+        """ bytes list utf-8 """
         value: list[bytes] = [b'1', b'2', b'3']
         res: str = TypeConverterTest.t.converter([i.decode() for i in value], 'bytes_utf-8')
         self.assertEqual(value, res)
 
-    def test_helper_convert_to_type_024(self):
-        """ bytes """
+    def test_helper_convert_to_type_026(self):
+        """ bytes list utf-16 """
         value: list[bytes] = ['1'.encode('utf-16'), '2'.encode('utf-16'), '3'.encode('utf-16')]
         res: str = TypeConverterTest.t.converter([i.decode('utf-16') for i in value], 'bytes_utf-16')
         self.assertEqual(value, res)
 
-    def test_helper_convert_to_type_025(self):
-        """ bytes """
+    def test_helper_convert_to_type_027(self):
+        """ bytes list ascii"""
         value: list[bytes] = [b'1', b'2', b'3']
         res: str = TypeConverterTest.t.converter([i.decode('ascii') for i in value], 'bytes_ascii')
         self.assertEqual(value, res)
