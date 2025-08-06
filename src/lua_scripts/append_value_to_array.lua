@@ -42,7 +42,7 @@ else -- key exists
         -- Insert element by index -----------------------------
         local temp = {}
         -- Remove elements from the tail until we reach the desired position
-        for i = length - 1, index, -1 do
+        for _ = length - 1, index, -1 do
             temp[#temp + 1] = redis.call('RPOP', key)
         end
 

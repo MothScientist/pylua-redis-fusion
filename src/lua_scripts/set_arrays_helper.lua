@@ -55,7 +55,7 @@ if without_chunks then
 
 else
 
-  local chunk_size = 5000
+  local chunk_size = 7850
   local current_chunk = {}
 
   -- Function to write the current chunk to Redis

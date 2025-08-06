@@ -25,17 +25,25 @@ __For quick connection to your Python projects and easy usage.__ <span style="co
 * It is assumed that you already have the <span style="color: red;">__Redis__</span> service installed and running.
 * There is no need to install <span style="color: DodgerBlue;">__Lua__</span> as it is built into <span style="color: red;">__Redis__</span>.
 
+### _________________________________________________________________________
+### Is it slower than the original implementation? Yes, it is slower.
+But, .lua scripts are cached within a single class object and subsequent function calls will be faster (almost the same time as the original implementation).
+
+You can see comparisons with the original library in the file **benchmark/main.py**
+This library is not about the speed of working with Redis, it is about the ease of working with Redis, allowing you to not worry about a lot of different functions of the database and the original library, as well as data types.
+#### ______________________________________________________________________________________________
+
+
 <span style="color: aqua;">**Supported Python types:**</span>
 * integer
 * float
 * string
 * boolean
+* bytes
 * list
 * tuple
 * set
 * frozenset
-
-#### Support for writing arrays longer than 1 million (implemented in Lua) in 1 Python operation without losing write speed!
 
 The number of supported methods and data types increases as the project develops, <span style="color: aqua;">**but it has all the basic methods for working with Redis**</span> (see the list and description of current commands with examples in the `example.py` file in the root of the repository).
 

@@ -61,7 +61,7 @@ class TypeConverter:
 				if isinstance(value, list) \
 				else {self.__helper_convert_to_type(i, _type, encoding) for i in value}
 
-		return self.__helper_convert_to_type(value, _type)
+		return self.__helper_convert_to_type(value, _type, encoding)
 
 	def __helper_convert_to_type(self, value: str, _type, encoding: str):
 		try:
