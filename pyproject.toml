@@ -3,8 +3,26 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "swift_redis"
-version = "1.0"
+name = "pyluaredis"
+version = "1.0.0"
 description = "Pluggable client for easy and intuitive work with the Redis database in Python projects"
+readme = "README.md"
+license = { text = "MIT" }
+keywords = ["package", "redis"]
+dependencies = [
+    "redis==6.4.0"
+]
 requires-python = ">=3.11"
-dependencies = ["python-dotenv==1.1.1", "redis==6.4.0"]
+
+[project.urls]
+Repository = "https://github.com/MothScientist/pylua-redis-fusion"
+Issues = "https://github.com/MothScientist/pylua-redis-fusion/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = [
+    "tests",
+    "docs",
+    "benchmark",
+    ".github"
+]
