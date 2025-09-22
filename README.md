@@ -5,13 +5,9 @@
 
 Python version: <span style="color: aqua;">__3.13__</span> (Support includes Python <span style="color: white;">__3.11__</span> and <span style="color: white;">__3.12__</span>)
 #### The library is very limited in functions compared to [redis-py](https://github.com/redis/redis-py), but has a wide functionality if you need a minimal set of commands to work with the database.
-## <span style="color: white;">Installing with an external directory</span>
+## <span style="color: white;">Install</span>
 
-```git clone https://github.com/MothScientist/pylua-redis-fusion.git```
-
-## <span style="color: white;">Install (pip)</span>
-
-`pip install git+https://github.com/MothScientist/pylua-redis-fusion.git`</br></br>
+`pip install pyluaredis`</br></br>
 
 ### <span style="color: white;">How does this library differ from [redis-py](https://github.com/redis/redis-py), on which it is built?</span>
 
