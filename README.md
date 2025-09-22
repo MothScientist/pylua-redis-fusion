@@ -3,7 +3,7 @@
 ![Test coverage](https://img.shields.io/badge/Test_coverage-99%25-green) [![UnitTests](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml)
  [![CodeQL Advanced](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/codeql.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/codeql.yml) [![Dependabot Updates](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates)
 
-Python version: <span style="color: aqua;">__3.13__</span> (Support includes Python <span style="color: white;">__3.11__</span> and <span style="color: white;">__3.12__</span>)
+Python version: <span style="color: aqua;">__>= 3.11__</span>
 #### The library is very limited in functions compared to [redis-py](https://github.com/redis/redis-py), but has a wide functionality if you need a minimal set of commands to work with the database.
 ## <span style="color: white;">Install</span>
 
