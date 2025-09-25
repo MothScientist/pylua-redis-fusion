@@ -17,3 +17,9 @@ requires-python = ">=3.11"
 [project.urls]
 Repository = "https://github.com/MothScientist/pylua-redis-fusion"
 Issues = "https://github.com/MothScientist/pylua-redis-fusion/issues"
+
+[tool.setuptools]
+packages = ["pyluaredis"]
+
+[tool.setuptools.packages.find]
+exclude = [".github", "benchmark", "docs", "tests"]
