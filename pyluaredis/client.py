@@ -39,8 +39,8 @@ class PyRedis:
             )
         )
         self.curr_dir = os_path.dirname(__file__)
-        self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts  # TODO - tests
-        self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts  # TODO - tests
+        self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts
+        self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts
         self.data_type_converter = TypeConverter().converter
 
     def __enter__(self):
@@ -183,7 +183,7 @@ class PyRedis:
         :param time_s: key lifetime in seconds (0 equal None).
         :param if_exist: set value only if such key already exists.
         :param if_not_exist: set value only if such key does not exist yet.
-        :param keep_ttl: retain the time to live associated with the key.  # TODO - tests
+        :param keep_ttl: retain the time to live associated with the key.
         :return: None
         """
         if (not key or (not value and value not in (False, 0))
@@ -197,7 +197,6 @@ class PyRedis:
         res = None
 
         if isinstance(key, dict):
-            # TODO - key_exists if dict + get_old_value
             pass
 
         elif isinstance(value, (bool, int, float, str)):
@@ -309,6 +308,50 @@ class PyRedis:
         """
         res = self.__register_lua_scripts('r_pop', 1, key, count, int(reverse))  # return list
         return tuple(self.__convert_to_type(res, convert_to_type) if convert_to_type else res) if res else ()
+
+    def array_is_empty(self, key: str):
+        pass
+
+    def r_sort(
+            self, key: str, desc: bool = True, return_before: bool = False, return_after: bool = False
+    ) -> None | tuple:
+        """
+        Сортирует список
+        :param key:
+        :param desc: True = DESC; False = ASC
+        :param return_before:
+        :param return_after:
+        :return: None
+        """
+        pass
+
+    def get_element(self, key: str):
+        pass
+
+    def get_range(self, key: str, start: int, stop: int):
+        """
+
+        :param key:
+        :param start: [включительно]
+        :param stop: [включительно]
+        :return:
+        """
+        pass
+
+    def del_element(self, key: str):
+        pass
+
+    def del_range(self, key: str, start: int, stop: int, return_before: bool = False, return_after: bool = False):
+        """
+
+        :param key:
+        :param start: [включительно]
+        :param stop: [включительно]
+        :param return_before:
+        :param return_after:
+        :return:
+        """
+        pass
 
     def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
@@ -590,8 +633,3 @@ class PyRedis:
         if isinstance(iterable_var, (set, frozenset)):
             return tuple(iterable_var)
         return tuple(set(iterable_var))
-
-    def __load_lua_script(self, filename: str) -> str:
-        """ Load Lua script from a file """
-        with open(os_path.join(self.curr_dir, f'lua_scripts/{filename}.lua'), 'r', encoding='utf-8') as lua_file:
-            return lua_file.read()

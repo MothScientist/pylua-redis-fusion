@@ -6,7 +6,7 @@ from sys import path as sys_path
 
 from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 sys_path.append('../')
-from src.client import PyRedis
+from pyluaredis.client import PyRedis
 
 redis_db: int = 0
 
@@ -1052,6 +1052,8 @@ class SmokeTests(unittest.TestCase):
 		self.assertEqual(str(value), res, f'res = {res}; type(res) = {type(res)}')
 		self.assertTrue(isinstance(res, str), type(res))
 
+	# TODO - get without set
+
 	# delete ###########################################################################################################
 
 	def test_delete_001(self):
@@ -1230,6 +1232,30 @@ class SmokeTests(unittest.TestCase):
 
 		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='bytes_ascii')
 		self.assertEqual(res_2, value)
+
+	def test_set_get_delete_convert_008(self):
+		key: str = 'test_set_get_delete_convert_008'
+		value: set[bytes] = {b'1', b'2', b'3', b'4', b'5'}
+
+		value_decode = {i.decode('ascii') for i in value}
+		self.assertIsNone(SmokeTests.r.r_set(key, value_decode))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='any_bytes_ascii')  # wrong format for convert type
+		self.assertEqual(res_1, value_decode)
+
+		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='any_bytes_ascii')
+		self.assertEqual(res_2, value_decode)
+
+	def test_set_get_delete_convert_009(self):
+		key: str = 'test_set_get_delete_convert_009'
+		value_bytes: list[bytes] = [b'1', b'2', b'3', b'4', b'5']
+		value: list[str] = [i.decode('utf-8') for i in value_bytes]
+
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res_1 = SmokeTests.r.r_get(key, convert_to_type='bytes_utf-8')
+		self.assertEqual(res_1, value_bytes)
+
+		res_2 = SmokeTests.r.r_delete(key, returning=True, convert_to_type_for_return='bytes_utf-8')
+		self.assertEqual(res_2, value_bytes)
 
 	# unlink ###########################################################################################################
 
