@@ -4,7 +4,7 @@ from string import ascii_letters, digits
 from sys import path as sys_path
 
 sys_path.append('../')
-from pyluaredis.client import PyRedis
+from src.client import PyRedis
 
 
 class PrivateStaticFuncTests(unittest.TestCase):

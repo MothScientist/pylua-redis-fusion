@@ -4,7 +4,7 @@ from string import ascii_letters, digits
 from sys import path as sys_path
 
 sys_path.append('../')
-from pyluaredis.data_type_converter import TypeConverter
+from src.data_type_converter import TypeConverter
 
 
 class TypeConverterTest(unittest.TestCase):

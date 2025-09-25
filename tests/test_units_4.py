@@ -4,7 +4,7 @@ from sys import path as sys_path
 
 from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 sys_path.append('../')
-from pyluaredis.client import PyRedis
+from src.client import PyRedis
 
 redis_db: int = 5
 

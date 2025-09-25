@@ -9,7 +9,7 @@ from sys import path as sys_path
 
 from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 sys_path.append('../')
-from pyluaredis.client import PyRedis
+from src.client import PyRedis
 
 redis_db_2: int = 2  # redis_db: int = 2 - for quick search in IDE
 redis_db_3: int = 3  # redis_db: int = 3
