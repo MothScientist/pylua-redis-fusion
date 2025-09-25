@@ -7,7 +7,7 @@ from functools import wraps
 
 from pyluaredis.client import PyRedis
 
-load_dotenv('pyluaredis/redis.env')  # Load environment variables from redis.env file
+load_dotenv('pyluaredis.env')  # Load environment variables
 redis_psw: str = getenv('REDIS_PSW')
 redis_db: int = int(getenv('REDIS_DB'))
 redis_host: str = getenv('REDIS_HOST')
