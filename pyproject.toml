@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyluaredis"
-version = "1.0.5"
+version = "1.0.6"
 description = "Pluggable client for easy and intuitive work with the Redis database in Python projects"
 readme = "README.md"
 license = { text = "MIT" }
@@ -20,6 +20,9 @@ Issues = "https://github.com/MothScientist/pylua-redis-fusion/issues"
 
 [tool.setuptools]
 packages = ["pyluaredis"]
+
+[tool.setuptools.package-data]
+pyluaredis = ["lua_scripts/*.lua"]
 
 [tool.setuptools.exclude-package-data]
 "*" = [
