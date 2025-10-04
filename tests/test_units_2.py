@@ -74,7 +74,7 @@ class MultipleDatabasesTests(unittest.TestCase):
 		self.assertTrue(MultipleDatabasesTests.r3.r_ping())
 
 	def test_ping_003(self):
-		wrong_r = PyRedis(host='unknown')
+		wrong_r = PyRedis(host='unknown', preload_lua_scripts=False)
 		self.assertFalse(wrong_r.r_ping())
 
 	def test_r_remove_all_keys_local_001(self):
