@@ -309,50 +309,6 @@ class PyRedis:
         res = self.__register_lua_scripts('r_pop', 1, key, count, int(reverse))  # return list
         return tuple(self.__convert_to_type(res, convert_to_type) if convert_to_type else res) if res else ()
 
-    def array_is_empty(self, key: str):
-        pass
-
-    def r_sort(
-            self, key: str, desc: bool = True, return_before: bool = False, return_after: bool = False
-    ) -> None | tuple:
-        """
-        Сортирует список
-        :param key:
-        :param desc: True = DESC; False = ASC
-        :param return_before:
-        :param return_after:
-        :return: None
-        """
-        pass
-
-    def get_element(self, key: str):
-        pass
-
-    def get_range(self, key: str, start: int, stop: int):
-        """
-
-        :param key:
-        :param start: [включительно]
-        :param stop: [включительно]
-        :return:
-        """
-        pass
-
-    def del_element(self, key: str):
-        pass
-
-    def del_range(self, key: str, start: int, stop: int, return_before: bool = False, return_after: bool = False):
-        """
-
-        :param key:
-        :param start: [включительно]
-        :param stop: [включительно]
-        :param return_before:
-        :param return_after:
-        :return:
-        """
-        pass
-
     def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
         Delete a key
