@@ -27,14 +27,6 @@ class LibraryTests(unittest.TestCase):
 
 	original_redis = r.redis_py
 
-	@classmethod
-	def setUpClass(cls):
-		LibraryTests.original_redis.flushdb()  # clear the database before tests
-
-	@classmethod
-	def tearDownClass(cls):
-		LibraryTests.original_redis.flushdb()  # clear the database after tests
-
 	@staticmethod
 	def get_random_integer():
 		return randint(0, 1_000_000)
@@ -45,8 +37,13 @@ class LibraryTests(unittest.TestCase):
 
 	def test_ping_001(self):
 		""" Service is available """
-		self.assertTrue(LibraryTests.r.r_ping())
+		original_redis = LibraryTests.r.redis_py()
+		self.assertTrue(original_redis.ping())
 
 	def test_ping_002(self):
+		""" Service is available """
+		self.assertTrue(LibraryTests.r.r_ping())
+
+	def test_ping_003(self):
 		wrong_r = PyRedis(host='unknown')
 		self.assertFalse(wrong_r.r_ping())
