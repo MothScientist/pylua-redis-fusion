@@ -3,7 +3,7 @@ Testing using the library as a PyPI package
 """
 
 import unittest
-from pyluaredis import PyRedis
+from pyluaredis.client import PyRedis
 from random import randint, choice
 from string import ascii_letters, digits
 
