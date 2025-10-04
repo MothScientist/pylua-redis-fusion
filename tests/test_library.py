@@ -29,11 +29,11 @@ class LibraryTests(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		original_redis.flushdb()  # clear the database before tests
+		LibraryTests.original_redis.flushdb()  # clear the database before tests
 
 	@classmethod
 	def tearDownClass(cls):
-		original_redis.flushdb()  # clear the database after tests
+		LibraryTests.original_redis.flushdb()  # clear the database after tests
 
 	@staticmethod
 	def get_random_integer():
