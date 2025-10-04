@@ -25,7 +25,7 @@ class PyRedis:
             socket_timeout: int | float = 0.1,
             retry_on_timeout: bool = True,
             socket_keepalive: bool = True,
-            max_connections: int = None,
+            max_connections: int = 50,
             preload_lua_scripts: bool = True,
     ):
         self.redis = Redis(
