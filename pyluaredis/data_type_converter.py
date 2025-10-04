@@ -13,7 +13,8 @@ class TypeConverter:
 			'numeric': float,
 			'bool': bool,
 			'boolean': bool,
-			'bytes': bytes
+			'byte': bytes,
+			'bytes': bytes,
 		}
 
 		self.true_equals = ('1', 'True', 'true')
