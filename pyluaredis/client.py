@@ -2,7 +2,7 @@
 Client for working with the Redis database
 Original library documentation: https://redis-py.readthedocs.io/en/stable/index.html
 """
-from os import path as os_path
+from os import path as os_path, listdir as os_listdir
 from json import loads as json_loads
 from redis import (
     Redis,
@@ -22,7 +22,11 @@ class PyRedis:
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
-            socket_timeout: int | float = 0.1, retry_on_timeout: bool = True, socket_keepalive: bool = True
+            socket_timeout: int | float = 0.1,
+            retry_on_timeout: bool = True,
+            socket_keepalive: bool = True,
+            max_connections: int = None,
+            preload_lua_scripts: bool = True,
     ):
         self.redis = Redis(
             connection_pool=rConnectionPool(
@@ -35,13 +39,17 @@ class PyRedis:
                 encoding='utf-8',
                 decode_responses=True,
                 retry_on_timeout=retry_on_timeout,
-                socket_keepalive=socket_keepalive
+                socket_keepalive=socket_keepalive,
+                max_connections=max_connections,
             )
         )
         self.curr_dir = os_path.dirname(__file__)
         self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts
         self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts
         self.data_type_converter = TypeConverter().converter
+
+        if preload_lua_scripts:
+            self.__preload_lua_scripts()
 
     def __enter__(self):
         return self
@@ -589,3 +597,10 @@ class PyRedis:
         if isinstance(iterable_var, (set, frozenset)):
             return tuple(iterable_var)
         return tuple(set(iterable_var))
+
+    def __preload_lua_scripts(self):
+        lua_scripts_path = os_path.join(self.curr_dir, 'lua_scripts')
+        for file in os_listdir(lua_scripts_path):
+            if file.endswith('.lua'):
+                lua_script = self.__load_lua_script_from_file(file[:-4])
+                self.lua_scripts_sha[file] = self.redis.script_load(lua_script)

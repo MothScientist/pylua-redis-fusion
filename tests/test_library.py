@@ -3,9 +3,7 @@ Testing using the library as a PyPI package
 """
 
 import unittest
-from pyluaredis.client import PyRedis
-from random import randint, choice
-from string import ascii_letters, digits
+from pyluaredis import PyRedis
 
 from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 
@@ -24,16 +22,6 @@ class LibraryTests(unittest.TestCase):
 		db=redis_db,
 		socket_timeout=5
 	)
-
-	original_redis = r.redis_py
-
-	@staticmethod
-	def get_random_integer():
-		return randint(0, 1_000_000)
-
-	@staticmethod
-	def get_random_string(length: int = randint(10, 20)):
-		return ''.join(choice(ascii_letters + digits) for _ in range(length))
 
 	def test_ping_001(self):
 		""" Service is available """
