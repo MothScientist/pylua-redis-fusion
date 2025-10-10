@@ -3,7 +3,7 @@
 
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)
 
-![Test coverage](https://img.shields.io/badge/Test_coverage-99%25-green) [![UnitTests](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml)
+[![Socket Badge](https://badge.socket.dev/pypi/package/pyluaredis/1.0.6?artifact_id=tar-gz)](https://badge.socket.dev/pypi/package/pyluaredis/1.0.6?artifact_id=tar-gz) ![Test coverage](https://img.shields.io/badge/Test_coverage-99%25-green) [![UnitTests](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml)
  [![CodeQL Advanced](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/codeql.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/codeql.yml) [![Dependabot Updates](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates)
 
 Python version: <span style="color: aqua;">__>= 3.11__</span>
