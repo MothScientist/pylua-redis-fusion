@@ -1,3 +1,6 @@
+[pypi.org/project/pyluaredis](https://pypi.org/project/pyluaredis/)</br>
+[socket.dev/pypi/package/pyluaredis](https://socket.dev/pypi/package/pyluaredis)
+
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)
 
 ![Test coverage](https://img.shields.io/badge/Test_coverage-99%25-green) [![UnitTests](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/units.yml)
