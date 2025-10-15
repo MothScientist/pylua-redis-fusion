@@ -30,7 +30,7 @@ def get_cache(key: str, convert_to_type=None):
 def decorator():
     easy_set_cache('1', 'Decorator')
     easy_set_cache('2', 1.5)
-    print(f'\tGet value: {easy_get_cache('1')}')
+    print(f"\tGet value: {easy_get_cache('1')}")
     res = easy_get_cache('2', convert_to_type="float")
     print(f'\tGet value: {res} / type = {type(res)}')
 
