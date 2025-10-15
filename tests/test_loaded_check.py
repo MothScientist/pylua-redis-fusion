@@ -348,13 +348,18 @@ class LoadedTests(unittest.TestCase):
 		value.add(new_value)
 		self.assertEqual(value, res)
 
+	# r_pop_loaded #####################################################################################################
+
 	def test_r_pop_loaded_001(self):
 		key: str = self.test_r_pop_loaded_001.__name__
-		pass
+		pass  # TODO
+
+	# convert_to_type_loaded ###########################################################################################
 
 	def test_convert_to_type_loaded_001(self):
 		""" boolean """
-		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(5_000_000)]
+		_len = 5_000_000
+		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(_len)]
 		value: list[str] = [str(val) for val in expected_res]
 		start_time = perf_counter()
 		res: list[bool] = LoadedTests.t.converter(value, 'bool')
@@ -363,13 +368,14 @@ class LoadedTests(unittest.TestCase):
 		self.assertEqual(res, expected_res)
 
 		print(
-			f'{self.test_convert_to_type_loaded_001.__name__}: convert_time = {convert_time:.3f} sec.;'
+			f'{self.test_convert_to_type_loaded_001.__name__}: '
+			f'len [bool] = {_len}; convert_time = {convert_time:.3f} sec.;'
 		)
-		# 1.423 sec.; 1.405 sec.; 1.346 sec.;
 
 	def test_convert_to_type_loaded_002(self):
 		""" integer """
-		expected_res: list[int] = [randint(0, 10_000_000) for _ in range(5_000_000)]
+		_len = 5_000_000
+		expected_res: list[int] = [randint(0, 10_000_000) for _ in range(_len)]
 		value: list[str] = [str(val) for val in expected_res]
 		start_time = perf_counter()
 		res: list[int] = LoadedTests.t.converter(value, 'int')
@@ -378,13 +384,14 @@ class LoadedTests(unittest.TestCase):
 		self.assertEqual(res, expected_res)
 
 		print(
-			f'{self.test_convert_to_type_loaded_002.__name__}: convert_time = {convert_time:.3f} sec.;'
+			f'{self.test_convert_to_type_loaded_002.__name__}: '
+			f'len [int] = {_len}; convert_time = {convert_time:.3f} sec.;'
 		)
-		# 0.550 sec.; 0.665 sec.; 0.545 sec.;
 
 	def test_convert_to_type_loaded_003(self):
 		""" float """
-		expected_res: list[float] = [randint(0, 10_000) + random() for _ in range(5_000_000)]
+		_len = 5_000_000
+		expected_res: list[float] = [randint(0, 10_000) + random() for _ in range(_len)]
 		value: list[str] = [str(val) for val in expected_res]
 		start_time = perf_counter()
 		res: list[float] = LoadedTests.t.converter(value, 'float')
@@ -393,13 +400,14 @@ class LoadedTests(unittest.TestCase):
 		self.assertEqual(res, expected_res)
 
 		print(
-			f'{self.test_convert_to_type_loaded_003.__name__}: convert_time = {convert_time:.3f} sec.;'
+			f'{self.test_convert_to_type_loaded_003.__name__}: '
+			f'len [float] = {_len}; convert_time = {convert_time:.3f} sec.;'
 		)
-		# 1.868 sec.; 1.797 sec.; 2.003 sec.;
 
 	def test_convert_to_type_loaded_004(self):
 		""" boolean any """
-		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(5_000_000)]
+		_len = 5_000_000
+		expected_res: list[bool] = [bool(randint(0, 1)) for _ in range(_len)]
 		value: list[str] = [str(val) for val in expected_res]
 		start_time = perf_counter()
 		res: list[bool] = LoadedTests.t.converter(value, 'bool_any')
@@ -408,13 +416,14 @@ class LoadedTests(unittest.TestCase):
 		self.assertEqual(res, expected_res)
 
 		print(
-			f'{self.test_convert_to_type_loaded_004.__name__}: convert_time = {convert_time:.3f} sec.;'
+			f'{self.test_convert_to_type_loaded_004.__name__}: '
+			f'len [bool any] = {_len}; convert_time = {convert_time:.3f} sec.;'
 		)
-		# 1.389 sec.; 1.365 sec.; 1.394 sec.;
 
 	def test_convert_to_type_loaded_005(self):
 		""" integer any """
-		expected_res: list[int] = [randint(0, 10_000_000) for _ in range(5_000_000)]
+		_len = 5_000_000
+		expected_res: list[int] = [randint(0, 10_000_000) for _ in range(_len)]
 		value: list[str] = [str(val) for val in expected_res]
 		start_time = perf_counter()
 		res: list[int] = LoadedTests.t.converter(value, 'int_any')
@@ -423,13 +432,14 @@ class LoadedTests(unittest.TestCase):
 		self.assertEqual(res, expected_res)
 
 		print(
-			f'{self.test_convert_to_type_loaded_005.__name__}: convert_time = {convert_time:.3f} sec.;'
+			f'{self.test_convert_to_type_loaded_005.__name__}: '
+			f'len [int any] = {_len}; convert_time = {convert_time:.3f} sec.;'
 		)
-		# 1.078 sec.; 1.071 sec.; 1.713 sec.;
 
 	def test_convert_to_type_loaded_006(self):
-		""" float """
-		expected_res: list[float] = [randint(0, 10_000) + random() for _ in range(5_000_000)]
+		""" float any """
+		_len = 5_000_000
+		expected_res: list[float] = [randint(0, 10_000) + random() for _ in range(_len)]
 		value: list[str] = [str(val) for val in expected_res]
 		start_time = perf_counter()
 		res: list[float] = LoadedTests.t.converter(value, 'float_any')
@@ -438,9 +448,9 @@ class LoadedTests(unittest.TestCase):
 		self.assertEqual(res, expected_res)
 
 		print(
-			f'{self.test_convert_to_type_loaded_006.__name__}: convert_time = {convert_time:.3f} sec.;'
+			f'{self.test_convert_to_type_loaded_006.__name__}: '
+			f'len [float any] = {_len}; convert_time = {convert_time:.3f} sec.;'
 		)
-		# 2.548 sec.; 2.475 sec.; 3.088 sec.;
 
 
 if __name__ == '__main__':
