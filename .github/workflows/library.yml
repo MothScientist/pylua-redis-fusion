@@ -47,6 +47,15 @@ jobs:
           pip install pyluaredis
           pip install python-dotenv
 
+      - name: Remove local library source
+        run: |
+          # Remove local library sources to ensure imports are from the installed library
+          rm -rf pyluaredis/
+
+      - name: Verify library import
+        run: |
+          python -c "import pyluaredis; print(f'Successfully imported {pyluaredis.__version__} from {pyluaredis.__file__}')"
+
       - name: Create .env file
         env:
           REDIS_PSW: ${{ secrets.REDIS_PSW }}
