@@ -11,7 +11,7 @@
 
 [![Dependabot Updates](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates)
 
-Python version: <span style="color: aqua;">__>= 3.11__</span>
+#### <span style="color: aqua;">__3.11 =< Python version <= 3.13__</span>
 #### The library is very limited in functions compared to [redis-py](https://github.com/redis/redis-py), but has a wide functionality if you need a minimal set of commands to work with the database.
 ## <span style="color: white;">Install</span>
 
