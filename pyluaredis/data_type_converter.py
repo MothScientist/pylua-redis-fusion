@@ -1,3 +1,6 @@
+""" Module for converting data types in different structures """
+
+
 class TypeConverter:
 	""" Class providing methods for converting data """
 	__slots__ = ('data_type_names', 'true_equals', 'false_equals', 'boolean_equals')
@@ -24,7 +27,7 @@ class TypeConverter:
 		type_check: tuple = tuple(_type.split('_', 1))
 
 		type_len = len(type_check)
-		extended = True if type_len == 2 and type_check[1] == 'any' and type_check[0] != 'bytes' else False
+		extended = type_len == 2 and type_check[1] == 'any' and type_check[0] != 'bytes'
 		encoding = type_check[1] if type_len == 2 and type_check[0] == 'bytes' and type_check[1] != 'any' else 'utf-8'
 		_type = self.data_type_names.get(type_check[0]) if type_len in (1, 2) else None
 		if _type is None:

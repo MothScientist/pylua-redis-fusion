@@ -9,6 +9,7 @@ ignore=
 disable=
     too-many-positional-arguments,
     too-many-arguments,
+    too-many-public-methods,
     bad-indentation
 
 [FORMAT]

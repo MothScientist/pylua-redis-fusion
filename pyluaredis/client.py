@@ -71,16 +71,20 @@ class PyRedis:
         return self.redis
 
     def r_ping(self) -> bool:
+        """ Checking server availability """
         try:
             return self.redis.ping()
         except (rConnectionError, rTimeoutError):
             return False
 
     def flush_lua_scripts(self):
+        """ Clears all saved lua scripts (both built-in and user-defined) """
         self.lua_scripts_sha: dict = {}
+        self.user_lua_scripts_buffer: dict = {}
         self.redis.script_flush()
 
     def keys_is_exists(self, keys: str | list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
+        """ Checking the existence of a key """
         if isinstance(keys, str) and keys:
             keys = [keys]
         return self.redis.exists(*keys) if keys else None
@@ -101,6 +105,7 @@ class PyRedis:
             ttl_sec: int | None = None,
             ttl_ms: int | None = None
     ) -> None:
+        """ Set the time for multiple keys (ttl) in seconds or milliseconds """
         keys: tuple = PyRedis.__remove_duplicates(keys)
         ttl_ms = PyRedis.__compare_and_select_sec_ms(ttl_sec, ttl_ms) if ((ttl_sec or ttl_ms) and keys) else None
         if ttl_ms:
