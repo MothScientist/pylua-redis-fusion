@@ -470,25 +470,6 @@ class SmokeTests(unittest.TestCase):
 		res: int = SmokeTests.r.r_len(key)
 		self.assertEqual(res, None)
 
-	# get_count_of_keys ################################################################################################
-
-	def test_get_count_of_keys_001(self):
-		""" get_count_of_keys() == dbsize() """
-		original_res: int = SmokeTests.original_redis.dbsize()
-		library_res: int = SmokeTests.r.get_count_of_keys()
-		self.assertEqual(original_res, library_res)
-
-	def test_get_count_of_keys_002(self):
-		SmokeTests.original_redis.flushdb()
-
-		count_of_keys: int = randint(50, 100)
-		for i in range(count_of_keys):
-			SmokeTests.r.r_set(str(i), i)
-		res: int = SmokeTests.r.get_count_of_keys()
-		self.assertEqual(count_of_keys, res)
-
-		SmokeTests.original_redis.flushdb()
-
 	# get_type_value_of_key ############################################################################################
 
 	def test_get_type_value_of_key_str_001(self):
@@ -1893,34 +1874,6 @@ class SmokeTests(unittest.TestCase):
 		SmokeTests.r.r_set(key, value_lst, if_not_exist=True)
 		res: str = SmokeTests.r.r_get(key)
 		self.assertEqual(res, value_1)
-
-	def test_get_redis_info_001(self):
-		self.assertTrue(len(SmokeTests.r.get_redis_info()) > 0)
-
-	def test_get_redis_info_002(self):
-		self.assertTrue(SmokeTests.r.get_redis_info().get('uptime_in_seconds'))
-
-	def test_get_redis_info_003(self):
-		self.assertTrue(SmokeTests.r.get_redis_info().get('redis_version'))
-
-	def test_get_redis_info_004(self):
-		self.assertTrue(SmokeTests.r.get_redis_info().get('gcc_version'))
-
-	def test_get_redis_info_005(self):
-		self.assertTrue(SmokeTests.r.get_redis_info().get('arch_bits'))
-
-	def test_get_redis_info_006(self):
-		self.assertTrue(SmokeTests.r.get_redis_info().get('os'))
-
-	def test_get_key_memory_usage_001(self):
-		key: str = 'get_key_memory_usage_001'
-		SmokeTests.r.r_set(key, key)
-		self.assertTrue(SmokeTests.r.get_key_memory_usage(key) > 0)
-
-	def test_get_key_memory_usage_002(self):
-		key: str = 'get_key_memory_usage_002'
-		# without set
-		self.assertEqual(SmokeTests.r.get_key_memory_usage(key), 0)
 
 	# r_pop ############################################################################################################
 

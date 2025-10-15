@@ -11,7 +11,7 @@ from redis import (
     TimeoutError as rTimeoutError
 )
 
-from .data_type_converter import TypeConverter
+from pyluaredis.data_type_converter import TypeConverter
 
 
 class PyRedis:
@@ -75,35 +75,6 @@ class PyRedis:
             return self.redis.ping()
         except (rConnectionError, rTimeoutError):
             return False
-
-    def get_redis_info(self) -> dict:
-        """
-        Some of the most popular keys in the output dictionary are:
-
-        used_memory_vm_eval (For Redis >= 7.0):
-        Number of bytes used by the script VM engines for EVAL framework (not part of used_memory)
-
-        number_of_cached_scripts (For Redis >= 7.0):
-        The number of EVAL scripts cached by the server
-
-        uptime_in_seconds, uptime_in_days, redis_version, gcc_version, arch_bits, os, etc.
-        """
-        return self.redis.info()
-
-    def get_key_memory_usage(self, key: str):
-        """
-        The MEMORY USAGE command reports the number of bytes that a key and its value require to be stored in RAM.
-        The reported usage is the total of memory allocations for data and administrative
-        overheads that a key and its value require.
-        SAMPLES option is set to 0.
-        :param key:
-        :return: [integer] the memory usage in bytes
-        """
-        return self.redis.memory_usage(key, samples=0) or 0
-
-    def get_count_of_keys(self) -> int:
-        """ Returns the number of keys in the current database """
-        return self.redis.dbsize()
 
     def flush_lua_scripts(self):
         self.lua_scripts_sha: dict = {}
