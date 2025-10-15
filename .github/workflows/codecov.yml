@@ -59,6 +59,7 @@ jobs:
 
       - name: Generate coverage report
         run: |
+          cd tests
           coverage xml -o coverage.xml
           coverage report
 
