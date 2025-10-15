@@ -1,12 +1,15 @@
-
 [MASTER]
 fail-under=9.95
 ignore-paths=
     tests/.*
+ignore=
+    example.py,
+    benchmark/main.py
 
 disable=
     too-many-positional-arguments
     too-many-arguments
+    bad-indentation
 
 [FORMAT]
 max-line-length=120

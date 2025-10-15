@@ -1,3 +1,4 @@
+""" Entry point for: from pyluaredis import ... """
 from importlib.metadata import metadata, version, PackageNotFoundError
 from pyluaredis.client import PyRedis
 from pyluaredis.data_type_converter import TypeConverter
