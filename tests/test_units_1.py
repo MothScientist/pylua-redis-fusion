@@ -30,11 +30,11 @@ class TtlTests(unittest.TestCase):
 		password=REDIS_PWS,
 		username=REDIS_USERNAME,
 		db=redis_db,
-		socket_timeout=.1
+		socket_timeout=5
 	)
 
 	original_redis = Redis(connection_pool=ConnectionPool(
-		host=REDIS_HOST, port=REDIS_PORT, db=redis_db, password=REDIS_PWS, username=REDIS_USERNAME
+		host=REDIS_HOST, port=REDIS_PORT, db=redis_db, password=REDIS_PWS, username=REDIS_USERNAME, socket_timeout=5
 	))
 
 	@classmethod

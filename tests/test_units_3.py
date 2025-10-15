@@ -16,7 +16,7 @@ class ContextManagerTests(unittest.TestCase):
 	# 	self.maxDiff = None
 
 	original_redis = Redis(connection_pool=ConnectionPool(
-		host=REDIS_HOST, port=REDIS_PORT, db=redis_db, password=REDIS_PWS, username=REDIS_USERNAME
+		host=REDIS_HOST, port=REDIS_PORT, db=redis_db, password=REDIS_PWS, username=REDIS_USERNAME, socket_timeout=5
 	))
 
 	@classmethod
@@ -35,7 +35,7 @@ class ContextManagerTests(unittest.TestCase):
 				password=REDIS_PWS,
 				username=REDIS_USERNAME,
 				db=redis_db,
-				socket_timeout=.1
+				socket_timeout=5
 		).r_ping())
 
 	def test_with_001(self):
@@ -45,7 +45,7 @@ class ContextManagerTests(unittest.TestCase):
 				password=REDIS_PWS,
 				username=REDIS_USERNAME,
 				db=redis_db,
-				socket_timeout=.1
+				socket_timeout=5
 		) as redis_conn:
 			conn = redis_conn
 			self.assertTrue(redis_conn.r_ping())
@@ -59,7 +59,7 @@ class ContextManagerTests(unittest.TestCase):
 				password=REDIS_PWS,
 				username=REDIS_USERNAME,
 				db=redis_db,
-				socket_timeout=.1
+				socket_timeout=5
 		) as redis_conn:
 			conn = redis_conn
 			key: str = 'RedisContextManager'

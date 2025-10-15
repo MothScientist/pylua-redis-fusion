@@ -25,7 +25,7 @@ class MultipleDatabasesTests(unittest.TestCase):
 		password=REDIS_PWS,
 		username=REDIS_USERNAME,
 		db=redis_db_2,
-		socket_timeout=.1
+		socket_timeout=5
 	)
 
 	r3 = PyRedis(
@@ -34,15 +34,15 @@ class MultipleDatabasesTests(unittest.TestCase):
 		password=REDIS_PWS,
 		username=REDIS_USERNAME,
 		db=redis_db_3,
-		socket_timeout=.1
+		socket_timeout=5
 	)
 
 	original_redis_db2 = Redis(connection_pool=ConnectionPool(
-		host=REDIS_HOST, port=REDIS_PORT, db=2, password=REDIS_PWS, username=REDIS_USERNAME
+		host=REDIS_HOST, port=REDIS_PORT, db=2, password=REDIS_PWS, username=REDIS_USERNAME, socket_timeout=5
 	))
 
 	original_redis_db3 = Redis(connection_pool=ConnectionPool(
-		host=REDIS_HOST, port=REDIS_PORT, db=3, password=REDIS_PWS, username=REDIS_USERNAME
+		host=REDIS_HOST, port=REDIS_PORT, db=3, password=REDIS_PWS, username=REDIS_USERNAME, socket_timeout=5
 	))
 
 	@classmethod
