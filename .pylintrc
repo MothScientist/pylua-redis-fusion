@@ -7,8 +7,8 @@ ignore=
     benchmark/main.py
 
 disable=
-    too-many-positional-arguments
-    too-many-arguments
+    too-many-positional-arguments,
+    too-many-arguments,
     bad-indentation
 
 [FORMAT]
