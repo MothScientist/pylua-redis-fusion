@@ -2,7 +2,7 @@
 Client for working with the Redis database
 Original library documentation: https://redis-py.readthedocs.io/en/stable/index.html
 """
-from os import path as os_path
+from os import path as os_path, listdir as os_listdir
 from json import loads as json_loads
 from redis import (
     Redis,
@@ -11,7 +11,7 @@ from redis import (
     TimeoutError as rTimeoutError
 )
 
-from .data_type_converter import TypeConverter
+from pyluaredis.data_type_converter import TypeConverter
 
 
 class PyRedis:
@@ -22,7 +22,11 @@ class PyRedis:
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
-            socket_timeout: int | float = 0.1, retry_on_timeout: bool = True, socket_keepalive: bool = True
+            socket_timeout: int | float = 0.1,
+            retry_on_timeout: bool = True,
+            socket_keepalive: bool = True,
+            max_connections: int = 50,
+            preload_lua_scripts: bool = True,
     ):
         self.redis = Redis(
             connection_pool=rConnectionPool(
@@ -35,13 +39,17 @@ class PyRedis:
                 encoding='utf-8',
                 decode_responses=True,
                 retry_on_timeout=retry_on_timeout,
-                socket_keepalive=socket_keepalive
+                socket_keepalive=socket_keepalive,
+                max_connections=max_connections,
             )
         )
         self.curr_dir = os_path.dirname(__file__)
         self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts
         self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts
         self.data_type_converter = TypeConverter().converter
+
+        if preload_lua_scripts:
+            self.__preload_lua_scripts()
 
     def __enter__(self):
         return self
@@ -67,35 +75,6 @@ class PyRedis:
             return self.redis.ping()
         except (rConnectionError, rTimeoutError):
             return False
-
-    def get_redis_info(self) -> dict:
-        """
-        Some of the most popular keys in the output dictionary are:
-
-        used_memory_vm_eval (For Redis >= 7.0):
-        Number of bytes used by the script VM engines for EVAL framework (not part of used_memory)
-
-        number_of_cached_scripts (For Redis >= 7.0):
-        The number of EVAL scripts cached by the server
-
-        uptime_in_seconds, uptime_in_days, redis_version, gcc_version, arch_bits, os, etc.
-        """
-        return self.redis.info()
-
-    def get_key_memory_usage(self, key: str):
-        """
-        The MEMORY USAGE command reports the number of bytes that a key and its value require to be stored in RAM.
-        The reported usage is the total of memory allocations for data and administrative
-        overheads that a key and its value require.
-        SAMPLES option is set to 0.
-        :param key:
-        :return: [integer] the memory usage in bytes
-        """
-        return self.redis.memory_usage(key, samples=0) or 0
-
-    def get_count_of_keys(self) -> int:
-        """ Returns the number of keys in the current database """
-        return self.redis.dbsize()
 
     def flush_lua_scripts(self):
         self.lua_scripts_sha: dict = {}
@@ -308,50 +287,6 @@ class PyRedis:
         """
         res = self.__register_lua_scripts('r_pop', 1, key, count, int(reverse))  # return list
         return tuple(self.__convert_to_type(res, convert_to_type) if convert_to_type else res) if res else ()
-
-    def array_is_empty(self, key: str):
-        pass
-
-    def r_sort(
-            self, key: str, desc: bool = True, return_before: bool = False, return_after: bool = False
-    ) -> None | tuple:
-        """
-        Сортирует список
-        :param key:
-        :param desc: True = DESC; False = ASC
-        :param return_before:
-        :param return_after:
-        :return: None
-        """
-        pass
-
-    def get_element(self, key: str):
-        pass
-
-    def get_range(self, key: str, start: int, stop: int):
-        """
-
-        :param key:
-        :param start: [включительно]
-        :param stop: [включительно]
-        :return:
-        """
-        pass
-
-    def del_element(self, key: str):
-        pass
-
-    def del_range(self, key: str, start: int, stop: int, return_before: bool = False, return_after: bool = False):
-        """
-
-        :param key:
-        :param start: [включительно]
-        :param stop: [включительно]
-        :param return_before:
-        :param return_after:
-        :return:
-        """
-        pass
 
     def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
@@ -633,3 +568,10 @@ class PyRedis:
         if isinstance(iterable_var, (set, frozenset)):
             return tuple(iterable_var)
         return tuple(set(iterable_var))
+
+    def __preload_lua_scripts(self):
+        lua_scripts_path = os_path.join(self.curr_dir, 'lua_scripts')
+        for file in os_listdir(lua_scripts_path):
+            if file.endswith('.lua'):
+                lua_script = self.__load_lua_script_from_file(file[:-4])
+                self.lua_scripts_sha[file] = self.redis.script_load(lua_script)

@@ -19,8 +19,7 @@ __For quick connection to your Python projects and easy usage.__ <span style="co
 1. The methods have a more flexible type system, you can get both a number and a list using one r_get function, without worrying about what exactly is being treated in a given key.
 2. Scenarios that require 2 or more calls to the Redis service are built on the basis of Lua scripts that perform all operations in 1 call to the server.
 3. The methods have additional parameters that are not in the standard library, for example, an analogue of RETURNING (like in Postgres), which also allows you not to worry about the type of the variable that lies in a given key.
-4. Pluggable flexible logging with many settings that allow you to customize it "for yourself"
-5. It helps in the development of applications following the [12-factor](https://12factor.net/) principles.
+4. It helps in the development of applications following the [12-factor](https://12factor.net/) principles.
 * It is assumed that you already have the <span style="color: red;">__Redis__</span> service installed and running.
 * There is no need to install <span style="color: DodgerBlue;">__Lua__</span> as it is built into <span style="color: red;">__Redis__</span>.
 

@@ -3,7 +3,7 @@ Checking the execution and saving of user scripts
 """
 import unittest
 from redis import Redis, ConnectionPool
-from random import randint, choice, random
+from random import randint, choice
 from string import ascii_letters, digits
 from sys import path as sys_path
 
@@ -28,7 +28,7 @@ class UserScriptsInterface(unittest.TestCase):
 		password=REDIS_PWS,
 		username=REDIS_USERNAME,
 		db=redis_db,
-		socket_timeout=.1
+		socket_timeout=5
 	)
 
 	original_redis = Redis(connection_pool=ConnectionPool(

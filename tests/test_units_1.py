@@ -439,7 +439,7 @@ class TtlTests(unittest.TestCase):
 
 		TtlTests.r.set_keys_ttl(keys)  # do not set the lifetime of the key
 
-		sleep(5)
+		sleep(3)
 
 		for key in keys:
 			self.assertEqual(TtlTests.r.r_get(key), key)
@@ -497,12 +497,12 @@ class TtlTests(unittest.TestCase):
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_1)
 
-		TtlTests.r.set_key_ttl(key, ttl_ms=15_000)
+		TtlTests.r.set_key_ttl(key, ttl_ms=10_000)
 		res_2: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_2)
 
 		TtlTests.r.drop_key_ttl(key)
-		sleep(16)
+		sleep(11)
 		res_3: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_3)
 
@@ -514,12 +514,12 @@ class TtlTests(unittest.TestCase):
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_1)
 
-		TtlTests.r.set_key_ttl(key, ttl_sec=10)
+		TtlTests.r.set_key_ttl(key, ttl_sec=5)
 		res_2: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_2)
 
 		TtlTests.r.drop_key_ttl(key)
-		sleep(11)
+		sleep(6)
 		res_3: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_3)
 
@@ -531,12 +531,12 @@ class TtlTests(unittest.TestCase):
 		res_1: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_1)
 
-		TtlTests.r.set_key_ttl(key, ttl_sec=10)
+		TtlTests.r.set_key_ttl(key, ttl_sec=5)
 		res_2: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_2)
 
 		TtlTests.r.drop_key_ttl('')  # unknown key
-		sleep(11)
+		sleep(6)
 		self.assertIsNone(TtlTests.r.r_get(key))
 
 	def test_drop_key_ttl_004(self):
@@ -615,12 +615,6 @@ class TtlTests(unittest.TestCase):
 
 		sleep(3)
 		self.assertEqual(value_2, TtlTests.r.r_get(key))
-
-	def test_keep_ttl_005(self):
-		key: str = self.test_keep_ttl_005.__name__
-
-
-	# TODO
 
 
 if __name__ == '__main__':
