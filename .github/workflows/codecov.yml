@@ -1,4 +1,4 @@
-name: UnitTests
+name: Codecov
 
 on:
   workflow_dispatch:
