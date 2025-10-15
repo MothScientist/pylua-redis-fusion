@@ -56,7 +56,7 @@ original_r = Redis(connection_pool=ConnectionPool(
     password=REDIS_PWS,
     username=REDIS_USERNAME,
     db=0,
-    socket_timeout=1,
+    socket_timeout=.1,
     encoding='utf-8',
     decode_responses=True,
     retry_on_timeout=True,
@@ -69,7 +69,7 @@ r = PyRedis(
     password=REDIS_PWS,
     username=REDIS_USERNAME,
     db=0,
-    socket_timeout=1,
+    socket_timeout=.1,
 )
 
 
@@ -219,6 +219,7 @@ def ch_6_original():
     end_time = perf_counter()
     print(f'test_6 (original): {(end_time - start_time):.5f} sec.;')
 
+
 def ch_7(cache: bool = False):
     """ Write and delete a very large array """
     key: str = 'test_7'
@@ -242,32 +243,6 @@ def ch_7_original():
 
 if __name__ == '__main__':
     original_r.flushall()
-
-    ch_1()
-    ch_1(cache=True)  # lua is cached and the result is the same as in ch_1_original
-    ch_1_original()
-    print('\n')
-    ch_2()
-    ch_2(cache=True)
-    ch_2_original()
-    print('\n')
-    ch_3()
-    ch_3(cache=True)
-    ch_3_original()
-    print('\n')
-    ch_4()
-    ch_4(cache=True)
-    ch_4_original()
-    print('\n')
-    ch_5()
-    ch_5(cache=True)
-    ch_5_original()
-    print('\n')
-    ch_6()
-    ch_6(cache=True)
-    ch_6_original()
-    print('\n')
-    ch_7()
-    ch_7(cache=True)
-    ch_7_original()
-
+    for i in range(1, 8):
+        ch, orig = globals()[f'ch_{i}'], globals()[f'ch_{i}_original']
+        ch(), ch(cache=True), orig(), print('\n')
