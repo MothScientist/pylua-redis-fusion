@@ -66,6 +66,3 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: MothScientist/MothScientist/pylua-redis-fusion
           files: .tests/coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
