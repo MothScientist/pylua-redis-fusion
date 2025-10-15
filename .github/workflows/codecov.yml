@@ -1,0 +1,71 @@
+name: UnitTests
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.13' ]
+        architecture: [ 'x64' ]
+
+    services:
+      redis:
+        image: redis:8.2-alpine
+        env:
+          REDIS_PSW: ${{ secrets.REDIS_PSW }}
+        ports:
+          - 6379:6379
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+          check-latest: true
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r dev-requirements.txt
+          pip install pyluaredis
+
+      - name: Create .env file
+        env:
+          REDIS_PSW: ${{ secrets.REDIS_PSW }}
+        run: |
+          cd tests || exit 1
+          echo "REDIS_PSW=${REDIS_PSW}" >> redis.env
+
+      - name: Run tests with coverage
+        run: |
+          cd tests
+          coverage run -m unittest discover
+
+      - name: Generate coverage report
+        run: |
+          coverage xml -o coverage.xml
+          coverage report
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          file: .tests/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
