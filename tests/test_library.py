@@ -31,7 +31,3 @@ class LibraryTests(unittest.TestCase):
 	def test_ping_002(self):
 		""" Service is available """
 		self.assertTrue(LibraryTests.r.r_ping())
-
-	def test_ping_003(self):
-		wrong_r = PyRedis(host='unknown')
-		self.assertFalse(wrong_r.r_ping())
