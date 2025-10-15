@@ -21,7 +21,6 @@ if delete_or_unlink == 'delete' then
 else
   redis.call("UNLINK", key)
 end
-  
 
 if returning then
   return {value, value_type.ok}

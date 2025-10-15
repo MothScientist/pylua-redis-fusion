@@ -1,5 +1,6 @@
 read_globals = {
     "KEYS",
     "ARGV",
-    "redis"
+    "redis",
+    "cjson"
 }
