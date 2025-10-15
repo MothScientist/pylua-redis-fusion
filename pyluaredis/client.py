@@ -129,6 +129,7 @@ class PyRedis:
             self.redis.persist(key)
 
     def drop_keys_ttl(self, keys: list[str] | tuple[str] | set[str] | frozenset[str]):
+        """ Removes the expiration time for multiple keys (ttl), if set. """
         if keys := PyRedis.__remove_duplicates(keys):
             self.__register_lua_scripts('drop_keys_ttl', len(keys), *keys)
 
@@ -336,7 +337,7 @@ class PyRedis:
         :return:
         """
         if not key:
-            return
+            return None
 
         res = self.__register_lua_scripts(
             'delete_or_unlink_with_returning', 1, key, int(returning), 'unlink' if command else 'delete'
@@ -345,7 +346,7 @@ class PyRedis:
 
         if returning and res:
             return self.__convert_to_type(res, convert_to_type_for_return) if convert_to_type_for_return else res
-        return
+        return None
 
     def rename_key(self, key: str, new_key: str, get_rename_status: bool = None):
         """
