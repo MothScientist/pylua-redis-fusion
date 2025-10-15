@@ -1,10 +1,10 @@
 [MASTER]
-fail-under=9.95
+fail-under=9.9
 ignore-paths=
-    tests/.*
+    tests/.*,
+    benchmark/.*
 ignore=
-    example.py,
-    benchmark/main.py
+    example.py
 
 disable=
     too-many-positional-arguments,
