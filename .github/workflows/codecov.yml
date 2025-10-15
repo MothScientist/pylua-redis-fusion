@@ -52,17 +52,17 @@ jobs:
         env:
           REDIS_PSW: ${{ secrets.REDIS_PSW }}
         run: |
+          echo "REDIS_PSW=${REDIS_PSW}" >> redis.env
           cd tests || exit 1
           echo "REDIS_PSW=${REDIS_PSW}" >> redis.env
 
       - name: Run tests with coverage
         run: |
           cd tests
-          pytest --cov --cov-branch --cov-report=xml
+          pytest --cov=pyluaredis --cov-branch --cov-report=xml
 
       - name: Upload to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: MothScientist/MothScientist/pylua-redis-fusion
-          files: .tests/coverage.xml
