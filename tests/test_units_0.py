@@ -3,7 +3,7 @@ from redis import Redis, ConnectionPool
 from random import randint, choice, random
 from string import ascii_letters, digits
 
-from tests.connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
+from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 from pyluaredis.client import PyRedis
 
 redis_db: int = 0
