@@ -1,5 +1,5 @@
 import unittest
-from random import randint, choice, random, shuffle
+from random import randint, choice
 from string import ascii_letters, digits
 from sys import path as sys_path
 
