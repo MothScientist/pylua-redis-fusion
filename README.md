@@ -1,3 +1,9 @@
+<div align="center">
+  <a href="destination.html">
+    <img src="images/logo.png" width="600" height="600" style="object-fit: cover;">
+  </a>
+</div>
+
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)
 
 [![codecov](https://codecov.io/github/MothScientist/pylua-redis-fusion/graph/badge.svg?token=XZ0E8Y7H3G)](https://codecov.io/github/MothScientist/pylua-redis-fusion) [![Socket Badge](https://badge.socket.dev/pypi/package/pyluaredis/1.0.6?artifact_id=tar-gz)](https://badge.socket.dev/pypi/package/pyluaredis/1.0.6?artifact_id=tar-gz) [![PyPI Downloads](https://static.pepy.tech/personalized-badge/pyluaredis?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLUE&right_color=BRIGHTGREEN&left_text=downloads)](https://pepy.tech/projects/pyluaredis)
@@ -9,7 +15,7 @@
 [![Dependabot Updates](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/MothScientist/pylua-redis-fusion/actions/workflows/dependabot/dependabot-updates)
 
 #### <span style="color: aqua;">__3.11 =< Python version <= 3.13__</span>
-#### The library is very limited in functions compared to [redis-py](https://github.com/redis/redis-py), but has a wide functionality if you need a minimal set of commands to work with the database.
+The library is quite limited in functionality compared to [redis-py](https://github.com/redis/redis-py), but it offers extensive functionality if you need a minimal set of commands for working with a database. If you need additional functionality, use the **redis_py()** function, which returns an object from the original library.
 ## <span style="color: white;">Install</span>
 
 `pip install pyluaredis`</br></br>
@@ -49,7 +55,3 @@ The number of supported methods and data types increases as the project develops
 
 <span style="color: white;"><u>Backward compatibility of functions is also preserved, which allows you to avoid problems when 
 using the library in your projects</u></span>
-
-<div style="text-align: center;">
-    <img src="logo1.jpg" alt="PyRedisImage" style="width: 500px; height: 500px;" />
-</div>
