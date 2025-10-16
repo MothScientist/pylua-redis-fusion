@@ -409,7 +409,32 @@ class SmokeTests(unittest.TestCase):
 		res = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [123])
 
-	# TODO - test_append_value_to_array: type_if_not_exists
+	def test_append_value_to_array_019(self):
+		""" List with duplicate elements """
+		key: str = self.test_append_value_to_array_019.__name__
+		value: list = [0, 0, 0, 2, 2, 2]
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, 1, index=3)
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, [0, 0, 0, 1, 2, 2, 2])
+
+	def test_append_value_to_array_020(self):
+		""" List with duplicate elements """
+		key: str = self.test_append_value_to_array_020.__name__
+		value: list = [0, 1, 2, 0, 0, 0, 2, 2, 2, 0, 1, 2]
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, 1, index=6)
+		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
+		self.assertEqual(res, [0, 1, 2, 0, 0, 0, 1, 2, 2, 2, 0, 1, 2])
+
+	def test_append_value_to_array_021(self):
+		""" List with duplicate elements """
+		key: str = self.test_append_value_to_array_021.__name__
+		value: list = ['a', 'b', 'c', 'a', 'a', 'a', 'c', 'c', 'c', 'a', 'b', 'c']
+		SmokeTests.r.r_set(key, value)
+		SmokeTests.r.append_value_to_array(key, 'b', index=6)
+		res: list[int] = SmokeTests.r.r_get(key)
+		self.assertEqual(res, ['a', 'b', 'c', 'a', 'a', 'a', 'b','c', 'c', 'c', 'a', 'b', 'c'])
 
 	# r_len ############################################################################################################
 
