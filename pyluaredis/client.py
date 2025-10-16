@@ -11,14 +11,15 @@ from redis import (
     TimeoutError as rTimeoutError
 )
 
-from pyluaredis.data_type_converter import TypeConverter
+from pyluaredis.helpers import _load_lua_script_from_file, _convert_to_type, _compare_and_select_sec_ms, \
+    _remove_duplicates
 
 
 class PyRedis:
     """
     The main entity for working with Redis
     """
-    __slots__ = ('redis', 'curr_dir', 'lua_scripts_sha', 'user_lua_scripts_buffer', 'data_type_converter')
+    __slots__ = ('redis', 'lua_scripts_sha', 'user_lua_scripts_buffer')
 
     def __init__(
             self, host: str = 'localhost', port: int = 6379, password='',username='default', db=0,
@@ -43,10 +44,8 @@ class PyRedis:
                 max_connections=max_connections,
             )
         )
-        self.curr_dir = os_path.dirname(__file__)
         self.lua_scripts_sha: dict = {}  # saving SHA1 hash of Lua scripts
         self.user_lua_scripts_buffer: dict = {}  # structure for storing SHA user Lua scripts
-        self.data_type_converter = TypeConverter().converter
 
         if preload_lua_scripts:
             self.__preload_lua_scripts()
@@ -77,11 +76,19 @@ class PyRedis:
         except (rConnectionError, rTimeoutError):
             return False
 
-    def flush_lua_scripts(self):
+    def flush_lua_scripts(self, async_type: bool = False):
         """ Clears all saved lua scripts (both built-in and user-defined) """
-        self.lua_scripts_sha: dict = {}
-        self.user_lua_scripts_buffer: dict = {}
-        self.redis.script_flush()
+        self.flush_local_lua_scripts()
+        self.redis.script_flush('ASYNC' if async_type else 'SYNC')
+
+    def flush_local_lua_scripts(self):
+        """ Clears locally cached library lua scripts """
+        self.lua_scripts_sha.clear()
+        self.flush_user_lua_scripts()
+
+    def flush_user_lua_scripts(self):
+        """ Clears locally cached user lua scripts """
+        self.user_lua_scripts_buffer.clear()
 
     def keys_is_exists(self, keys: str | list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
         """ Checking the existence of a key """
@@ -96,7 +103,7 @@ class PyRedis:
             ttl_ms: int | None = None
     ) -> None:
         """ Set key time (ttl) in seconds or milliseconds """
-        if ttl_ms := PyRedis.__compare_and_select_sec_ms(ttl_sec, ttl_ms) if (ttl_sec or ttl_ms) else None:
+        if ttl_ms := _compare_and_select_sec_ms(ttl_sec, ttl_ms) if (ttl_sec or ttl_ms) else None:
             self.redis.pexpire(key, ttl_ms)
 
     def set_keys_ttl(
@@ -106,8 +113,8 @@ class PyRedis:
             ttl_ms: int | None = None
     ) -> None:
         """ Set the time for multiple keys (ttl) in seconds or milliseconds """
-        keys: tuple = PyRedis.__remove_duplicates(keys)
-        ttl_ms = PyRedis.__compare_and_select_sec_ms(ttl_sec, ttl_ms) if ((ttl_sec or ttl_ms) and keys) else None
+        keys: tuple = _remove_duplicates(keys)
+        ttl_ms = _compare_and_select_sec_ms(ttl_sec, ttl_ms) if ((ttl_sec or ttl_ms) and keys) else None
         if ttl_ms:
             self.__register_lua_scripts('set_keys_ttl', len(keys), *keys, ttl_ms)
 
@@ -130,7 +137,7 @@ class PyRedis:
 
     def drop_keys_ttl(self, keys: list[str] | tuple[str] | set[str] | frozenset[str]):
         """ Removes the expiration time for multiple keys (ttl), if set. """
-        if keys := PyRedis.__remove_duplicates(keys):
+        if keys := _remove_duplicates(keys):
             self.__register_lua_scripts('drop_keys_ttl', len(keys), *keys)
 
     def get_type_value_of_key(self, key: str) -> str | None:
@@ -177,7 +184,7 @@ class PyRedis:
             return None
 
         if time_s or time_ms:
-            time_s, time_ms = None, PyRedis.__compare_and_select_sec_ms(time_s, time_ms)
+            time_s, time_ms = None, _compare_and_select_sec_ms(time_s, time_ms)
 
         res = None
 
@@ -208,7 +215,7 @@ class PyRedis:
                 'rpush' if isinstance(value, (list, tuple)) else 'sadd', int(len(value) < 7850), *value
             )
 
-        return self.__convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
+        return _convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
 
     def append_value_to_array(
             self,
@@ -247,7 +254,7 @@ class PyRedis:
             'append_value_to_array', 1, key, index, type_if_not_exists, get_old_value, value
         )
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
-        return self.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
+        return _convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
     def r_get(self, key: str, default_value=None, convert_to_type: str | None = None):
         """
@@ -263,7 +270,7 @@ class PyRedis:
 
         res = self.__register_lua_scripts('get_helper', 1, key)
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else default_value
-        return self.__convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
+        return _convert_to_type(res, convert_to_type) if (convert_to_type and res is not None) else res
 
     def r_len(self, key: str) -> int | None:
         """
@@ -292,7 +299,7 @@ class PyRedis:
         :return: tuple
         """
         res = self.__register_lua_scripts('r_pop', 1, key, count, int(reverse))  # return list
-        return tuple(self.__convert_to_type(res, convert_to_type) if convert_to_type else res) if res else ()
+        return tuple(_convert_to_type(res, convert_to_type) if convert_to_type else res) if res else ()
 
     def r_delete(self, key: str, returning: bool = False, convert_to_type_for_return: str = None):
         """
@@ -345,7 +352,7 @@ class PyRedis:
         res = (set(res[0]) if res[1] == 'set' else res[0]) if res else None
 
         if returning and res:
-            return self.__convert_to_type(res, convert_to_type_for_return) if convert_to_type_for_return else res
+            return _convert_to_type(res, convert_to_type_for_return) if convert_to_type_for_return else res
         return None
 
     def rename_key(self, key: str, new_key: str, get_rename_status: bool = None):
@@ -436,7 +443,7 @@ class PyRedis:
         if not keys:
             return (), (), {}
 
-        keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
+        keys: tuple = _remove_duplicates(keys)  # remove duplicates
 
         # all parameters = None | False
         if return_exists is return_non_exists is get_dict_key_value_exists is False:
@@ -452,7 +459,7 @@ class PyRedis:
 
         # convert_to_type_dict_key
         exists_key_value = {
-            key: self.__convert_to_type(value, convert_to_type_dict_key)
+            key: _convert_to_type(value, convert_to_type_dict_key)
             for key, value in exists_key_value.items()
         } if convert_to_type_dict_key else exists_key_value
 
@@ -469,9 +476,9 @@ class PyRedis:
         """
         Checks for the existence of keys in Redis and returns a dictionary of existing keys with their values
         """
-        keys: tuple = PyRedis.__remove_duplicates(keys)  # remove duplicates
+        keys: tuple = _remove_duplicates(keys)  # remove duplicates
         values = self.redis.mget(keys)  # later in the library the variable is converted to list
-        return {keys[i]: self.__convert_to_type(value, convert_to_type_dict_key)
+        return {keys[i]: _convert_to_type(value, convert_to_type_dict_key)
                 if convert_to_type_dict_key else value for i, value in enumerate(values) if value is not None}
 
     def r_remove_all_keys_local(self, get_count_keys: bool = False) -> int | None:
@@ -539,45 +546,13 @@ class PyRedis:
 
     def __register_lua_scripts(self, script_name: str, *args):
         if script_name not in self.lua_scripts_sha:
-            lua_script = self.__load_lua_script_from_file(script_name)
+            lua_script = _load_lua_script_from_file(script_name)
             self.lua_scripts_sha[script_name] = self.redis.script_load(lua_script)
         return self.redis.evalsha(self.lua_scripts_sha[script_name], *args)
 
-    def __load_lua_script_from_file(self, filename: str) -> str:
-        """ Load Lua script from a file """
-        with open(os_path.join(self.curr_dir, f'lua_scripts/{filename}.lua'), 'r', encoding='utf-8') as lua_file:
-            return lua_file.read()
-
-    def __convert_to_type(
-            self,
-            value: str | list[str] | set[str],
-            _type: str
-    ) -> str | bool | int | float | list | set:
-        return self.data_type_converter(value, _type)
-
-    @staticmethod
-    def __compare_and_select_sec_ms(time_s: int | None, time_ms: int | None) -> int | None:
-        """
-        If both seconds and milliseconds are specified,
-        the time is converted to milliseconds and the smallest one is selected
-        """
-        if not (time_s or time_ms):
-            return None
-
-        if not time_s or not time_ms:
-            return time_s * 1_000 if time_s else time_ms
-
-        return min(time_s * 1_000, time_ms)
-
-    @staticmethod
-    def __remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
-        if isinstance(iterable_var, (set, frozenset)):
-            return tuple(iterable_var)
-        return tuple(set(iterable_var))
-
     def __preload_lua_scripts(self):
-        lua_scripts_path = os_path.join(self.curr_dir, 'lua_scripts')
+        lua_scripts_path = os_path.join(os_path.dirname(__file__), 'lua_scripts')
         for file in os_listdir(lua_scripts_path):
             if file.endswith('.lua'):
-                lua_script = self.__load_lua_script_from_file(file[:-4])
+                lua_script = _load_lua_script_from_file(file[:-4])
                 self.lua_scripts_sha[file] = self.redis.script_load(lua_script)

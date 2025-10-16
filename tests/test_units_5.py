@@ -152,4 +152,38 @@ class UserScriptsInterface(unittest.TestCase):
 		with self.assertRaises(FileNotFoundError):
 			UserScriptsInterface.r._PyRedis__load_lua_script_from_file('unknown_script')
 
-	# flush_lua_scripts ################################################################################################
+	def test_flush_user_scripts_001(self):
+		lua_script: str = 'local test_flush_user_scripts_001 = 1;'
+		sha: str = UserScriptsInterface.r.load_lua_script(lua_script, use_buffer=True)
+		self.assertTrue(len(sha) > 0)  # Check that the script was loaded
+		self.assertTrue(len(UserScriptsInterface.r.user_lua_scripts_buffer) != 0)
+
+		UserScriptsInterface.r.flush_lua_scripts(async_type=False)
+		self.assertTrue(len(UserScriptsInterface.r.user_lua_scripts_buffer) == 0)
+
+	def test_flush_user_scripts_002(self):
+		lua_script: str = 'local test_flush_user_scripts_002 = 2;'
+		sha: str = UserScriptsInterface.r.load_lua_script(lua_script, use_buffer=True)
+		self.assertTrue(len(sha) > 0)  # Check that the script was loaded
+		self.assertTrue(len(UserScriptsInterface.r.user_lua_scripts_buffer) != 0)
+
+		UserScriptsInterface.r.flush_lua_scripts(async_type=True)
+		self.assertTrue(len(UserScriptsInterface.r.user_lua_scripts_buffer) == 0)
+
+	def test_flush_user_scripts_003(self):
+		lua_script: str = 'local test_flush_user_scripts_003 = 3;'
+		sha: str = UserScriptsInterface.r.load_lua_script(lua_script, use_buffer=True)
+		self.assertTrue(len(sha) > 0)  # Check that the script was loaded
+		self.assertTrue(len(UserScriptsInterface.r.user_lua_scripts_buffer) != 0)
+
+		UserScriptsInterface.r.flush_local_lua_scripts()
+		self.assertTrue(len(UserScriptsInterface.r.user_lua_scripts_buffer) == 0)
+
+	def test_flush_user_scripts_004(self):
+		lua_script: str = 'local test_flush_user_scripts_004 = 3;'
+		sha: str = UserScriptsInterface.r.load_lua_script(lua_script, use_buffer=True)
+		self.assertTrue(len(sha) > 0)  # Check that the script was loaded
+		self.assertTrue(len(UserScriptsInterface.r.user_lua_scripts_buffer) != 0)
+
+		UserScriptsInterface.r.flush_user_lua_scripts()
+		self.assertTrue(len(UserScriptsInterface.r.user_lua_scripts_buffer) == 0)

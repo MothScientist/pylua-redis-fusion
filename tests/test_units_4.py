@@ -107,6 +107,20 @@ class LuaScriptsSHATestsWithPreload(unittest.TestCase):
 		res = len(LuaScriptsSHATestsWithPreload.r.user_lua_scripts_buffer) == 0
 		self.assertTrue(res)
 
+	def test_lua_sha_003(self):
+		""" Очищаем загруженные lua-скрипты """
+		LuaScriptsSHATestsWithPreload.r.flush_local_lua_scripts()
+		res = len(LuaScriptsSHATestsWithPreload.r.lua_scripts_sha) == 0
+		self.assertTrue(res)
+
+		LuaScriptsSHATestsWithPreload.r._PyRedis__preload_lua_scripts()
+		res = len(LuaScriptsSHATestsWithPreload.r.lua_scripts_sha) != 0
+		self.assertTrue(res)
+
+		LuaScriptsSHATestsWithPreload.r.flush_lua_scripts()
+		res = len(LuaScriptsSHATestsWithPreload.r.lua_scripts_sha) == 0
+		self.assertTrue(res)
+
 
 if __name__ == '__main__':
 	unittest.main()
