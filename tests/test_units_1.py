@@ -557,6 +557,11 @@ class TtlTests(unittest.TestCase):
 		res_3: str = TtlTests.r.r_get(key)
 		self.assertEqual(value, res_3)
 
+	def test_drop_key_ttl_005(self):
+		""" bool(key) != True """
+		self.assertIsNone(TtlTests.r.drop_key_ttl(None))
+		self.assertIsNone(TtlTests.r.drop_key_ttl(''))
+
 	# drop_keys_ttl ####################################################################################################
 
 	# keep_ttl #########################################################################################################
