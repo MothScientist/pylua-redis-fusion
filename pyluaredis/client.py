@@ -490,10 +490,11 @@ class PyRedis:
         count_keys = self.__register_lua_scripts('remove_all_keys_local', 0, int(get_count_keys))
         return int(count_keys) if count_keys else None
 
-    def r_remove_all_keys(self, get_count_keys: bool = False) -> int | None:
+    def r_remove_all_keys(self, get_count_keys: bool = False, async_type: bool = False) -> int | None:
         """
         Delete all keys in all databases on the current host
         :param get_count_keys: need to return the number of deleted keys (True -> return integer, False -> return None)
+        :param async_type: An indication that the operation should be performed asynchronously by the server
         :return: count keys or None
 
         Why isn't this function written in Lua?
@@ -508,7 +509,7 @@ class PyRedis:
                 self.redis.execute_command("SELECT", db)
                 total_keys += self.redis.dbsize()
 
-        self.redis.flushall()
+        self.redis.flushall(asynchronous=async_type)
 
         return int(total_keys) if get_count_keys else None
 
