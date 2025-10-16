@@ -490,6 +490,7 @@ class PyRedis:
         count_keys = self.__register_lua_scripts('remove_all_keys_local', 0, int(get_count_keys))
         return int(count_keys) if count_keys else None
 
+    # pylint: disable=inconsistent-return-statements
     def r_remove_all_keys(self, get_count_keys: bool = False, async_type: bool = False) -> int | None:
         """
         Delete all keys in all databases on the current host
