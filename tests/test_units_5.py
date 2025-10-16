@@ -11,6 +11,7 @@ from connection_params import REDIS_PWS, REDIS_HOST, REDIS_PORT, REDIS_USERNAME
 
 sys_path.append('../')
 from pyluaredis.client import PyRedis
+from pyluaredis.helpers import _load_lua_script_from_file
 
 redis_db: int = 6
 
@@ -139,18 +140,18 @@ class UserScriptsInterface(unittest.TestCase):
 		self.assertEqual(UserScriptsInterface.r.user_lua_scripts_buffer, dict())
 
 	def test_load_library_lua_func_obj_001(self):
-		script: str = UserScriptsInterface.r._PyRedis__load_lua_script_from_file('get_helper')
+		script: str = _load_lua_script_from_file('get_helper')
 		self.assertNotEqual(script, '')
 		self.assertTrue(isinstance(script, str))
 
 	def test_load_library_lua_func_obj_002(self):
-		res = UserScriptsInterface.r._PyRedis__load_lua_script_from_file('set_arrays_helper')
+		res = _load_lua_script_from_file('set_arrays_helper')
 		self.assertNotEqual(res, '')
 		self.assertTrue(isinstance(res, str))
 
 	def test_load_library_lua_func_obj_003(self):
 		with self.assertRaises(FileNotFoundError):
-			UserScriptsInterface.r._PyRedis__load_lua_script_from_file('unknown_script')
+			_load_lua_script_from_file('unknown_script')
 
 	def test_flush_user_scripts_001(self):
 		lua_script: str = 'local test_flush_user_scripts_001 = 1;'
