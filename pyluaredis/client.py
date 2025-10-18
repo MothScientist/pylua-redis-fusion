@@ -11,8 +11,10 @@ from redis import (
     TimeoutError as rTimeoutError
 )
 
-from pyluaredis.helpers import _SUPPORTED_TYPES, _SUPPORTED_ITERABLE_TYPES, _ALL_SUPPORTED_TYPES, _remove_duplicates, \
-    _load_lua_script_from_file, _convert_to_type, _compare_and_select_sec_ms, _convert_value_to_string
+from pyluaredis.helpers import (
+    _SUPPORTED_TYPES, _SUPPORTED_ITERABLE_TYPES, _ALL_SUPPORTED_TYPES, _remove_duplicates, _convert_value_to_string,
+    _load_lua_script_from_file, _convert_to_type, _compare_and_select_sec_ms
+)
 
 
 class PyRedis:
