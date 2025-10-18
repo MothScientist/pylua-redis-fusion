@@ -53,5 +53,4 @@ This library is not about the speed of working with Redis, it is about the ease 
 
 The number of supported methods and data types increases as the project develops, <span style="color: aqua;">**but it has all the basic methods for working with Redis**</span> (see the list and description of current commands with examples in the `example.py` file in the root of the repository).
 
-<span style="color: white;"><u>Backward compatibility of functions is also preserved, which allows you to avoid problems when 
-using the library in your projects</u></span>
+<span style="color: white;"><u>Backward compatibility of functions is also maintained (from versions >= 2.0), which allows you to avoid problems when using the library in your projects.</u></span>
