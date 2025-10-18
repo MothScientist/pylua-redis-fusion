@@ -90,7 +90,7 @@ class PyRedis:
         """ Clears locally cached user lua scripts """
         self.user_lua_scripts_buffer.clear()
 
-    def keys_is_exists(self, keys: str | list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
+    def exists(self, keys: str | list[str] | tuple[str] | set[str] | frozenset[str]) -> int:
         """ Checking the existence of a key """
         if isinstance(keys, str) and keys:
             keys = [keys]
