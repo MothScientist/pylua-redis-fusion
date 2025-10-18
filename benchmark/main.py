@@ -145,7 +145,7 @@ def ch_4(cache: bool = False):
     r.r_set(key, value)
 
     # добавляем значение
-    r.append_value_to_array(key, 999, 0)
+    r.insert_value_to_array(key, 999, 0)
 
     _ = r.r_get(key, convert_to_type='int')
     end_time = perf_counter()
@@ -196,7 +196,7 @@ def ch_6(cache=False):
     value: list[int] = [1 for _ in range(100_000)]
     start_time = perf_counter()
     r.r_set(key, value)
-    r.append_value_to_array(key, 999, 50_000)
+    r.insert_value_to_array(key, 999, 50_000)
     _ = r.r_get(key, convert_to_type='int')
     end_time = perf_counter()
     print(f'test_6: {(end_time - start_time):.5f} sec.;{" (cache)" if cache else ""}')

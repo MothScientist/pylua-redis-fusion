@@ -217,7 +217,7 @@ class PyRedis:
 
         return _convert_to_type(res, convert_to_type_for_get) if res and convert_to_type_for_get else res
 
-    def append_value_to_array(
+    def insert_value_to_array(
             self,
             key: str,
             value: bool | int | float | str,

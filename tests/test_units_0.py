@@ -255,92 +255,92 @@ class SmokeTests(unittest.TestCase):
 
 		SmokeTests.original_redis.flushdb()
 
-	# append_value_to_array ############################################################################################
+	# insert_value_to_array ############################################################################################
 
-	def test_append_value_to_array_001(self):
+	def test_insert_value_to_array_001(self):
 		""" List """
-		key: str = self.test_append_value_to_array_001.__name__
+		key: str = self.test_insert_value_to_array_001.__name__
 		value: list = [1, 2, 3, 4, 5]
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, 0, index=0)
+		SmokeTests.r.insert_value_to_array(key, 0, index=0)
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [0, 1, 2, 3, 4, 5])
 
-	def test_append_value_to_array_002(self):
+	def test_insert_value_to_array_002(self):
 		""" List """
-		key: str = self.test_append_value_to_array_002.__name__
+		key: str = self.test_insert_value_to_array_002.__name__
 		value: list = [0, 1, 2, 3, 4]
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, 5, index=-1)
+		SmokeTests.r.insert_value_to_array(key, 5, index=-1)
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [0, 1, 2, 3, 4, 5])
 
-	def test_append_value_to_array_003(self):
+	def test_insert_value_to_array_003(self):
 		""" List """
-		key: str = self.test_append_value_to_array_003.__name__
+		key: str = self.test_insert_value_to_array_003.__name__
 		value: list = [0, 1, 2]
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, 3)
+		SmokeTests.r.insert_value_to_array(key, 3)
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [0, 1, 2, 3])
 
-	def test_append_value_to_array_004(self):
+	def test_insert_value_to_array_004(self):
 		""" List """
-		key: str = self.test_append_value_to_array_004.__name__
+		key: str = self.test_insert_value_to_array_004.__name__
 		value: list = [0, 1, 2, 4, 5]
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, 3, index=3)
+		SmokeTests.r.insert_value_to_array(key, 3, index=3)
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [0, 1, 2, 3, 4, 5])
 
-	def test_append_value_to_array_005(self):
+	def test_insert_value_to_array_005(self):
 		""" List """
-		key: str = self.test_append_value_to_array_005.__name__
+		key: str = self.test_insert_value_to_array_005.__name__
 		value: list = list(range(10))
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, randint(0, 100), index=randint(1, 9))
+		SmokeTests.r.insert_value_to_array(key, randint(0, 100), index=randint(1, 9))
 		res: list = SmokeTests.r.r_get(key)
 		self.assertTrue(len(res) == len(value) + 1)
 
-	def test_append_value_to_array_006(self):
+	def test_insert_value_to_array_006(self):
 		""" Set """
-		key: str = self.test_append_value_to_array_006.__name__
+		key: str = self.test_insert_value_to_array_006.__name__
 		value: set = set(range(10))
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, randint(50, 100))  # the new value must not overlap with existing ones
+		SmokeTests.r.insert_value_to_array(key, randint(50, 100))  # the new value must not overlap with existing ones
 		res: set = SmokeTests.r.r_get(key)
 		self.assertTrue(len(res) == len(value) + 1)
 
-	def test_append_value_to_array_007(self):
+	def test_insert_value_to_array_007(self):
 		""" Set """
-		key: str = self.test_append_value_to_array_007.__name__
+		key: str = self.test_insert_value_to_array_007.__name__
 		value: set = set(randint(0, 10_000) for _ in range(0, 25))
 		SmokeTests.r.r_set(key, value)
 		new_value: int = randint(100_000, 1_000_000)
-		SmokeTests.r.append_value_to_array(key, new_value)
+		SmokeTests.r.insert_value_to_array(key, new_value)
 		res: set = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(value.union({new_value}), res)
 
-	def test_append_value_to_array_008(self):
-		""" test_append_value_to_array: get_old_value - #1 """
-		key: str = self.test_append_value_to_array_008.__name__
+	def test_insert_value_to_array_008(self):
+		""" test_insert_value_to_array: get_old_value - #1 """
+		key: str = self.test_insert_value_to_array_008.__name__
 		value: list[int] = [0, 1, 2]
 		new_value: int = 3
 		SmokeTests.r.r_set(key, value)
 
-		old_value: list[int] = SmokeTests.r.append_value_to_array(key, 3, get_old_value=True, convert_to_type='int')
+		old_value: list[int] = SmokeTests.r.insert_value_to_array(key, 3, get_old_value=True, convert_to_type='int')
 		self.assertEqual(old_value, value)
 
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
 		self.assertEqual(res, (value + [new_value]))
 
-	def test_append_value_to_array_009(self):
-		""" test_append_value_to_array: get_old_value - #2 """
-		key: str = self.test_append_value_to_array_009.__name__
+	def test_insert_value_to_array_009(self):
+		""" test_insert_value_to_array: get_old_value - #2 """
+		key: str = self.test_insert_value_to_array_009.__name__
 		value: list[int] = [9, 8, 6, 5, 4, 3, 2, 1, 0]
 		SmokeTests.r.r_set(key, value)
 
-		old_value: list[int] = SmokeTests.r.append_value_to_array(
+		old_value: list[int] = SmokeTests.r.insert_value_to_array(
 			key, 7, index=2, get_old_value=True, convert_to_type='int'
 		)
 		self.assertEqual(old_value, value)
@@ -348,13 +348,13 @@ class SmokeTests(unittest.TestCase):
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
 		self.assertEqual(res, [9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
 
-	def test_append_value_to_array_010(self):
-		""" test_append_value_to_array: get_old_value - #3 """
-		key: str = self.test_append_value_to_array_010.__name__
+	def test_insert_value_to_array_010(self):
+		""" test_insert_value_to_array: get_old_value - #3 """
+		key: str = self.test_insert_value_to_array_010.__name__
 		value: list[int] = [9, 8, 7, 6, 5, 4, 3, 2, 0]
 		SmokeTests.r.r_set(key, value)
 
-		old_value: list[int] = SmokeTests.r.append_value_to_array(
+		old_value: list[int] = SmokeTests.r.insert_value_to_array(
 			key, 1, index=len(value)-1, get_old_value=True, convert_to_type='int'
 		)
 		self.assertEqual(old_value, value)
@@ -362,77 +362,77 @@ class SmokeTests(unittest.TestCase):
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='integer')
 		self.assertEqual(res, [9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
 
-	def test_append_value_to_array_011(self):
-		key: str = self.test_append_value_to_array_011.__name__
+	def test_insert_value_to_array_011(self):
+		key: str = self.test_insert_value_to_array_011.__name__
 		value: list[str] = ['q', 'qw', 'qwer', 'qwert', 'qwerty']
 		SmokeTests.r.r_set(key, value)
-		old_value: None = SmokeTests.r.append_value_to_array(key, 'qwe', index=2, get_old_value=False)
+		old_value: None = SmokeTests.r.insert_value_to_array(key, 'qwe', index=2, get_old_value=False)
 		self.assertIsNone(old_value)
 		res: list[str] = SmokeTests.r.r_get(key)
 		self.assertEqual(res, ['q', 'qw', 'qwe', 'qwer', 'qwert', 'qwerty'])
 
-	def test_append_value_to_array_012(self):
-		key: str = self.test_append_value_to_array_012.__name__
-		SmokeTests.r.append_value_to_array(key, 0, type_if_not_exists='null')
+	def test_insert_value_to_array_012(self):
+		key: str = self.test_insert_value_to_array_012.__name__
+		SmokeTests.r.insert_value_to_array(key, 0, type_if_not_exists='null')
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
-	def test_append_value_to_array_013(self):
-		key: str = self.test_append_value_to_array_013.__name__
-		SmokeTests.r.append_value_to_array(key, 0, type_if_not_exists='list')
+	def test_insert_value_to_array_013(self):
+		key: str = self.test_insert_value_to_array_013.__name__
+		SmokeTests.r.insert_value_to_array(key, 0, type_if_not_exists='list')
 		res = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [0])
 
-	def test_append_value_to_array_014(self):
-		key: str = self.test_append_value_to_array_014.__name__
-		SmokeTests.r.append_value_to_array(key, 'res', type_if_not_exists='set')
+	def test_insert_value_to_array_014(self):
+		key: str = self.test_insert_value_to_array_014.__name__
+		SmokeTests.r.insert_value_to_array(key, 'res', type_if_not_exists='set')
 		self.assertEqual(SmokeTests.r.r_get(key), {'res'})
 
-	def test_append_value_to_array_015(self):
-		key: str = self.test_append_value_to_array_015.__name__
-		SmokeTests.r.append_value_to_array(key, '123', type_if_not_exists='qwerty')
+	def test_insert_value_to_array_015(self):
+		key: str = self.test_insert_value_to_array_015.__name__
+		SmokeTests.r.insert_value_to_array(key, '123', type_if_not_exists='qwerty')
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
-	def test_append_value_to_array_016(self):
-		key: str = self.test_append_value_to_array_016.__name__
-		SmokeTests.r.append_value_to_array(key, 987, type_if_not_exists='')
+	def test_insert_value_to_array_016(self):
+		key: str = self.test_insert_value_to_array_016.__name__
+		SmokeTests.r.insert_value_to_array(key, 987, type_if_not_exists='')
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
-	def test_append_value_to_array_017(self):
-		key: str = self.test_append_value_to_array_017.__name__
-		SmokeTests.r.append_value_to_array(key, 98765, type_if_not_exists='   ')
+	def test_insert_value_to_array_017(self):
+		key: str = self.test_insert_value_to_array_017.__name__
+		SmokeTests.r.insert_value_to_array(key, 98765, type_if_not_exists='   ')
 		self.assertIsNone(SmokeTests.r.r_get(key))
 
-	def test_append_value_to_array_018(self):
+	def test_insert_value_to_array_018(self):
 		""" index > len """
-		key: str = self.test_append_value_to_array_018.__name__
-		SmokeTests.r.append_value_to_array(key, 123, index=15, type_if_not_exists='list')
+		key: str = self.test_insert_value_to_array_018.__name__
+		SmokeTests.r.insert_value_to_array(key, 123, index=15, type_if_not_exists='list')
 		res = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [123])
 
-	def test_append_value_to_array_019(self):
+	def test_insert_value_to_array_019(self):
 		""" List with duplicate elements """
-		key: str = self.test_append_value_to_array_019.__name__
+		key: str = self.test_insert_value_to_array_019.__name__
 		value: list = [0, 0, 0, 2, 2, 2]
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, 1, index=3)
+		SmokeTests.r.insert_value_to_array(key, 1, index=3)
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [0, 0, 0, 1, 2, 2, 2])
 
-	def test_append_value_to_array_020(self):
+	def test_insert_value_to_array_020(self):
 		""" List with duplicate elements """
-		key: str = self.test_append_value_to_array_020.__name__
+		key: str = self.test_insert_value_to_array_020.__name__
 		value: list = [0, 1, 2, 0, 0, 0, 2, 2, 2, 0, 1, 2]
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, 1, index=6)
+		SmokeTests.r.insert_value_to_array(key, 1, index=6)
 		res: list[int] = SmokeTests.r.r_get(key, convert_to_type='int')
 		self.assertEqual(res, [0, 1, 2, 0, 0, 0, 1, 2, 2, 2, 0, 1, 2])
 
-	def test_append_value_to_array_021(self):
+	def test_insert_value_to_array_021(self):
 		""" List with duplicate elements """
-		key: str = self.test_append_value_to_array_021.__name__
+		key: str = self.test_insert_value_to_array_021.__name__
 		value: list = ['a', 'b', 'c', 'a', 'a', 'a', 'c', 'c', 'c', 'a', 'b', 'c']
 		SmokeTests.r.r_set(key, value)
-		SmokeTests.r.append_value_to_array(key, 'b', index=6)
+		SmokeTests.r.insert_value_to_array(key, 'b', index=6)
 		res: list[int] = SmokeTests.r.r_get(key)
 		self.assertEqual(res, ['a', 'b', 'c', 'a', 'a', 'a', 'b','c', 'c', 'c', 'a', 'b', 'c'])
 
