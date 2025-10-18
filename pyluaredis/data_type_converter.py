@@ -27,8 +27,7 @@ class TypeConverter:
 		type_check: tuple = tuple(_type.split('_', 1))
 
 		type_len = len(type_check)
-		extended = type_len == 2 and type_check[1] == 'any' and type_check[0] != 'bytes'
-		encoding = type_check[1] if type_len == 2 and type_check[0] == 'bytes' and type_check[1] != 'any' else 'utf-8'
+		extended = type_len == 2 and type_check[1] == 'any'
 		_type = self.data_type_names.get(type_check[0]) if type_len in (1, 2) else None
 		if _type is None:
 			return value
@@ -40,29 +39,31 @@ class TypeConverter:
 			if set(value).intersection(set(self.boolean_equals)):
 				extended = True
 
-		return self.convert_to_type(value, _type) if not extended and _type is not bytes \
-			else self.convert_to_type_extended(value, _type, encoding)
+		return self.convert_to_type(value, _type) if not extended \
+			else self.convert_to_type_extended(value, _type)
 
 	def convert_to_type(self, value: str | list[str] | set[str], _type: type):
 		""" Conversion on the principle of "all or nothing" """
 		if isinstance(value, (list, set)):
 			try:
+				if _type == bytes:
+					return list(map(bytes.fromhex, value)) if isinstance(value, list) \
+						else set(map(bytes.fromhex, value))
 				return list(map(_type, value)) if isinstance(value, list) else set(map(_type, value))
 			except (ValueError, TypeError):
 				return value
 
 		return self.__helper_convert_to_type(value, _type)
 
-	def convert_to_type_extended(self, value: str | list[str] | set[str], _type: type, encoding: str):
+	def convert_to_type_extended(self, value: str | list[str] | set[str], _type: type):
 		""" Array conversion is performed for each element separately """
 		if isinstance(value, (list, set)):
-			return [self.__helper_convert_to_type(i, _type, encoding) for i in value] \
-				if isinstance(value, list) \
-				else {self.__helper_convert_to_type(i, _type, encoding) for i in value}
+			return [self.__helper_convert_to_type(i, _type) for i in value] \
+				if isinstance(value, list) else {self.__helper_convert_to_type(i, _type) for i in value}
 
-		return self.__helper_convert_to_type(value, _type, encoding)
+		return self.__helper_convert_to_type(value, _type)
 
-	def __helper_convert_to_type(self, value: str, _type, encoding: str = 'utf-8'):
+	def __helper_convert_to_type(self, value: str, _type: type):
 		""" attempt to convert a value to a given type """
 		try:
 			if _type is int:
@@ -76,7 +77,7 @@ class TypeConverter:
 			elif _type is bool:
 				value: bool | str = (value in self.true_equals) if value in self.boolean_equals else value
 			elif _type is bytes:
-				value: bytes = value.encode(encoding)
+				value: bytes = bytes.fromhex(value)
 		except (ValueError, TypeError):
 			pass
 		return value

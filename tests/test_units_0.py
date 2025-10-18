@@ -40,8 +40,20 @@ class SmokeTests(unittest.TestCase):
 		SmokeTests.original_redis.flushdb()  # clear the database after tests
 
 	@staticmethod
-	def get_random_integer():
-		return randint(0, 1_000_000)
+	def get_random_integer(a: int = 0, b: int = 1_000_000) -> int:
+		return randint(a, b)
+
+	@staticmethod
+	def get_random_float() -> float:
+		return float(randint(0, 1_000_000) + random())
+
+	@staticmethod
+	def get_random_bool() -> bool:
+		return bool(randint(0, 1))
+
+	@staticmethod
+	def get_random_byte() -> bytes:
+		return bytes(SmokeTests.get_random_integer(a=0, b=10))
 
 	@staticmethod
 	def get_random_string(length: int = randint(10, 20)):
@@ -707,6 +719,20 @@ class SmokeTests(unittest.TestCase):
 		self.assertIsNone(SmokeTests.r.r_set(key, value))
 		res = SmokeTests.r.r_get(key)
 		self.assertEqual(res, str(value))
+
+	def test_set_get_byte_001(self):
+		key: str = self.test_set_get_byte_001.__name__
+		value: bytes = SmokeTests.get_random_byte()
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res = SmokeTests.r.r_get(key, convert_to_type='bytes')
+		self.assertEqual(res, value)
+
+	def test_set_get_byte_002(self):
+		key: str = self.test_set_get_byte_002.__name__
+		value: bytes = bytes('Redis', 'utf-8')
+		self.assertIsNone(SmokeTests.r.r_set(key, value))
+		res = SmokeTests.r.r_get(key, convert_to_type='bytes')
+		self.assertEqual(res, value)
 
 	def test_set_get_list_001(self):
 		""" integer """

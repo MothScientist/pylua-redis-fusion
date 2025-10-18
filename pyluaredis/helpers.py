@@ -3,6 +3,10 @@ from os import path as os_path
 
 from pyluaredis.data_type_converter import TypeConverter
 
+_SUPPORTED_TYPES: tuple[type, ...] = (bool, int, float, str, bytes)
+_SUPPORTED_ITERABLE_TYPES: tuple[type, ...] = (list, tuple, set, frozenset)
+_ALL_SUPPORTED_TYPES: tuple[type, ...] = tuple(list(_SUPPORTED_TYPES) + list(_SUPPORTED_ITERABLE_TYPES))
+
 
 def _load_lua_script_from_file(filename: str) -> str:
 	""" Load Lua script from a file """
@@ -13,7 +17,7 @@ def _load_lua_script_from_file(filename: str) -> str:
 		return lua_file.read()
 
 
-def _convert_to_type(value: str | list[str] | set[str], _type: str) -> str | bool | int | float | list | set:
+def _convert_to_type(value: str | list[str] | set[str], _type: str) -> str | bool | int | float | bytes | list | set:
 	return TypeConverter().converter(value, _type)
 
 
@@ -32,6 +36,12 @@ def _compare_and_select_sec_ms(time_s: int | None, time_ms: int | None) -> int |
 
 
 def _remove_duplicates(iterable_var: list | tuple | set | frozenset) -> tuple:
+	""" Removes duplicate values from iterable types """
 	if isinstance(iterable_var, (set, frozenset)):
 		return tuple(iterable_var)
 	return tuple(set(iterable_var))
+
+
+def _convert_value_to_string(value: _SUPPORTED_TYPES) -> str:
+	""" Returns a string to pass the value to a Lua script """
+	return value.hex() if isinstance(value, bytes) else str(value)

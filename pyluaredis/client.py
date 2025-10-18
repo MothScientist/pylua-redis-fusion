@@ -11,8 +11,8 @@ from redis import (
     TimeoutError as rTimeoutError
 )
 
-from pyluaredis.helpers import _load_lua_script_from_file, _convert_to_type, _compare_and_select_sec_ms, \
-    _remove_duplicates
+from pyluaredis.helpers import _SUPPORTED_TYPES, _SUPPORTED_ITERABLE_TYPES, _ALL_SUPPORTED_TYPES, _remove_duplicates, \
+    _load_lua_script_from_file, _convert_to_type, _compare_and_select_sec_ms, _convert_value_to_string
 
 
 class PyRedis:
@@ -152,7 +152,7 @@ class PyRedis:
     def r_set(
             self,
             key: str | dict,
-            value: bool | int | float | str | list | tuple | set | frozenset,
+            value: _ALL_SUPPORTED_TYPES,
             get_old_value: bool = False,
             convert_to_type_for_get: str = None,
             time_ms: int | None = None,
@@ -160,7 +160,7 @@ class PyRedis:
             if_exist: bool = False,
             if_not_exist: bool = False,
             keep_ttl: bool = False
-    ) -> None | str | int | float | bool | list:
+    ) -> None | str | int | float | bool | bytes | list | set:
         """
         Set a new key or override an existing one
         If both parameters (time_s, time_ms) are specified, the key will be deleted based on the smallest value.
@@ -178,8 +178,7 @@ class PyRedis:
         :param keep_ttl: retain the time to live associated with the key.
         :return: None
         """
-        if (not key or (not value and value not in (False, 0))
-                or not isinstance(value, (bool, int, float, str, list, tuple, set, frozenset))):
+        if not key or (not value and value not in (False, 0)) or not isinstance(value, _ALL_SUPPORTED_TYPES):
             # Writing empty objects is not supported
             return None
 
@@ -191,19 +190,19 @@ class PyRedis:
         if isinstance(key, dict):
             pass
 
-        elif isinstance(value, (bool, int, float, str)):
+        elif isinstance(value, _SUPPORTED_TYPES):
             get_old_value: int = int(get_old_value)
             time_ms: int = time_ms or 0
             if_exist: int = int(if_exist)
             if_not_exist: int = int(if_not_exist)
             keep_ttl: int = int(keep_ttl)
-            value: str = str(value)
+            value: str = _convert_value_to_string(value)
             res = self.__register_lua_scripts(
                 'set_not_array_helper', 1, key, get_old_value, time_ms, if_exist, if_not_exist, keep_ttl, value
             )
 
-        elif isinstance(value, (list, tuple, set, frozenset)):
-            value: list | tuple | set | frozenset = type(value)(str(element) for element in value)
+        elif isinstance(value, _SUPPORTED_ITERABLE_TYPES):
+            value: list = type(value)([_convert_value_to_string(i) for i in value])
             time_ms: int = time_ms or 0
             if_exist: int = int(if_exist)
             if_not_exist: int = int(if_not_exist)
