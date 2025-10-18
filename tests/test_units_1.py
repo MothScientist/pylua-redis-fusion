@@ -621,6 +621,126 @@ class TtlTests(unittest.TestCase):
 		sleep(3)
 		self.assertEqual(value_2, TtlTests.r.r_get(key))
 
+	# if_without_ttl | if_with_ttl | only_greater | only_less ##########################################################
+
+	def test_ttl_if_without_ttl_001(self):
+		key: str = self.test_ttl_if_without_ttl_001.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=5, if_without_ttl=True)
+
+		sleep(2)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_ttl_if_without_ttl_002(self):
+		key: str = self.test_ttl_if_without_ttl_001.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=1, if_without_ttl=True)
+
+		sleep(2)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_ttl_if_with_ttl_001(self):
+		key: str = self.test_ttl_if_with_ttl_001.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=1, if_with_ttl=True)
+
+		sleep(2)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+	def test_ttl_if_with_ttl_002(self):
+		key: str = self.test_ttl_if_with_ttl_002.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=3, if_with_ttl=True)
+
+		sleep(1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		sleep(3)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_ttl_only_greater_001(self):
+		key: str = self.test_ttl_only_greater_001.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=3, only_greater=True)
+
+		sleep(1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		sleep(3)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_ttl_only_greater_002(self):
+		key: str = self.test_ttl_only_greater_002.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=5)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=3, only_greater=True)
+
+		sleep(3)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		sleep(3)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_ttl_only_less_001(self):
+		key: str = self.test_ttl_only_less_001.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=1)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=1_000, only_less=True)
+
+		sleep(1)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_ttl_only_less_002(self):
+		key: str = self.test_ttl_only_less_002.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=5)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		TtlTests.r.set_key_ttl(key, ttl_sec=1, only_less=True)
+
+		sleep(2)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
+	def test_ttl_multi_001(self):
+		key: str = self.test_ttl_multi_001.__name__
+		value_1 = TtlTests.get_random_string()
+
+		TtlTests.r.r_set(key, value_1, time_s=10)
+		self.assertEqual(value_1, TtlTests.r.r_get(key))
+
+		# wait if_with_ttl to exec
+		TtlTests.r.set_key_ttl(key, ttl_sec=1, if_without_ttl=True, if_with_ttl=True, only_greater=True, only_less=True)
+
+		sleep(2)
+		self.assertIsNone(TtlTests.r.r_get(key))
+
 
 if __name__ == '__main__':
 	unittest.main()

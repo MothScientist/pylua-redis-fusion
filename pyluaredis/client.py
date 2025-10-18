@@ -100,23 +100,48 @@ class PyRedis:
             self,
             key: str,
             ttl_sec: int | None = None,
-            ttl_ms: int | None = None
+            ttl_ms: int | None = None,
+            if_without_ttl: bool = False,
+            if_with_ttl: bool = False,
+            only_greater: bool = False,
+            only_less: bool = False
     ) -> None:
-        """ Set key time (ttl) in seconds or milliseconds """
-        if ttl_ms := _compare_and_select_sec_ms(ttl_sec, ttl_ms) if (ttl_sec or ttl_ms) else None:
-            self.redis.pexpire(key, ttl_ms)
+        """
+        Set key time (ttl) in seconds or milliseconds.
+        The only_greater, only_less and if_without_ttl options are mutually exclusive.
+        Priority: if_with_ttl -> if_without_ttl -> only_greater -> only_less
+        """
+        key = [key]
+        self.set_keys_ttl(
+            key, ttl_sec, ttl_ms,
+            if_without_ttl=if_without_ttl,
+            if_with_ttl=if_with_ttl,
+            only_greater=only_greater,
+            only_less=only_less
+        )
 
     def set_keys_ttl(
             self,
             keys: list[str] | tuple[str] | set[str] | frozenset[str],
             ttl_sec: int | None = None,
-            ttl_ms: int | None = None
+            ttl_ms: int | None = None,
+            if_without_ttl: bool = False,
+            if_with_ttl: bool = False,
+            only_greater: bool = False,
+            only_less: bool = False
     ) -> None:
-        """ Set the time for multiple keys (ttl) in seconds or milliseconds """
+        """
+        Set the time for multiple keys (ttl) in seconds or milliseconds
+        The only_greater, only_less and if_without_ttl options are mutually exclusive.
+        Priority: if_with_ttl -> if_without_ttl -> only_greater -> only_less
+        """
         keys: tuple = _remove_duplicates(keys)
         ttl_ms = _compare_and_select_sec_ms(ttl_sec, ttl_ms) if ((ttl_sec or ttl_ms) and keys) else None
         if ttl_ms:
-            self.__register_lua_scripts('set_keys_ttl', len(keys), *keys, ttl_ms)
+            self.__register_lua_scripts(
+                'set_keys_ttl', len(keys), *keys, ttl_ms,
+                int(if_without_ttl), int(if_with_ttl), int(only_greater), int(only_less)
+            )
 
     def get_key_ttl(self, key: str, in_seconds: bool = False) -> int | None:
         """
