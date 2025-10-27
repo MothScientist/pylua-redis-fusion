@@ -12,7 +12,7 @@ description = "Pluggable client for easy and intuitive work with the Redis datab
 readme = "README.md"
 license = "MIT"
 dependencies = [
-    "redis==6.4.0"
+    "redis==7.0.1"
 ]
 requires-python = ">=3.11"
 keywords = ["redis", "lua", "PnP"]
