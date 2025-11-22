@@ -55,7 +55,7 @@ class SmokeTests(unittest.TestCase):
 
 	@staticmethod
 	def get_random_byte() -> bytes:
-		return bytes(SmokeTests.get_random_integer(a=0, b=10))
+		return bytes(SmokeTests.get_random_integer(a=1, b=10))
 
 	@staticmethod
 	def get_random_string(length: int = randint(10, 20)):
