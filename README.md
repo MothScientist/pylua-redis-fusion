@@ -1,7 +1,5 @@
 <div align="center">
-  <a href="destination.html">
     <img src="images/logo.png" width="400" height="400" style="object-fit: cover;">
-  </a>
 </div>
 
 </br>![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)
